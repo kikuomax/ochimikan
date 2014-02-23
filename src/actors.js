@@ -120,7 +120,7 @@ const ActorSystem = {
      * Makes the specified object an actor.
      *
      * @method makeActor
-     * @param self
+     * @param self {Object}
      *     The object to be an actor.
      * @param priority {int}
      *     The priority of the actor.
@@ -137,7 +137,7 @@ const ActorSystem = {
      * Makes the specified object an actor scheduler.
      *
      * @method makeActorScheduler
-     * @param self
+     * @param self {Object}
      *     The object to be an actor scheduler.
      * @return {ActorScheduler}  `self`.
      */

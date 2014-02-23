@@ -14,16 +14,6 @@ const SPRITES = {
     ]
 };
 
-/**
- * Makes the specified object a renderable.
- *
- * @param render  `function(context)`.
- */
-function makeRenderable(self, render) {
-    self.render = render;
-    return self;
-}
-
 /** A function which compares specified two actors' priorities. */
 function compareActorPriority(lhs, rhs) {
     var order = 0;
@@ -74,7 +64,7 @@ function Mikan() {
     self.y = 0;
 
     /** Renders this mikan. */
-    makeRenderable(self, function(context) {
+    rs.makeRenderable(self, function(context) {
 	SPRITES.mikan[self.state].render(context, self.x, self.y);
     });
 }
@@ -100,7 +90,7 @@ function Spray(x, y, dX, dY) {
     self.ttl = SPRAY_TTL;  // time to live
 
     /** Renders this spray. */
-    makeRenderable(self, function(context) {
+    rs.makeRenderable(self, function(context) {
 	SPRITES.spray[self.state].render(context, self.x, self.y);
     });
 
@@ -157,7 +147,7 @@ function MikanBox(columnCount, rowCount, gridSize) {
     ];
 
     /** Renders mikans in this mikan box. */
-    makeRenderable(self, function(context) {
+    rs.makeRenderable(self, function(context) {
 	forEachMikan(function(m) {
 	    m.render(context);
 	});
@@ -386,7 +376,7 @@ function Scene() {
 	// reschedules this actor
 	scheduler.schedule(this);
     });
-    makeRenderable(mikanController, function(context) {
+    rs.makeRenderable(mikanController, function(context) {
 	if (self.controlledMikan !== null) {
 	    self.controlledMikan.render(context);
 	}

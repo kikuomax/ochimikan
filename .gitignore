@@ -5,3 +5,5 @@
 
 # managed directories
 build/output/
+npm-debug.log
+node_modules/

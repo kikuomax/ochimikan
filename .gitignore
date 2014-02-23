@@ -1,9 +1,6 @@
-.DS_Store
-
-# emacs files
-*~
-
-# managed directories
 build/output/
 npm-debug.log
 node_modules/
+
+.DS_Store
+*~

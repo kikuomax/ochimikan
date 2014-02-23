@@ -1,3 +1,4 @@
 [
+    "./src/sprite.js",
     "./src/mikan.js"
 ]

@@ -4,8 +4,22 @@ module.exports = function(grunt) {
 	fragments: './build/fragments/',
 	build: {
 	    debug: './dist/mikan.debug.js'
+	},
+	yuidoc: {
+	    compile: {
+		'name': '<%= pkg.name %>',
+		'description': 'mikan developer documentation',
+		'version': '<%= pkg.version %>',
+		'url': '',
+		options: {
+		    paths: './src/',
+		    outdir: './out/yuidoc/'
+		}
+	    }
 	}
     });
+
+    grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
     /** Makes separated source files in one. */
     function combineSources() {
@@ -22,5 +36,5 @@ module.exports = function(grunt) {
 	grunt.file.write(output, source.replace(/\r\n/g, '\n'));
     });
 
-    grunt.registerTask('default', ['build']);
+    grunt.registerTask('default', ['build', 'yuidoc']);
 };

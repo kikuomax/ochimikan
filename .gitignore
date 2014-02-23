@@ -1,6 +1,7 @@
-build/output/
 npm-debug.log
 node_modules/
+
+out/
 
 .DS_Store
 *~

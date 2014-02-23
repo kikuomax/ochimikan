@@ -1,8 +1,12 @@
 /**
  * The constructor of a Sprite.
- * @param url     The url to the image data.
- * @param x       The x-coordinate value of the top-left corner of the sprite.
- * @param y       The y-coordinate value of the top-left corner of the sprite.
+ *
+ * @class Sprite
+ * @constructor 
+ * @param url     The url to the image data. The image may contain multiple
+ *                sprites in it.
+ * @param x       The x-coordinate value of the top-left corner of this sprite.
+ * @param y       The y-coordinate value of the top-left corner of this sprite.
  * @param width   The width of the sprite.
  * @param height  The height of the sprite.
  */
@@ -14,13 +18,27 @@ function Sprite(url, x, y, width, height) {
     self.width = width;
     self.height = height;
 
-    /** Loads the sprite specified by this definition. */
+    /**
+     * Loads the sprite specified by this definition.
+     *
+     * @method load
+     */
     self.load = function() {
 	self.image = new Image();
 	self.image.src = self.url;
-    }
+    };
 
-    /** Renders this sprite at the specified location. */
+    /**
+     * Renders this sprite at the specified location.
+     *
+     * @method render
+     * @param context  A Context like object in which rendering is
+     *                 to be performed.
+     * @param x        The x-coordinate value of the top-left corner of
+     *                 the destination.
+     * @param y        The y-coordinate value of the top-left corner of
+     *                 the destination.
+     */
     self.render = function(context, x, y) {
 	if ((self.image !== null) && (self.image !== undefined)) {
 	    context.drawImage(self.image,
@@ -33,7 +51,7 @@ function Sprite(url, x, y, width, height) {
 			      self.width,
 			      self.height);
 	}
-    }
+    };
 }
 
 /** Defines the sprites. */

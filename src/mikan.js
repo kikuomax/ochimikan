@@ -15,52 +15,12 @@ const SPRITES = {
 };
 
 /**
- * Makes the specified object an actor.
- *
- * @param act  `function(scheduler)`.
- */
-function makeActor(self, priority, act) {
-    self.priority = priority;
-    self.act = act;
-    return self;
-}
-
-/**
  * Makes the specified object a renderable.
  *
  * @param render  `function(context)`.
  */
 function makeRenderable(self, render) {
     self.render = render;
-    return self;
-}
-
-/** Makes the specified object an actor scheduler. */
-function makeActorScheduler(self) {
-    self.actorQueue = [];
-    /** Schedules the specified actor. */
-    self.schedule = function(actor) {
-	self.actorQueue.push(actor);
-    };
-    /** Runs scheduled actors. */
-    self.run = function() {
-	// checks if any actor is scheduled
-	if (self.actorQueue.length > 0) {
-	    // spares the actor queue
-	    var actorQueue = self.actorQueue;
-	    self.actorQueue = [];
-	    // sorts actors by priorities (a higher priority comes earlier)
-	    actorQueue.sort(compareActorPriority);
-	    // runs actors which have the highest priority
-	    // and reschedules actors which have lower priorities
-	    var toRun = actorQueue[0];
-	    var upper = upperBound(actorQueue, toRun, compareActorPriority);
-	    actorQueue.slice(0, upper).forEach(function(a) {
-		a.act(self);
-	    });
-	    self.actorQueue = self.actorQueue.concat(actorQueue.slice(upper));
-	}
-    };
     return self;
 }
 
@@ -145,7 +105,7 @@ function Spray(x, y, dX, dY) {
     });
 
     /** Moves this spray. */
-    makeActor(self, ACTOR_PRIORITIES.SPRAY, function(scheduler) {
+    as.makeActor(self, ACTOR_PRIORITIES.SPRAY, function(scheduler) {
 	// updates this spray if ttl is enough
 	--self.ttl;
 	if (self.ttl > 0) {
@@ -337,7 +297,7 @@ function MikanBox(columnCount, rowCount, gridSize) {
 	    }
 	    // queues combo checker if it's necessary
 	    if (mayCombo) {
-		var comboChecker = makeActor({}, ACTOR_PRIORITIES.COMBO, function(scheduler) {
+		var comboChecker = as.makeActor({}, ACTOR_PRIORITIES.COMBO, function(scheduler) {
 		    self.eraseMikans(scheduler);
 		});
 		scheduler.schedule(comboChecker);
@@ -369,7 +329,7 @@ function MikanBox(columnCount, rowCount, gridSize) {
     function makeFall(mikan, dstRow) {
 	var column = self.columnAt(mikan.x);
 	var dY = 6;
-	makeActor(mikan, ACTOR_PRIORITIES.MOVE, function(scheduler) {
+	as.makeActor(mikan, ACTOR_PRIORITIES.MOVE, function(scheduler) {
 	    var row = self.rowAt(mikan.y + dY + self.gridSize);
 	    if (row >= dstRow) {
 		// continues to move this mikan
@@ -398,11 +358,11 @@ function MikanBox(columnCount, rowCount, gridSize) {
 function Scene() {
     var self = this;
     self.mikanBox = new MikanBox(8, 12, 32);
-    makeActorScheduler(self);
+    as.makeActorScheduler(self);
 
     // the mikan controller
     self.controlledMikan = null;
-    var mikanController = makeActor({}, ACTOR_PRIORITIES.CONTROL, function(scheduler) {
+    var mikanController = as.makeActor({}, ACTOR_PRIORITIES.CONTROL, function(scheduler) {
 	if (self.controlledMikan === null) {
 	    self.controlledMikan = new Mikan();
 	}

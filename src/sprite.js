@@ -5,12 +5,12 @@
  *
  * ## Loading a sprite
  *
- * 1. Constructs a `Sprite` with a URL of an image and a part to be rendered.
- * 2. `load`s the `Sprite`.
+ * 1. Constructs a sprite with a URL of an image and a part to be rendered.
+ * 2. Loads a sprite.
  *
  * ## Rendering a sprite
  *
- * 1. `render`s a `Sprite`.
+ * 1. Renders a sprite.
  *
  * @module sprite
  */
@@ -20,14 +20,18 @@
  *
  * @class Sprite
  * @constructor 
- * @param url     The URL of the image data. The image may contain multiple
- *                sprites in it.
- * @param x       The x-coordinate value of the top-left corner of the part
- *                to be rendered as the sprite.
- * @param y       The y-coordinate value of the top-left corner of the part
- *                to be rendered as the sprite.
- * @param width   The width of the sprite.
- * @param height  The height of the sprite.
+ * @param url {String}
+ *     The URL of the image data. The image may contain multiple sprites in it.
+ * @param x {int}
+ *     The x-coordinate value of the top-left corner of the part to be rendered
+ *     as the sprite.
+ * @param y {int}
+ *     The y-coordinate value of the top-left corner of the part to be rendered
+ *     as the sprite.
+ * @param width {int}
+ *     The width of the sprite.
+ * @param height {int}
+ *     The height of the sprite.
  */
 function Sprite(url, x, y, width, height) {
     var self = this;
@@ -50,15 +54,15 @@ function Sprite(url, x, y, width, height) {
     /**
      * Renders this sprite at the specified location.
      *
-     * Does nothing if this sprite isn't yet `load`ed.
+     * Does nothing if this sprite isn't yet loaded.
      *
      * @method render
-     * @param context  A Context like object in which rendering is
-     *                 to be performed.
-     * @param x        The x-coordinate value of the top-left corner of
-     *                 the destination.
-     * @param y        The y-coordinate value of the top-left corner of
-     *                 the destination.
+     * @param context {Context}
+     *     The Context which rendering is to be performed.
+     * @param x {int}
+     *     The x-coordinate value of the top-left corner of the destination.
+     * @param y {int}
+     *     The y-coordinate value of the top-left corner of the destination.
      */
     self.render = function(context, x, y) {
 	if ((self.image !== null) && (self.image !== undefined)) {

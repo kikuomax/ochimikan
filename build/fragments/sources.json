@@ -1,4 +1,5 @@
 [
     "./src/sprite.js",
+    "./src/actors.js",
     "./src/mikan.js"
 ]

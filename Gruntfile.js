@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 	pkg: grunt.file.readJSON('package.json'),
 	fragments: './build/fragments/',
 	build: {
-	    debug: './build/output/mikan.debug.js'
+	    debug: './dist/mikan.debug.js'
 	}
     });
 

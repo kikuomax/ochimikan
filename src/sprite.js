@@ -1,16 +1,19 @@
 /**
  * Defines `Sprite` class.
  *
- * # Scenarios
+ * # Use Cases
  *
  * ## Loading a sprite
  *
- * 1. Constructs a sprite with a URL of an image and a part to be rendered.
- * 2. Loads a sprite.
+ * 1. A user creates a `Sprite` with a URL of an image and its part
+ *    to be rendered.
+ * 2. The user loads the `Sprite`.
  *
  * ## Rendering a sprite
  *
- * 1. Renders a sprite.
+ * 1. Given a `Sprite`.
+ * 2. Given a `Context`.
+ * 3. A user renders the `Sprite` in the `Context`.
  *
  * @module sprite
  */

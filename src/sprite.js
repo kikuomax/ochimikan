@@ -47,12 +47,16 @@ function Sprite(url, x, y, width, height) {
     /**
      * Loads the sprite specified by this definition.
      *
-     * Adds a property `image`:{Image} associated with the URL to this.
+     * Adds a property `image:Image` associated with the URL to this.
+     *
+     * Does nothing if this sprite has already been loaded.
      * @method load
      */
     self.load = function() {
-	self.image = new Image();
-	self.image.src = self.url;
+	if (self.image === undefined) {
+	    self.image = new Image();
+	    self.image.src = self.url;
+	}
     };
 
     /**
@@ -68,7 +72,7 @@ function Sprite(url, x, y, width, height) {
      *     The y-coordinate value of the top-left corner of the destination.
      */
     self.render = function(context, x, y) {
-	if ((self.image !== null) && (self.image !== undefined)) {
+	if (self.image !== undefined) {
 	    context.drawImage(self.image,
 			      self.x,
 			      self.y,

@@ -42,6 +42,12 @@ describe('load and render Sprite', function() {
 	expect(src.slice(src.length - 15)).toBe('imgs/sprite.png');
     });
 
+    it('Sprite should not create image again', function() {
+	var image = sprite.image;
+	sprite.load();
+	expect(sprite.image).toBe(image);
+    });
+
     it('Sprite should render loaded Image in Context', function() {
 	// mocks out Context
 	var context = {

@@ -1,23 +1,23 @@
 /**
  * Defines the actor system.
  *
- * # Scenarios
+ * # Use Cases
  *
  * ## Creating a new actor
  *
- * 1. Determines the action of an actor.
- * 2. Determines the priority of an actor.
- * 3. Constructs a new actor with the above action and priority.
+ * 1. A user defines an action of an `Actor`.
+ * 2. The user creates a new `Actor` with the action and a priority.
  *
  * ## Making an existing object an actor
  *
- * 1. Determines the action of an actor.
- * 2. Determines the priority of an actor.
- * 3. Makes an exsiting object an actor with the above action and priority.
+ * 1. An object is given.
+ * 2. A user defines an action of an `Actor`.
+ * 3. The user makes the object with the action and a priority.
  *
  * ## Making an existing object an actor scheduler
  *
- * 1. Makes an exsiting object an actor scheduler.
+ * 1. An object is given.
+ * 1. A user makes the object an `ActorScheduler`.
  *
  * @module actors
  */
@@ -52,6 +52,19 @@ function Actor(priority, act) {
      */
     self.act = act;
 }
+
+/**
+ * Returns whether the specified object is an actor.
+ *
+ * @method isActor
+ * @static
+ * @param obj {Object}
+ *     The object to be tested.
+ * @return {Boolean}  Whether `obj` is an actor.
+ */
+Actor.isActor = function(obj) {
+    return false;
+};
 
 /**
  * An actor scheduler.

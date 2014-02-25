@@ -47,6 +47,7 @@ function Sprite(url, x, y, width, height) {
     /**
      * Loads the sprite specified by this definition.
      *
+     * Adds a property `image`:{Image} associated with the URL to this.
      * @method load
      */
     self.load = function() {
@@ -58,7 +59,6 @@ function Sprite(url, x, y, width, height) {
      * Renders this sprite at the specified location.
      *
      * Does nothing if this sprite isn't yet loaded.
-     *
      * @method render
      * @param context {Context}
      *     The Context which rendering is to be performed.

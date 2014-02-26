@@ -12,8 +12,17 @@
   <script type="text/javascript" src="lib/jasmine-2.0.0/boot.js"></script>
 
   <!-- include source files here... -->
-  <script type="text/javascript" src="../src/sprite.js"></script>
-  <script type="text/javascript" src="../src/actors.js"></script>
+  <script type="text/javascript">
+    function addScript(url) {
+        document.write('\u003cscript type="text/javascript" src="' + url + '"\u003e\u003c/scr' + 'ipt\u003e');
+    }
+    function linkMikanSources(filenames) {
+        filenames.forEach(function(fn) {
+            addScript('../' + fn);
+        });
+    }
+    addScript('../build/fragments/sources.js');
+  </script>
 
   <!-- include spec files here... -->
   <script type="text/javascript" src="spritesSpec.js"></script>

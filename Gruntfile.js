@@ -21,14 +21,24 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
+    /** Returns an array of the source filenames. */
+    function getSourceFilenames() {
+	var sourceFilenames;
+	function linkMikanSources(filenames) {
+	    sourceFilenames = filenames;
+	}
+	var fragments = grunt.config('fragments');
+	eval(grunt.file.read(fragments + 'sources.js'));
+	return sourceFilenames;
+    }
+
     /** Makes separated source files in one. */
     function combineSources() {
-	var fragments = grunt.config('fragments');
-	sourceFilenames = JSON.parse(grunt.file.read(fragments + 'sources.json'));
+	var sourceFilenames = getSourceFilenames();
 	return sourceFilenames.map(function(fn) {
 	    return grunt.file.read(fn);
 	}).join('');
-    };
+    }
 
     grunt.registerMultiTask('build', 'Build mikan.js', function() {
 	var output = this.data;

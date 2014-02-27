@@ -26,22 +26,68 @@ describe('Actor', function() {
 	}).toThrow("act must be a function");
     });
 
-    it('isActor should return true for an actor', function() {
+    it('isActor should be true for an actor', function() {
 	var actor = new Actor(0, function(s){});
 	expect(Actor.isActor(actor)).toBe(true);
     });
 
-    it('isActor should return false for an empty object', function() {
+    it('isActor should be false for an empty object', function() {
 	var actor = {};
 	expect(Actor.isActor(actor)).toBe(false);
     });
 
-    it('isActor should return false for null', function() {
+    it('isActor should be false for null', function() {
 	expect(Actor.isActor(null)).toBe(false);
     });
 
-    it('isActor should return false for undefined', function() {
+    it('isActor should be false for undefined', function() {
 	expect(Actor.isActor(undefined)).toBe(false);
+    });
+});
+
+describe('ActorScheduler', function() {
+    it('Should have empty actor queue', function() {
+	var scheduler = new ActorScheduler();
+	expect(scheduler.actorQueue.length).toBe(0);
+    });
+
+    it('Can schedule actor', function() {
+	var scheduler = new ActorScheduler();
+	var actor = new Actor(0, function(s) {});
+	scheduler.schedule(actor);
+	expect(scheduler.actorQueue.length).toBe(1);
+	expect(scheduler.actorQueue).toContain(actor);
+    });
+
+    it('isActorScheduler should be true for actor scheduler', function() {
+	var scheduler = new ActorScheduler();
+	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(true);
+    });
+
+    it('isActorScheduler should be false for an object which lacks actorQueue', function() {
+	var scheduler = new ActorScheduler();
+	scheduler.actorQueue = undefined;
+	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
+    });
+
+    it('isActorScheduler should be false for an object which lacks schedule', function() {
+	var scheduler = new ActorScheduler();
+	scheduler.schedule = undefined;
+	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
+    });
+
+    it('isActorScheduler should be false for an object which lacks run', function() {
+	var scheduler = new ActorScheduler();
+	scheduler.run = undefined;
+	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
+    });
+
+    it('isActorScheduler should be false for null', function() {
+	expect(ActorScheduler.isActorScheduler(null)).toBe(false);
+    });
+
+    it('isActorScheduler should be false for undefined', function() {
+	expect(ActorScheduler.isActorScheduler(undefined)).toBe(false);
     });
 });
 
@@ -56,11 +102,86 @@ describe('ActorSystem', function() {
     });
 
     it('makeActor should replace properties of object', function() {
-	var obj = {};
-	ActorSystem.makeActor(obj, 0, function(s) {});
+	var obj = {
+	    priority: 0,
+	    act: function(s) {}
+	};
 	var act = function(s) { return 0; };
 	ActorSystem.makeActor(obj, 1, act);
 	expect(obj.priority).toBe(1);
 	expect(obj.act).toBe(act);
+    });
+
+    it('makeActorScheduler should make object actor scheduler', function() {
+	var obj = {};
+	ActorSystem.makeActorScheduler(obj);
+	expect(ActorScheduler.isActorScheduler(obj)).toBe(true);
+    });
+
+    it('makeActorScheduler should replace properties of object', function() {
+	var obj = {
+	    actorQueue: [{}]
+	};
+	ActorSystem.makeActorScheduler(obj);
+	expect(obj.actorQueue.length).toBe(0);
+    });
+});
+
+describe('run scheduled actors', function() {
+    var act1, act2, act3;
+    var scheduler;
+
+    beforeEach(function() {
+	act1 = jasmine.createSpy('act1');
+	act2 = jasmine.createSpy('act2');
+	act3 = jasmine.createSpy('act3');
+	scheduler = new ActorScheduler();
+    });
+
+    afterEach(function() {
+	act1 = undefined;
+	act2 = undefined;
+	act3 = undefined;
+	scheduler = undefined;
+    });
+
+    it('actor scheduler should run scheduled actor and delete it from queue. priority = 0', function() {
+	scheduler.schedule(new Actor(0, act1));
+	scheduler.run();
+	expect(act1).toHaveBeenCalledWith(scheduler);
+	expect(scheduler.actorQueue.length).toBe(0);
+    });
+
+    it('actor scheduler should run scheduled actors and delete them from queue. priorities = 0, 0, 0', function() {
+	scheduler.schedule(new Actor(0, act1));
+	scheduler.schedule(new Actor(0, act2));
+	scheduler.schedule(new Actor(0, act3));
+	scheduler.run();
+	expect(act1).toHaveBeenCalledWith(scheduler);
+	expect(act2).toHaveBeenCalledWith(scheduler);
+	expect(act3).toHaveBeenCalledWith(scheduler);
+	expect(scheduler.actorQueue.length).toBe(0);
+    });
+
+    it('actor scheduler should run scheduled actors and delete them from queue. priorities = 1, 2, 1', function() {
+	var leftActor;
+	scheduler.schedule(new Actor(1, act1));
+	scheduler.schedule(leftActor = new Actor(2, act2));
+	scheduler.schedule(new Actor(1, act3));
+	scheduler.run();
+	expect(act1).toHaveBeenCalledWith(scheduler);
+	expect(act3).toHaveBeenCalledWith(scheduler);
+	expect(scheduler.actorQueue).toEqual([leftActor]);
+    });
+
+    it('actor scheduler should run scheduled actors and delete them from queue. priorities = -1, 0, 1', function() {
+	var leftActor;
+	scheduler.schedule(new Actor(-1, act1));
+	scheduler.schedule(new Actor(0, act2));
+	scheduler.schedule(leftActor = new Actor(1, act3));
+	scheduler.run();
+	expect(act1).toHaveBeenCalledWith(scheduler);
+	expect(act2).toHaveBeenCalledWith(scheduler);
+	expect(scheduler.actorQueue).toEqual([leftActor]);
     });
 });

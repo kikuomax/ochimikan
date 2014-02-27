@@ -30,7 +30,7 @@
  *
  * 1. An `ActorScheduler` is given.
  * 2. A user asks the `ActorScheduler` to run `Actor`s scheduled in it.
- * 3. The `ActorScheduler` asks scheduled `Actor`s to act.
+ * 3. The `ActorScheduler` selects `Actor`s to run and asks them to act.
  *
  * @module actors
  */
@@ -43,6 +43,7 @@
  * @constructor
  * @param priority {int}
  *     The priority of the actor.
+ *     The lower this value is, the higher priority is.
  * @param act {function(ActorScheduler)}
  *     The action of the actor.
  */
@@ -56,6 +57,7 @@ function Actor(priority, act) {
     /**
      * The priority of this actor.
      *
+     * The lower this property is, the higher priority is.
      * @property priority
      * @type int
      */
@@ -144,6 +146,23 @@ function ActorScheduler() {
 	}
     };
 }
+
+/**
+ * Returns whether the specified object is an actor scheduler.
+ *
+ * An actor scheduler has the following properties,
+ * - actorQueue
+ * - schedule: function
+ * - run: function
+ * @method isActorScheduler
+ * @static
+ * @param obj {Object}
+ *     The object to be tested.
+ * @return {Boolean}  Whether `obj` is an actor scheduler.
+ */
+ActorScheduler.isActorScheduler = function(obj) {
+    return (obj != null) && (obj.actorQueue !== undefined) && (typeof obj.schedule == "function") && (typeof obj.run == "function");
+};
 
 /**
  * Provides APIs of the actor system.

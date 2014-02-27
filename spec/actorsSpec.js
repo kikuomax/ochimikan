@@ -44,3 +44,23 @@ describe('Actor', function() {
 	expect(Actor.isActor(undefined)).toBe(false);
     });
 });
+
+describe('ActorSystem', function() {
+    it('makeActor should make object actor', function() {
+	var obj = {};
+	var act = function(s) {};
+	ActorSystem.makeActor(obj, 0, act);
+	expect(Actor.isActor(obj)).toBe(true);
+	expect(obj.priority).toBe(0);
+	expect(obj.act).toBe(act);
+    });
+
+    it('makeActor should replace properties of object', function() {
+	var obj = {};
+	ActorSystem.makeActor(obj, 0, function(s) {});
+	var act = function(s) { return 0; };
+	ActorSystem.makeActor(obj, 1, act);
+	expect(obj.priority).toBe(1);
+	expect(obj.act).toBe(act);
+    });
+});

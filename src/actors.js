@@ -157,6 +157,7 @@ const ActorSystem = {
     /**
      * Makes the specified object an actor.
      *
+     * Replaces the properites of `self`.
      * @method makeActor
      * @param self {Object}
      *     The object to be an actor.

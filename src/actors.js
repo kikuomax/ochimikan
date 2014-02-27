@@ -17,7 +17,20 @@
  * ## Making an existing object an actor scheduler
  *
  * 1. An object is given.
- * 1. A user makes the object an `ActorScheduler`.
+ * 2. A user makes the object an `ActorScheduler`.
+ *
+ * ## Scheduling an actor
+ *
+ * 1. An `Actor` is given.
+ * 2. An `ActorScheduler` is given.
+ * 3. A user asks the `ActorScheduler` to schedule the `Actor`.
+ * 4. The `ActorScheduler` schedules the `Actor`.
+ *
+ * ## Running actors
+ *
+ * 1. An `ActorScheduler` is given.
+ * 2. A user asks the `ActorScheduler` to run `Actor`s scheduled in it.
+ * 3. The `ActorScheduler` asks scheduled `Actor`s to act.
  *
  * @module actors
  */
@@ -97,7 +110,11 @@ function ActorScheduler() {
     /**
      * Runs scheduled actors.
      *
-     * Executed actors will be deleted from the queue.
+     * Runs actors which satisfies one of the following conditions,
+     * - has negative priority
+     * - has the highes priority (>=0) among the scheduled actors
+     *
+     * Executed actors will be deleted from the queue of this actor scheduler.
      * @method run
      */
     self.run = function() {
@@ -158,7 +175,7 @@ const ActorSystem = {
 	ActorScheduler.call(self);
 	return self;
     }
-}
+};
 
 // A shortcut for the actor system.
 const as = ActorSystem;

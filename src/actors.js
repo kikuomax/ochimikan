@@ -38,6 +38,7 @@
 /**
  * An actor.
  *
+ * Throws "act must be a function" if `act` isn't a function.
  * @class Actor
  * @constructor
  * @param priority {int}
@@ -47,6 +48,10 @@
  */
 function Actor(priority, act) {
     var self = this;
+    // makes sure that act is a function
+    if (typeof act != "function") {
+	throw "act must be a function";
+    }
 
     /**
      * The priority of this actor.
@@ -69,6 +74,9 @@ function Actor(priority, act) {
 /**
  * Returns whether the specified object is an actor.
  *
+ * An actor has the following properties,
+ * - priority
+ * - act: function
  * @method isActor
  * @static
  * @param obj {Object}
@@ -76,7 +84,7 @@ function Actor(priority, act) {
  * @return {Boolean}  Whether `obj` is an actor.
  */
 Actor.isActor = function(obj) {
-    return false;
+    return (obj != null) && (obj.priority !== undefined) && (typeof obj.act == "function");
 };
 
 /**

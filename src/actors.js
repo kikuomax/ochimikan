@@ -32,6 +32,13 @@
  * 2. A user asks the `ActorScheduler` to run `Actor`s scheduled in it.
  * 3. The `ActorScheduler` selects `Actor`s to run and asks them to act.
  *
+ * ## Self-reproducing actor
+ *
+ * 1. An `ActorScheduler` is given.
+ * 2. An `Actor` scheduled in the `ActorScheduler` is given.
+ * 3. The `ActorScheduler` asks the `Actor` to act.
+ * 4. The `Actor` acts and asks the `ActorScheduler` to schedule it again.
+ *
  * @module actors
  */
 
@@ -66,6 +73,7 @@ function Actor(priority, act) {
     /**
      * Performs the action of this actor.
      *
+     * `scheduler.schedule` may be invoked in this method.
      * @method act
      * @param scheduler {ActorScheduler}
      *     The actor scheduler which is running this actor.

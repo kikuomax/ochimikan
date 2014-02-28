@@ -164,7 +164,9 @@ function ActorScheduler() {
 	    // runs actors which have the highest priority
 	    // and reschedules actors which have lower priorities
 	    var toRun = actorQueue[0];
-	    var upper = upperBound(actorQueue, toRun, Actor.comparePriorities);
+	    var upper = Search.upperBound(actorQueue,
+					  toRun,
+					  Actor.comparePriorities);
 	    actorQueue.slice(0, upper).forEach(function(a) {
 		a.act(self);
 	    });

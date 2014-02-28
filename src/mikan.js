@@ -14,27 +14,6 @@ const SPRITES = {
     ]
 };
 
-/**
- * Returns the upper bound of the specified element in the specified array.
- * @param array       Must be sorted.
- * @param comparator  A function which compares two elements (lhs, rhs)
- *                    for order.
- *                    -1 if lhs < rhs, 1 if lhs > rhs, 0 if lhs == rhs.
- */
-function upperBound(array, element, comparator) {
-    var lower = 0;
-    var upper = array.length;
-    while (lower < upper) {
-	var center = Math.floor((lower + upper) / 2);
-	if (comparator(element, array[center]) < 0) {
-	    upper = center;  // element is in the lower half
-	} else {
-	    lower = center + 1;  // element is in the upper half
-	}
-    }
-    return upper;
-}
-
 /** The priority of actors. */
 const ACTOR_PRIORITIES = {
     'MOVE':    0,  // moving mikans

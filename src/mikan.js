@@ -14,19 +14,6 @@ const SPRITES = {
     ]
 };
 
-/** A function which compares specified two actors' priorities. */
-function compareActorPriority(lhs, rhs) {
-    var order = 0;
-    if (lhs.priority < rhs.priority) {
-	order = -1;
-    } else if (lhs.priority > rhs.priority) {
-	order = 1;
-    } else {
-	order = 0;
-    }
-    return order;
-}
-
 /**
  * Returns the upper bound of the specified element in the specified array.
  * @param array       Must be sorted.

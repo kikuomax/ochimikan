@@ -43,7 +43,7 @@
  * @constructor
  * @param priority {int}
  *     The priority of the actor.
- *     The lower this value is, the higher priority is.
+ *     The lower this number is, the higher priority is.
  * @param act {function(ActorScheduler)}
  *     The action of the actor.
  */
@@ -57,7 +57,7 @@ function Actor(priority, act) {
     /**
      * The priority of this actor.
      *
-     * The lower this property is, the higher priority is.
+     * The lower this number is, the higher priority is.
      * @property priority
      * @type int
      */
@@ -87,6 +87,32 @@ function Actor(priority, act) {
  */
 Actor.isActor = function(obj) {
     return (obj != null) && (obj.priority !== undefined) && (typeof obj.act == "function");
+};
+
+/**
+ * A comparator which compares priorities of specified two actors for order.
+ *
+ * @method comparePriorities
+ * @static
+ * @param lhs {Actor}
+ *     The left hand side of comparison.
+ * @param rhs {Actor}
+ *     The right hand side of comparison.
+ * @return {int}
+ *     - negative number if `lhs.priority < rhs.priority`
+ *     - 0 if `lhs.priority == rhs.priority`
+ *     - positive number if `lhs.priority > rhs.priority`
+ */
+Actor.comparePriorities = function(lhs, rhs) {
+    var order;
+    if (lhs.priority < rhs.priority) {
+	order = -1;
+    } else if (lhs.priority > rhs.priority) {
+	order = 1;
+    } else {
+	order = 0;
+    }
+    return order;
 };
 
 /**
@@ -134,11 +160,11 @@ function ActorScheduler() {
 	    var actorQueue = self.actorQueue;
 	    self.actorQueue = [];
 	    // sorts actors by priorities (a higher priority comes earlier)
-	    actorQueue.sort(compareActorPriority);
+	    actorQueue.sort(Actor.comparePriorities);
 	    // runs actors which have the highest priority
 	    // and reschedules actors which have lower priorities
 	    var toRun = actorQueue[0];
-	    var upper = upperBound(actorQueue, toRun, compareActorPriority);
+	    var upper = upperBound(actorQueue, toRun, Actor.comparePriorities);
 	    actorQueue.slice(0, upper).forEach(function(a) {
 		a.act(self);
 	    });
@@ -172,37 +198,37 @@ ActorScheduler.isActorScheduler = function(obj) {
  * @class ActorSystem
  * @static
  */
-const ActorSystem = {
-    /**
-     * Makes the specified object an actor.
-     *
-     * Replaces the properites of `self`.
-     * @method makeActor
-     * @param self {Object}
-     *     The object to be an actor.
-     * @param priority {int}
-     *     The priority of the actor.
-     * @param act {function(ActorScheduler)}
-     *     The action of the actor.
-     * @return {Actor}  `self`.
-     */
-    makeActor: function(self, priority, act) {
-	Actor.call(self, priority, act);
-	return self;
-    },
+function ActorSystem() { }
 
-    /**
-     * Makes the specified object an actor scheduler.
-     *
-     * @method makeActorScheduler
-     * @param self {Object}
-     *     The object to be an actor scheduler.
-     * @return {ActorScheduler}  `self`.
-     */
-    makeActorScheduler: function(self) {
-	ActorScheduler.call(self);
-	return self;
-    }
+/**
+ * Makes the specified object an actor.
+ *
+ * Replaces the properites of `self`.
+ * @method makeActor
+ * @param self {Object}
+ *     The object to be an actor.
+ * @param priority {int}
+ *     The priority of the actor.
+ * @param act {function(ActorScheduler)}
+ *     The action of the actor.
+ * @return {Actor}  `self`.
+ */
+ActorSystem.makeActor = function(self, priority, act) {
+    Actor.call(self, priority, act);
+    return self;
+};
+
+/**
+ * Makes the specified object an actor scheduler.
+ *
+ * @method makeActorScheduler
+ * @param self {Object}
+ *     The object to be an actor scheduler.
+ * @return {ActorScheduler}  `self`.
+ */
+ActorSystem.makeActorScheduler = function(self) {
+    ActorScheduler.call(self);
+    return self;
 };
 
 // A shortcut for the actor system.

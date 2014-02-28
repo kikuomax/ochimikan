@@ -43,6 +43,30 @@ describe('Actor', function() {
     it('isActor should be false for undefined', function() {
 	expect(Actor.isActor(undefined)).toBe(false);
     });
+
+    it('comparePriorities should return 0 if lhs.priority == rhs.priority', function() {
+	expect(Actor.comparePriorities(new Actor(0, nop),
+				       new Actor(0, nop))).toBe(0);
+	expect(Actor.comparePriorities(new Actor(1, nop),
+				       new Actor(1, nop))).toBe(0);
+    });
+
+    it('comparePriorities should return negative number if lhs.priority < rhs.priority', function() {
+	expect(Actor.comparePriorities(new Actor(0, nop),
+				       new Actor(1, nop))).toBeLessThan(0);
+	expect(Actor.comparePriorities(new Actor(-1, nop),
+				       new Actor(0, nop))).toBeLessThan(0);
+    });
+
+    it('comparePriorities should return positive number if lhs.priority > rhs.priority', function() {
+	expect(Actor.comparePriorities(new Actor(0, nop),
+				       new Actor(-1, nop))).toBeGreaterThan(0);
+	expect(Actor.comparePriorities(new Actor(1, nop),
+				       new Actor(0, nop))).toBeGreaterThan(0);
+    });
+
+    // does nothing
+    function nop(scheduler) { }
 });
 
 describe('ActorScheduler', function() {

@@ -169,15 +169,22 @@ function ActorScheduler() {
 	    self.actorQueue = [];
 	    // sorts actors by priorities (a higher priority comes earlier)
 	    actorQueue.sort(Actor.comparePriorities);
-	    // runs actors which have the highest priority
-	    // and reschedules actors which have lower priorities
-	    var toRun = actorQueue[0];
-	    var upper = Search.upperBound(actorQueue,
-					  toRun,
+	    // runs actors which have negative priorities
+	    // lower bound of priority=0
+	    // => upper bound of negative priorities
+	    var upper = Search.lowerBound(actorQueue,
+					  { priority: 0 },
 					  Actor.comparePriorities);
+	    // and runs actors which have the highest priority (>= 0)
+	    if (upper < actorQueue.length) {
+		upper = Search.upperBound(actorQueue,
+					  actorQueue[upper],
+					  Actor.comparePriorities);
+	    }
 	    actorQueue.slice(0, upper).forEach(function(a) {
 		a.act(self);
 	    });
+	    // reschedules actors which have lower priorities
 	    self.actorQueue = self.actorQueue.concat(actorQueue.slice(upper));
 	}
     };

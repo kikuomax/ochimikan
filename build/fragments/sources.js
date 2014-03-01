@@ -3,5 +3,6 @@ linkMikanSources([
     "./src/search.js",
     "./src/actors.js",
     "./src/renders.js",
-    "./src/mikan.js"
+    "./src/entities.js",
+//    "./src/mikan.js"
 ]);

@@ -23,10 +23,11 @@ function Located(x, y) {
      * @property x
      * @type {Number}
      */
+    var _x = x;
     Object.defineProperty(self, "x", {
-	value: x,
 	configurable: true,
-	writable: true
+	get: function() { return _x; },
+	set: function(x) { _x = x; }
     });
 
     /**
@@ -35,10 +36,11 @@ function Located(x, y) {
      * @property y
      * @type {Number}
      */
+    var _y = y;
     Object.defineProperty(self, "y", {
-	value: y,
 	configurable: true,
-	writable: true
+	get: function() { return _y; },
+	set: function(y) { _y = y; }
     });
 
     /**
@@ -49,7 +51,7 @@ function Located(x, y) {
      */
     Object.defineProperty(self, "xy", {
 	configurable: true,
-	get: function() { return [self.x, self.y]; }
+	get: function() { return [_x, _y]; }
     });
 
     /**

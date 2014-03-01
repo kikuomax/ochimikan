@@ -6,19 +6,6 @@ const ACTOR_PRIORITIES = {
     'CONTROL': 3   // controls mikan
 }
 
-/** The constructor of a Mikan. */
-function Mikan() {
-    var self = this;
-    self.state = 2 + Math.floor(Math.random() * 2);
-    self.x = 0;
-    self.y = 0;
-
-    /** Renders this mikan. */
-    rs.makeRenderable(self, function(context) {
-	SPRITES.mikan[self.state].render(context, self.x, self.y);
-    });
-}
-
 /** The time to live of a spray. */
 const SPRAY_TTL = 15;
 

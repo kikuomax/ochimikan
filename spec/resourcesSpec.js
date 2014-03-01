@@ -1,4 +1,4 @@
-describe('loading sprites in Resources', function(){
+describe('Resources', function(){
     var savedSPRITES;
     var sprite1, sprite2, sprite3;
 
@@ -19,7 +19,7 @@ describe('loading sprites in Resources', function(){
 	Resources.SPRITES = savedSPRITES;
     });
 
-    it('Should load every sprite defined in Resources.SPRITES', function() {
+    it('should load every sprite defined in Resources.SPRITES', function() {
 	Resources.loadSprites();
 	expect(sprite1.load).toHaveBeenCalled();
 	expect(sprite2.load).toHaveBeenCalled();

@@ -1,7 +1,7 @@
 /**
- * Provides entities in the game.
+ * Provides a geometry in the game.
  *
- * @module entities
+ * @module geometry
  */
 
 /**

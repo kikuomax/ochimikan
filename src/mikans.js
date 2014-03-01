@@ -65,7 +65,7 @@
  * @extends Located
  * @extends Renderable
  * @param damage {Number}
- *     The degree of damage to set. Any float is to be floored.
+ *     The degree of damage to set. A float value is to be floored.
  */
 function Mikan(damage) {
     var self = this;
@@ -77,7 +77,7 @@ function Mikan(damage) {
     Located.makeLocated(self, 0, 0);
 
     // makes mikan renderable
-    rs.makeRenderable(self, function(context) {
+    Renderable.makeRenderable(self, function(context) {
 	Resources.SPRITES['mikan'][self.damage].render(context, self.x, self.y);
     });
 

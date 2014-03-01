@@ -21,7 +21,7 @@ function Located(x, y) {
      * The x-coordinate value of the location.
      *
      * @property x
-     * @type Number
+     * @type {Number}
      */
     Object.defineProperty(self, "x", {
 	value: x,
@@ -33,12 +33,23 @@ function Located(x, y) {
      * The y-coordinate value of the location.
      *
      * @property y
-     * @type Number
+     * @type {Number}
      */
     Object.defineProperty(self, "y", {
 	value: y,
 	configurable: true,
 	writable: true
+    });
+
+    /**
+     * Returns the location as a two dimensional array like `[x, y]`.
+     *
+     * @propety xy
+     * @type {[Number, Number]}
+     */
+    Object.defineProperty(self, "xy", {
+	configurable: true,
+	get: function() { return [self.x, self.y]; }
     });
 
     /**

@@ -17,7 +17,7 @@ describe('Mikan', function() {
 	expect(function() { new Mikan(Mikan.MAX_DAMAGE + 1)}).toThrow();
     });
 
-    it('Should be located at (0, 0)', function() {
+    it('Should initially be located at (0, 0)', function() {
 	var mikan = new Mikan(0);
 	expect(mikan.x).toBe(0);
 	expect(mikan.y).toBe(0);
@@ -31,7 +31,7 @@ describe('Mikan', function() {
 	expect(mikan.damage).toBe(Mikan.MAX_DAMAGE);
     });
 
-    it('damage can be set to float but it should be floored', function() {
+    it('damage can be set to a float value but it should be floored', function() {
 	var mikan = new Mikan(0);
 	mikan.damage = 1.1;
 	expect(mikan.damage).toBe(1);
@@ -82,7 +82,7 @@ describe('rendering mikan', function() {
 
     it('Mikan can be rendered', function() {
 	var mikan = new Mikan(0);
-	var context = { };
+	var context = {};
 	mikan.render(context);
 	expect(spySprites[0].render).toHaveBeenCalledWith(context, 0, 0);
 	expect(spySprites[1].render).not.toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('rendering mikan', function() {
 
     it('Damaged mikan can be rendered', function() {
 	var mikan = new Mikan(Mikan.MAX_DAMAGE);
-	var context = { };
+	var context = {};
 	mikan.render(context);
 	expect(spySprites[0].render).not.toHaveBeenCalled();
 	expect(spySprites[1].render).not.toHaveBeenCalled();
@@ -100,13 +100,13 @@ describe('rendering mikan', function() {
 	expect(spySprites[3].render).toHaveBeenCalledWith(context, 0, 0);
     });
 
-    it('Mikan can be rendered at specified location', function() {
+    it('Mikan can be rendered at a specified location', function() {
 	var mikan = new Mikan(0).locate(10, -5);
-	var context = { };
+	var context = {};
 	mikan.render(context);
 	expect(spySprites[0].render).toHaveBeenCalledWith(context, 10, -5);
-	expect(spySprites[1].render).not.toHaveBeenCalled();;
-	expect(spySprites[2].render).not.toHaveBeenCalled();;
-	expect(spySprites[3].render).not.toHaveBeenCalled();;
+	expect(spySprites[1].render).not.toHaveBeenCalled();
+	expect(spySprites[2].render).not.toHaveBeenCalled();
+	expect(spySprites[3].render).not.toHaveBeenCalled();
     });
 });

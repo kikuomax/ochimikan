@@ -24,14 +24,21 @@ describe('Located', function() {
 	expect(loc.y).toBe(-5);
     });
 
-    it('makeLocated make object located', function() {
-	var obj = { };
+    it('makeLocated should make an object located', function() {
+	var obj = {};
 	expect(Located.makeLocated(obj, 0, 0)).toBe(obj);
 	expect(obj.x).toBe(0);
 	expect(obj.y).toBe(0);
 	expect(Located.makeLocated(obj, -10, 99)).toBe(obj);
 	expect(obj.x).toBe(-10);
 	expect(obj.y).toBe(99);
+    });
+
+    it('makeLocated should overwrite properties of the target', function() {
+	var obj = { x: "x", y: "y" };
+	expect(Located.makeLocated(obj, 0, 0)).toBe(obj);
+	expect(obj.x).toBe(0);
+	expect(obj.y).toBe(0);
     });
 
     it('Can be located at another location', function() {

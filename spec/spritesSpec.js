@@ -17,7 +17,7 @@ describe('Sprite', function() {
 	expect(sprite.image).not.toBeDefined();
     });
 
-    it("Should not render image if it's not loaded", function() {
+    it('Should render nothing if it is not loaded', function() {
 	var sprite = new Sprite('./imgs/sprite.png', 0, 0, 32, 32);
 	// mocks out Context
 	var context = {
@@ -36,19 +36,19 @@ describe('load and render Sprite', function() {
 	sprite.load();
     });
 
-    it('Sprite should create Image associated with the specified URL', function() {
+    it('Sprite should create an Image associated with the specified URL', function() {
 	expect(sprite.image).toBeDefined();
 	var src = sprite.image.src;
 	expect(src.slice(src.length - 15)).toBe('imgs/sprite.png');
     });
 
-    it('Sprite should not create image again', function() {
+    it('Sprite should not create any Image again', function() {
 	var image = sprite.image;
 	sprite.load();
 	expect(sprite.image).toBe(image);
     });
 
-    it('Sprite should render loaded Image in Context', function() {
+    it('Sprite should render the loaded Image in a specified context', function() {
 	// mocks out Context
 	var context = {
 	    drawImage: jasmine.createSpy('drawImage')

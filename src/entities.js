@@ -64,7 +64,10 @@ function Located(x, y) {
 /**
  * Makes an existing object a located object.
  *
- * Overwrites properties of `self`.
+ * Overwrites the following properties,
+ * - x
+ * - y
+ *
  * @method makeLocated
  * @static
  * @param self {Object}

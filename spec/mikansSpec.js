@@ -246,11 +246,8 @@ describe('rendering a mikan box:', function() {
     });
 
     it('mikan box should render placed mikans', function() {
-	var context = {
-	    clearRect: jasmine.createSpy("clearRect")
-	};
+	var context = {};
 	mikanBox.render(context);
-	expect(context.clearRect).toHaveBeenCalledWith(0, 0, 8*32, 12*32);
 	expect(mikan1.render).toHaveBeenCalledWith(context);
 	expect(mikan2.render).toHaveBeenCalledWith(context);
 	expect(mikan3.render).toHaveBeenCalledWith(context);

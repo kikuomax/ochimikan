@@ -159,9 +159,7 @@ Object.defineProperty(Mikan, "MAX_DAMAGE", { value: 3, writable: false });
  * ## Rendering a mikan box
  *
  * 1. A context is given.
- * 1. A `MikanBox` clears the context.
- * 1. The `MikanBox` asks each `Mikan` in it to render the `Mikan`
- *    in the context.
+ * 1. A `MikanBox` asks each `Mikan` in it to render the `Mikan` in the context.
  *
  * @class MikanBox
  * @constructor
@@ -196,7 +194,6 @@ function MikanBox(columnCount, rowCount, squareSize) {
 
     // makes mikan box renderable
     Renderable.makeRenderable(self, function(context) {
-	context.clearRect(0, 0, columnCount * squareSize, rowCount * squareSize);
 	mikanGrid.forEach(function(mikan) {
 	    if (mikan !== null) {
 		mikan.render(context);

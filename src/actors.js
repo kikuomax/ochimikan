@@ -46,12 +46,13 @@
  * An actor.
  *
  * Throws "act must be a function" if `act` isn't a function.
+ *
  * @class Actor
  * @constructor
  * @param priority {int}
  *     The priority of the actor.
  *     The lower this number is, the higher priority is.
- * @param act {function(ActorScheduler)}
+ * @param act {Function(ActorScheduler)}
  *     The action of the actor.
  */
 function Actor(priority, act) {
@@ -65,6 +66,7 @@ function Actor(priority, act) {
      * The priority of this actor.
      *
      * The lower this number is, the higher priority is.
+     *
      * @property priority
      * @type int
      */
@@ -74,6 +76,7 @@ function Actor(priority, act) {
      * Performs the action of this actor.
      *
      * `scheduler.schedule` may be invoked in this method.
+     *
      * @method act
      * @param scheduler {ActorScheduler}
      *     The actor scheduler which is running this actor.
@@ -82,11 +85,36 @@ function Actor(priority, act) {
 }
 
 /**
+ * Makes the specified object an actor.
+ *
+ * Overwrites the following properties.
+ * - priority
+ * - act
+ *
+ * Throws an exception if `act` isn't a function.
+ *
+ * @method makeActor
+ * @static
+ * @param self {Object}
+ *     The object to be an actor.
+ * @param priority {Number}
+ *     The priority of the actor.
+ * @param act {Function(ActorScheduler)}
+ *     The the action of the actor.
+ * @retrun {Actor}  `self`.
+ */
+Actor.makeActor = function(self, priority, act) {
+    Actor.call(self, priority, act);
+    return self;
+};
+
+/**
  * Returns whether the specified object is an actor.
  *
  * An actor has the following properties,
  * - priority
  * - act: function
+ *
  * @method isActor
  * @static
  * @param obj {Object}
@@ -159,6 +187,7 @@ function ActorScheduler() {
      * - has the highes priority (>=0) among the scheduled actors
      *
      * Executed actors will be deleted from the queue of this actor scheduler.
+     *
      * @method run
      */
     self.run = function() {
@@ -191,12 +220,32 @@ function ActorScheduler() {
 }
 
 /**
+ * Makes the specified object an actor scheduler.
+ *
+ * Overwrites the following properties,
+ * - actorQueue
+ * - schedule
+ * - run
+ *
+ * @method makeActorScheduler
+ * @static
+ * @param self {Object}
+ *     The object to be an actor scheduler.
+ * @return {ActorScheduler}  `self`.
+ */
+ActorScheduler.makeActorScheduler = function(self) {
+    ActorScheduler.call(self);
+    return self;
+};
+
+/**
  * Returns whether the specified object is an actor scheduler.
  *
- * An actor scheduler has the following properties,
+ * An actor scheduler must have the following properties,
  * - actorQueue
  * - schedule: function
  * - run: function
+ *
  * @method isActorScheduler
  * @static
  * @param obj {Object}
@@ -206,47 +255,3 @@ function ActorScheduler() {
 ActorScheduler.isActorScheduler = function(obj) {
     return (obj != null) && (obj.actorQueue !== undefined) && (typeof obj.schedule == "function") && (typeof obj.run == "function");
 };
-
-/**
- * Provides APIs of the actor system.
- *
- * May be referred to as `as`.
- *
- * @class ActorSystem
- * @static
- */
-function ActorSystem() { }
-
-/**
- * Makes the specified object an actor.
- *
- * Replaces the properites of `self`.
- * @method makeActor
- * @param self {Object}
- *     The object to be an actor.
- * @param priority {int}
- *     The priority of the actor.
- * @param act {function(ActorScheduler)}
- *     The action of the actor.
- * @return {Actor}  `self`.
- */
-ActorSystem.makeActor = function(self, priority, act) {
-    Actor.call(self, priority, act);
-    return self;
-};
-
-/**
- * Makes the specified object an actor scheduler.
- *
- * @method makeActorScheduler
- * @param self {Object}
- *     The object to be an actor scheduler.
- * @return {ActorScheduler}  `self`.
- */
-ActorSystem.makeActorScheduler = function(self) {
-    ActorScheduler.call(self);
-    return self;
-};
-
-// A shortcut for the actor system.
-const as = ActorSystem;

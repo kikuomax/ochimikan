@@ -1,16 +1,10 @@
 describe('Actor', function() {
-    it('Should have priority (0)', function() {
+    it('Should have priority', function() {
 	var actor = new Actor(0, function(s){});
 	expect(actor.priority).toBe(0);
-    });
-
-    it('Should have priority (1)', function() {
-	var actor = new Actor(1, function(s){});
+	actor = new Actor(1, function(s){});
 	expect(actor.priority).toBe(1);
-    });
-
-    it('Should have priority (-1)', function() {
-	var actor = new Actor(-1, function(s){});
+	actor = new Actor(-1, function(s){});
 	expect(actor.priority).toBe(-1);
     });
 
@@ -20,7 +14,7 @@ describe('Actor', function() {
 	expect(actor.act).toBe(act);
     });
 
-    it('Should throw "act must be a function" if act isn\'t a function', function() {
+    it('Should throw exception if act is not a function', function() {
 	expect(function() {
 	    new Actor(0, {});
 	}).toThrow("act must be a function");
@@ -42,6 +36,32 @@ describe('Actor', function() {
 
     it('isActor should be false for undefined', function() {
 	expect(Actor.isActor(undefined)).toBe(false);
+    });
+
+    it('makeActor should make object actor', function() {
+	var obj = {};
+	var act = function(s) {};
+	expect(Actor.makeActor(obj, 0, act)).toBe(obj);
+	expect(Actor.isActor(obj)).toBe(true);
+	expect(obj.priority).toBe(0);
+	expect(obj.act).toBe(act);
+    });
+
+    it('makeActor should overwrite properties of the target', function() {
+	var obj = {
+	    priority: 0,
+	    act: function(s) {}
+	};
+	var act = function(s) { return 0; };
+	expect(Actor.makeActor(obj, 1, act)).toBe(obj);
+	expect(obj.priority).toBe(1);
+	expect(obj.act).toBe(act);
+    });
+
+    it('makeActor should throw an exception if act is not a function', function() {
+	expect(function() {
+	    Actor.makeActor({}, 0, {});
+	}).toThrow();
     });
 
     it('comparePriorities should return 0 if lhs.priority == rhs.priority', function() {
@@ -113,32 +133,10 @@ describe('ActorScheduler', function() {
     it('isActorScheduler should be false for undefined', function() {
 	expect(ActorScheduler.isActorScheduler(undefined)).toBe(false);
     });
-});
 
-describe('ActorSystem', function() {
-    it('makeActor should make object actor', function() {
+    it('makeActorScheduler should make an object an actor scheduler', function() {
 	var obj = {};
-	var act = function(s) {};
-	ActorSystem.makeActor(obj, 0, act);
-	expect(Actor.isActor(obj)).toBe(true);
-	expect(obj.priority).toBe(0);
-	expect(obj.act).toBe(act);
-    });
-
-    it('makeActor should replace properties of object', function() {
-	var obj = {
-	    priority: 0,
-	    act: function(s) {}
-	};
-	var act = function(s) { return 0; };
-	ActorSystem.makeActor(obj, 1, act);
-	expect(obj.priority).toBe(1);
-	expect(obj.act).toBe(act);
-    });
-
-    it('makeActorScheduler should make object actor scheduler', function() {
-	var obj = {};
-	ActorSystem.makeActorScheduler(obj);
+	expect(ActorScheduler.makeActorScheduler(obj)).toBe(obj);
 	expect(ActorScheduler.isActorScheduler(obj)).toBe(true);
     });
 
@@ -146,7 +144,7 @@ describe('ActorSystem', function() {
 	var obj = {
 	    actorQueue: [{}]
 	};
-	ActorSystem.makeActorScheduler(obj);
+	expect(ActorScheduler.makeActorScheduler(obj)).toBe(obj);
 	expect(obj.actorQueue.length).toBe(0);
     });
 });

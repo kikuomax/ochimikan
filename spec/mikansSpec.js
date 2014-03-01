@@ -60,7 +60,53 @@ describe('Mikan', function() {
 });
 
 describe('rendering mikan', function() {
+    var savedSprites;
+    var dummySprites;
+
+    // fakes the sprite resources
+    beforeEach(function() {
+	savedSprites = Resources.SPRITES['mikan'];
+	spySprites = [
+	    { render: jasmine.createSpy("dmg0") },
+	    { render: jasmine.createSpy("dmg1") },
+	    { render: jasmine.createSpy("dmg2") },
+	    { render: jasmine.createSpy("dmg3") }
+	];
+	Resources.SPRITES['mikan'] = spySprites;
+    });
+
+    // restores the sprite resources
+    afterEach(function() {
+	Resources.SPRITES.mikan = savedSprites;
+    });
+
     it('Mikan can be rendered', function() {
-	expect(true).toBe(false);
+	var mikan = new Mikan(0);
+	var context = { };
+	mikan.render(context);
+	expect(spySprites[0].render).toHaveBeenCalledWith(context, 0, 0);
+	expect(spySprites[1].render).not.toHaveBeenCalled();
+	expect(spySprites[2].render).not.toHaveBeenCalled();
+	expect(spySprites[3].render).not.toHaveBeenCalled();
+    });
+
+    it('Damaged mikan can be rendered', function() {
+	var mikan = new Mikan(Mikan.MAX_DAMAGE);
+	var context = { };
+	mikan.render(context);
+	expect(spySprites[0].render).not.toHaveBeenCalled();
+	expect(spySprites[1].render).not.toHaveBeenCalled();
+	expect(spySprites[2].render).not.toHaveBeenCalled();
+	expect(spySprites[3].render).toHaveBeenCalledWith(context, 0, 0);
+    });
+
+    it('Mikan can be rendered at specified location', function() {
+	var mikan = new Mikan(0).locate(10, -5);
+	var context = { };
+	mikan.render(context);
+	expect(spySprites[0].render).toHaveBeenCalledWith(context, 10, -5);
+	expect(spySprites[1].render).not.toHaveBeenCalled();;
+	expect(spySprites[2].render).not.toHaveBeenCalled();;
+	expect(spySprites[3].render).not.toHaveBeenCalled();;
     });
 });

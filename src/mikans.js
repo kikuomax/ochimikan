@@ -76,6 +76,11 @@ function Mikan(damage) {
     // locates at (0, 0)
     Located.makeLocated(self, 0, 0);
 
+    // makes mikan renderable
+    rs.makeRenderable(self, function(context) {
+	Resources.SPRITES['mikan'][self.damage].render(context, self.x, self.y);
+    });
+
     /**
      * The degree of damage on this mikan.
      *

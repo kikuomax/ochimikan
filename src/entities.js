@@ -17,9 +17,6 @@
 function Located(x, y) {
     var self = this;
 
-    // the location
-    var _loc = [x, y];
-
     /**
      * The x-coordinate value of the location.
      *
@@ -27,9 +24,9 @@ function Located(x, y) {
      * @type Number
      */
     Object.defineProperty(self, "x", {
+	value: x,
 	configurable: true,
-	get: function() { return _loc[0]; },
-	set: function(x) { _loc[0] = x; }
+	writable: true
     });
 
     /**
@@ -39,9 +36,9 @@ function Located(x, y) {
      * @type Number
      */
     Object.defineProperty(self, "y", {
+	value: y,
 	configurable: true,
-	get: function() { return _loc[1]; },
-	set: function(y) { _loc[1] = y; }
+	writable: true
     });
 
     /**
@@ -55,8 +52,8 @@ function Located(x, y) {
      * @chainable
      */
     self.locate = function(x, y) {
-	_loc[0] = x;
-	_loc[1] = y;
+	self.x = x;
+	self.y = y;
 	return self;
     };
 }

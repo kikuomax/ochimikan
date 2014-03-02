@@ -5,6 +5,14 @@ module.exports = function(grunt) {
 	build: {
 	    debug: './dist/mikan.debug.js'
 	},
+	jasmine: {
+	    mikan: {
+		src: './dist/mikan.debug.js',
+		options: {
+		    specs: './spec/*Spec.js'
+		}
+	    }
+	},
 	yuidoc: {
 	    compile: {
 		'name': '<%= pkg.name %>',
@@ -18,6 +26,8 @@ module.exports = function(grunt) {
 	    }
 	}
     });
+
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
 
     grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
@@ -46,5 +56,5 @@ module.exports = function(grunt) {
 	grunt.file.write(output, source.replace(/\r\n/g, '\n'));
     });
 
-    grunt.registerTask('default', ['build', 'yuidoc']);
+    grunt.registerTask('default', ['build', 'jasmine', 'yuidoc']);
 };

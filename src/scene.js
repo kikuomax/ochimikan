@@ -3,12 +3,15 @@
  *
  * # Use Cases
  *
- * ## Starting the game
+ * ## Starting a scene
  *
  * 1. A user creates a `Scene` and associates it with the screen.
  * 1. The user sees a `MikanBox` in the `Scene`.
- * 1. A pair of `Mikan`s is shown in the `Scene` and begins falling
- *    under gravity.
+ *
+ * ## Running a single step
+ *
+ * 1. A `Scene` is given.
+ * 1. A user asks the `Scene` to run a single step.
  *
  * ## Horizontally moving a mikan pair
  *
@@ -39,6 +42,17 @@
  *
  * @class Scene
  * @contructor
+ * @param canvas {Node}
+ *     The canvas to be associated with the scene.
  */
-function Scene() {
+function Scene(canvas) {
+    var self = this;
+
+    /**
+     * Runs a single step of this scene.
+     *
+     * @method run
+     */
+    self.run = function() {
+    };
 }

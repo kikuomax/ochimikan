@@ -5,6 +5,8 @@ linkMikanSources([
     "./src/renders.js",
     "./src/geometry.js",
     "./src/resources.js",
-    "./src/mikans.js"
+    "./src/mikans.js",
+    "./src/scene.js",
+    "./src/game.js"
 //    "./src/mikan.js"
 ]);

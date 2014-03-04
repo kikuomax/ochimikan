@@ -22,6 +22,8 @@ describe('Initializing the game:', function() {
     it('Game should initialize the game if a canvas exists', function() {
 	Game.start();
 	expect(canvas.getContext).toHaveBeenCalledWith('2d');
+	expect(canvas.width).toBe(Scene.COLUMN_COUNT * Scene.SQUARE_SIZE);
+	expect(canvas.height).toBe(Scene.ROW_COUNT * Scene.SQUARE_SIZE);
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), false);
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchmove', jasmine.any(Function), false);
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchend', jasmine.any(Function), false);

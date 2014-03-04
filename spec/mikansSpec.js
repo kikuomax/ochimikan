@@ -77,6 +77,15 @@ describe('MikanBox', function() {
 	expect(new MikanBox(8, 12, 1).squareSize).toBe(1);
     });
 
+    it('should have its size', function() {
+	var mikanBox = new MikanBox(8, 12, 32);
+	expect(mikanBox.width).toBe(8 * 32);
+	expect(mikanBox.height).toBe(12 * 32);
+	mikanBox = new MikanBox(8, 10, 1);
+	expect(mikanBox.width).toBe(8);
+	expect(mikanBox.height).toBe(10);
+    });
+
     it('can have float columns, rows and squareSize but they are floored', function() {
 	var mikanBox = new MikanBox(8.5, 12.4, 32.9);
 	expect(mikanBox.columnCount).toBe(8);

@@ -10,8 +10,7 @@
  *
  * ## Creating a mikan box
  *
- * 1. A user determines the number of columns in a mikan box.
- * 1. The user determines the number of rows in a mikan box.
+ * 1. A user determines the number of columns and rows in a mikan box.
  * 1. The user creates a `MikanBox` with the size (# of column, # of row).
  *
  * ## Placing a mikan
@@ -43,6 +42,23 @@
  *
  * @module mikans
  */
+
+/**
+ * Defines priorities of actors.
+ *
+ * @class ActorPriorities
+ * @static
+ */
+const ActorPriorities = {
+    /**
+     * A priority of an actor which spawns mikans.
+     *
+     * @property SPAWN
+     * @type {Number}
+     * @final
+     */
+    SPAWN: 0
+};
 
 /**
  * A mikan.
@@ -214,7 +230,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * @type {Number}
      * @final
      */
-    Object.defineProperty(self, "columnCount", { value: columnCount });
+    Object.defineProperty(self, 'columnCount', { value: columnCount });
 
     /**
      * The number of rows in this mikan box.
@@ -223,7 +239,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * @type {Number}
      * @final
      */
-    Object.defineProperty(self, "rowCount", { value: rowCount });
+    Object.defineProperty(self, 'rowCount', { value: rowCount });
 
     /**
      * The size (in pixels) of each square in this mikan box.
@@ -232,7 +248,25 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * @type {Number}
      * @final
      */
-    Object.defineProperty(self, "squareSize", { value: squareSize });
+    Object.defineProperty(self, 'squareSize', { value: squareSize });
+
+    /**
+     * The width (in pixels) of this mikan box.
+     *
+     * @property width
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'width', { value: columnCount * squareSize });
+
+    /**
+     * The height (in pixels) of this mikan box.
+     *
+     * @property height
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'height', { value: rowCount * squareSize });
 
     /**
      * Returns the mikan in the specified square in this mikan box.

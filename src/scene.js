@@ -8,6 +8,12 @@
  * 1. A user creates a `Scene` and associates it with the canvas.
  * 1. The user sees a `MikanBox` in the `Scene`.
  *
+ * ## Resizing a canvas
+ *
+ * 1. A `Scene` is given.
+ * 1. A user asks the `Scene` for its size (width and height).
+ * 1. The user resizes a canvas so that it can render the entire `Scene`.
+ *
  * ## Running a single step
  *
  * 1. A `Scene` is given.
@@ -42,24 +48,77 @@
  *
  * # Scenarios
  *
+ * ## Creating a scene
+ *
+ * 1. A user creates a `Scene`.
+ * 1. The `Scene` creates an empty `MikanBox` which has
+ *    the following properties.
+ *    - number of columns is `COLUMN_COUNT`
+ *    - number of rows is `ROW_COUNT`
+ *    - size of each square is `SQUARE_SIZE`
+ * 1. The `Scene` sets its width and height to the same as the `MikanBox`.
+ * 1. The `Scene` schedules an actor which spawns controlled mikans.
+ *
  * ## Associating a scene with a canvas
  *
  * 1. A canvas (`Element`) is given.
  * 1. A `Scene` is given.
- * 1. A user associates the canvas with the `Scene`.
+ * 1. A user associates the `Scene` with the canvas.
  * 1. The `Scene` listens to the canvas for the following events,
  *    - touchstart
  *    - touchmove
  *    - touchend
  * 1. The `Scene` will perform rendering on the 2D context of the canvas.
  *
+ * ## Running a single step
+ *
+ * 1. A `Scene` is given.
+ * 1. A user asks the `Scene` to run a single step.
+ * 1. The `Scene` runs scheduled actors (ActorScheduler's behavior).
+ *
+ * ## Rendering a scene
+ *
+ * 1. A `Scene` is given.
+ * 1. A user asks the `Scene` to render it.
+ * 1. The `Scene` clears a canvas associated with it.
+ * 1. The `Scene` renders its mikan box, controlled mikans and
+ *    renderable actors scheduled in it.
+ *
  * @class Scene
  * @contructor
- * @param canvas {Node}
- *     The canvas to be associated with the scene.
+ * @extends ActorScheduler
+ * @extends Renderable
  */
 function Scene() {
     var self = this;
+
+    // makes this scene an actor scheduler
+    ActorScheduler.makeActorScheduler(self);
+
+    var _mikanBox = new MikanBox(Scene.COLUMN_COUNT, Scene.ROW_COUNT, Scene.SQUARE_SIZE);
+
+    // schedules an actor which spawns controlled mikans
+    self.schedule(new Actor(ActorPriorities.SPAWN, function(scheduler) {
+	
+    }));
+
+    /**
+     * The width of this scene.
+     *
+     * @property width
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'width', { value: _mikanBox.width });
+
+    /**
+     * The height of this scene.
+     *
+     * @preoperty height
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'height', { value: _mikanBox.height });
 
     /**
      * The canvas associated with this scene.
@@ -105,14 +164,6 @@ function Scene() {
     });
 
     /**
-     * Runs a single step of this scene.
-     *
-     * @method run
-     */
-    self.run = function() {
-    };
-
-    /**
      * Handles a 'touchstart' event.
      *
      * @method touchStarted
@@ -156,3 +207,39 @@ function Scene() {
 	canvas.removeEventListener('touchend', self.touchEnded, false);
     }
 }
+
+/**
+ * The number of columns in a mikan box.
+ *
+ * `COLUMN_COUNT = 8`
+ *
+ * @property COLUMN_COUNT
+ * @type {Number}
+ * @static
+ * @final
+ */
+Object.defineProperty(Scene, 'COLUMN_COUNT', { value: 8 });
+
+/**
+ * The number of rows in a mikan box.
+ *
+ * `ROW_COLUMN = 12`
+ *
+ * @property ROW_COUNT
+ * @type {Number}
+ * @static
+ * @final
+ */
+Object.defineProperty(Scene, 'ROW_COUNT', { value: 12 });
+
+/**
+ * The size of each square in a mikan box.
+ *
+ * `SQUARE_SIZE = 32`
+ *
+ * @property SQUARE_SIZE
+ * @type {Number}
+ * @static
+ * @final
+ */
+Object.defineProperty(Scene, 'SQUARE_SIZE', { value: 32 });

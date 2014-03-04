@@ -37,9 +37,16 @@ function Game() {}
  */
 Game.start = function() {
     var canvas = document.getElementById(Game.CANVAS_ID);
-    if (canvas == null) {
-	throw "Document must have a canvas";
+    if (canvas === null) {
+	throw 'Document must have a canvas';
     }
+    var context = canvas.getContext('2d');
+    canvas.addEventListener("touchstart", function(event) {
+    }, false);
+    canvas.addEventListener("touchmove", function(event) {
+    }, false);
+    canvas.addEventListener("touchend", function(event) {
+    }, false);
     window.setInterval(function() {
 	// runs a frame
     }, Game.FRAME_INTERVAL);

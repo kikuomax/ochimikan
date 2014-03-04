@@ -3,11 +3,13 @@ describe('Initializing the game:', function() {
 
     beforeEach(function() {
 	// creates a dummy canvas
-	canvas = document.createElement("canvas");
+	canvas = document.createElement('canvas');
 	canvas.id = Game.CANVAS_ID;
 	document.body.appendChild(canvas);
 	spyOn(canvas, 'getContext');
 	spyOn(canvas, 'addEventListener');
+	// spies the resource loader
+	spyOn(Resources, 'loadSprites');
 	// spies the window
 	spyOn(window, 'setInterval');
     });
@@ -23,6 +25,7 @@ describe('Initializing the game:', function() {
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), false);
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchmove', jasmine.any(Function), false);
 	expect(canvas.addEventListener).toHaveBeenCalledWith('touchend', jasmine.any(Function), false);
+	expect(Resources.loadSprites).toHaveBeenCalled();
 	expect(window.setInterval).toHaveBeenCalledWith(jasmine.any(Function), Game.FRAME_INTERVAL);
     });
 });

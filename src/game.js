@@ -6,7 +6,7 @@
  * ## Booting the game
  *
  * 1. A document is given.
- * 1. A user asks the `Boot` to start.
+ * 1. A user asks the `Game` to start.
  * 1. The game is associated with the document and runs on it.
  *
  * @module game
@@ -14,16 +14,6 @@
 
 /**
  * The instance of the game.
- *
- * @class Game
- * @static
- */
-function Game() {}
-
-/**
- * Starts the game.
- *
- * Throws an exception if there's no element whose ID is `CANVAS_ID`
  *
  * # Scenarios
  *
@@ -34,9 +24,20 @@ function Game() {}
  *    whose ID is `CANVAS_ID`.
  * 1. The `Game` loads resources (sprites).
  * 1. The `Game` creates a `Scene` supplied with the canvas.
- * 1. The `Game` resizes the canvas.
+ * 1. The `Game` resizes the canvas so that the canvas contains
+ *    the entire `Scene`.
  * 1. The `Game` starts a timer which asks the `Scene` to run and render
  *    a single frame at the interval (`FRAME_INTERVAL`).
+ *
+ * @class Game
+ * @static
+ */
+function Game() {}
+
+/**
+ * Starts the game.
+ *
+ * Throws an exception if there's no element whose ID is `CANVAS_ID`
  *
  * @method start
  */

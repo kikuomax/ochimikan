@@ -57,7 +57,8 @@
  *    - number of rows is `ROW_COUNT`
  *    - size of each square is `SQUARE_SIZE`
  * 1. The `Scene` sets its width and height to the same as the `MikanBox`.
- * 1. The `Scene` schedules an actor which spawns controlled mikans.
+ * 1. The `Scene` schedules an actor which spawns controlled mikans
+ *    (`mikanSpawner`).
  *
  * ## Associating a scene with a canvas
  *
@@ -97,10 +98,10 @@ function Scene() {
 
     var _mikanBox = new MikanBox(Scene.COLUMN_COUNT, Scene.ROW_COUNT, Scene.SQUARE_SIZE);
 
-    // schedules an actor which spawns controlled mikans
-    self.schedule(new Actor(ActorPriorities.SPAWN, function(scheduler) {
-	
-    }));
+    // schedules an actor which spawns a pair of two mikans
+    var _mikanSpawner = new Actor(ActorPriorities.SPAWN, function(scheduler) {
+    });
+    self.schedule(_mikanSpawner);
 
     /**
      * The width of this scene.
@@ -192,6 +193,19 @@ function Scene() {
      */
     self.touchEnded = function(event) {
     };
+
+    /**
+     * The actor which spawns controlled mikans.
+     *
+     * `act` schedules an actor which controls a pair of mikans.
+     *
+     * @property mikanSpawner
+     * @type {Actor}
+     * @final
+     */
+    Object.defineProperty(self, 'mikanSpawner', {
+	get: function() { return _mikanSpawner; }
+    });
 
     /** Adds listeners to the specified canvas. */
     function addListeners(canvas) {

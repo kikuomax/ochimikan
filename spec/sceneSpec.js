@@ -17,7 +17,7 @@ describe('Scene without a canvas', function() {
 
     it('Should initially schedule a mikanSpawner', function() {
 	var scene = new Scene();
-	expect(scene.actorQueue.length).toBe(1);
+	expect(scene.actorQueue).toEqual([scene.mikanSpawner]);
     });
 });
 

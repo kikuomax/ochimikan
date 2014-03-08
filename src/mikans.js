@@ -13,6 +13,19 @@
  * 1. A user determines the number of columns and rows in a mikan box.
  * 1. The user creates a `MikanBox` with the size (# of column, # of row).
  *
+ * ## Creating a mikan in a mikan box
+ *
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to create a `Mikan` in it.
+ * 1. The new `Mikan` belongs to the `MikanBox` but not placed yet.
+ *
+ * ## Drops a mikan
+ *
+ * 1. A `Mikan` is given.
+ * 1. A `MikanBox` is given.
+ * 1. A user drops the `Mikan` in the `MikanBox`.
+ * 1. The `Mikan` starts falling in the `MikanBox`.
+ *
  * ## Placing a mikan
  *
  * 1. A `Mikan` is given.
@@ -51,13 +64,29 @@
  */
 const ActorPriorities = {
     /**
+     * A priority of an actor which draps mikans.
+     *
+     * @property DROP
+     * @type {Number}
+     * @final
+     */
+    DROP: 0,
+    /**
+     * A priority of an actor which controls mikans.
+     *
+     * @property CONTROL
+     * @type {Number}
+     * @final
+     */
+    CONTROL: 1,
+    /**
      * A priority of an actor which spawns mikans.
      *
      * @property SPAWN
      * @type {Number}
      * @final
      */
-    SPAWN: 0
+    SPAWN: 2
 };
 
 /**
@@ -90,10 +119,10 @@ function Mikan(damage) {
     checkDamage(damage);
 
     // locates at (0, 0)
-    Located.makeLocated(self, 0, 0);
+    Located.call(self, 0, 0);
 
     // makes mikan renderable
-    Renderable.makeRenderable(self, function(context) {
+    Renderable.call(self, function(context) {
 	Resources.SPRITES['mikan'][self.damage].render(context, self.x, self.y);
     });
 
@@ -119,22 +148,6 @@ function Mikan(damage) {
 	}
     });
 
-    /**
-     * Spoils this mikan.
-     *
-     * The degree of damage of this mikan will be incremented unless it's
-     * `Mikan.MAX_DAMAGE`.
-     *
-     * @method spoil
-     * @chainable
-     */
-    self.spoil = function() {
-	if (_damage < Mikan.MAX_DAMAGE) {
-	    ++_damage;
-	}
-	return self;
-    };
-
     // makes sure that the damage is in [0, MAX_DAMAGE]
     function checkDamage(damage) {
 	if (damage < 0) {
@@ -145,6 +158,24 @@ function Mikan(damage) {
 	}
     }
 }
+// extends Located
+Located.wrap(Mikan.prototype);
+
+/**
+ * Spoils this mikan.
+ *
+ * The degree of damage of this mikan will be incremented unless it's
+ * `Mikan.MAX_DAMAGE`.
+ *
+ * @method spoil
+ * @chainable
+ */
+Mikan.prototype.spoil = function() {
+    if (this.damage < Mikan.MAX_DAMAGE) {
+	++this.damage;
+    }
+    return this;
+};
 
 /**
  * The maximum damage of a mikan.
@@ -154,7 +185,24 @@ function Mikan(damage) {
  * @type Number
  * @final
  */
-Object.defineProperty(Mikan, "MAX_DAMAGE", { value: 3, writable: false });
+Object.defineProperty(Mikan, 'MAX_DAMAGE', { value: 3, writable: false });
+
+/**
+ * Returns whether the specified object is a mikan.
+ *
+ * A mikan is a `Located` and has the following property.
+ * - damage
+ *
+ * @method isMikan
+ * @static
+ * @param obj {Object}
+ *     The object to be tested.
+ * @return {Boolean}
+ *     Whether `obj` is a mikan. `false` if `obj` is `null` or `undefined`.
+ */
+Mikan.isMikan = function(obj) {
+    return Located.isLocated(obj) && (obj.damage != null);
+};
 
 /**
  * A mikan box.
@@ -176,6 +224,14 @@ Object.defineProperty(Mikan, "MAX_DAMAGE", { value: 3, writable: false });
  *
  * 1. A context is given.
  * 1. A `MikanBox` asks each `Mikan` in it to render the `Mikan` in the context.
+ *
+ * ## Dropping mikans in a mikan box
+ *
+ * 1. A `ActorScheduler` is given.
+ * 1. A `MikanBox` collects `Mikan`s in it which aren't placed on the ground.
+ * 1. For each of those `Mikan`s, the `MikanBox` makes it float
+ *    and schedules it as an actor in the `ActorScheduler` as an actor
+ *    which moves downward until it reaches the ground.
  *
  * @class MikanBox
  * @constructor
@@ -209,7 +265,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
     squareSize = Math.floor(squareSize);
 
     // makes mikan box renderable
-    Renderable.makeRenderable(self, function(context) {
+    Renderable.call(self, function(context) {
 	mikanGrid.forEach(function(mikan) {
 	    if (mikan !== null) {
 		mikan.render(context);
@@ -311,11 +367,44 @@ function MikanBox(columnCount, rowCount, squareSize) {
 	checkSquare(column, row);
 	// makes sure that the square is vacant
 	var idx = indexOf(column ,row);
-	if (mikanGrid[idx] !== null) {
+	if (mikanGrid[idx] != null) {
 	    throw "square [" + column + ", " + row + "] isn't vacant";
 	}
 	mikanGrid[idx] = mikan;
 	mikan.locate(column * squareSize, (rowCount - row - 1) * squareSize);
+    };
+
+    /**
+     * Drops mikans in this mikan box.
+     *
+     * For each mikan in this mikan box which isn't placed on the ground,
+     * 1. Releases the mikan from this mikan box
+     * 1. Makes the mikan an actor which moves toward the ground
+     *    (ActorPriorities.DROP)
+     * 1. Schedules the mikan in `scheduler`
+     * 
+     * @method dropMikans
+     * @param scheduler {ActorScheduler}
+     *     The actor scheduler in which actors are to be scheduled.
+     */
+    self.dropMikans = function(scheduler) {
+	for (var c = 0; c < columnCount; ++c) {
+	    var height = 0;
+	    for (var r = 0; r < rowCount; ++r) {
+		var idx = indexOf(c, r);
+		var mikan = mikanGrid[idx];
+		if (mikan != null) {
+		    // drops the mikan if it's not on the ground
+		    if (r > height) {
+			Actor.call(mikan, ActorPriorities.DROP, function(scheduler) {
+			});
+			scheduler.schedule(mikan);
+			mikanGrid[idx] = null;
+		    }
+		    ++height;
+		}
+	    }
+	}
     };
 
     /**

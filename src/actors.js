@@ -45,7 +45,9 @@
 /**
  * An actor.
  *
- * Throws "act must be a function" if `act` isn't a function.
+ * Throws an exception if,
+ * - `priority` is `null` or `undefined`
+ * - `act` isn't a function
  *
  * @class Actor
  * @constructor
@@ -57,6 +59,11 @@
  */
 function Actor(priority, act) {
     var self = this;
+
+    // makes sure that priority is specified
+    if (priority == null) {
+	throw "priority must be specified"
+    }
     // makes sure that act is a function
     if (typeof act != "function") {
 	throw "act must be a function";
@@ -103,17 +110,18 @@ function Actor(priority, act) {
  *     The the action of the actor.
  * @retrun {Actor}  `self`.
  */
+/*
 Actor.makeActor = function(self, priority, act) {
     Actor.call(self, priority, act);
     return self;
-};
+};*/
 
 /**
  * Returns whether the specified object is an actor.
  *
  * An actor has the following properties,
  * - priority
- * - act: function
+ * - act: Function
  *
  * @method isActor
  * @static
@@ -122,7 +130,7 @@ Actor.makeActor = function(self, priority, act) {
  * @return {Boolean}  Whether `obj` is an actor.
  */
 Actor.isActor = function(obj) {
-    return (obj != null) && (obj.priority !== undefined) && (typeof obj.act == "function");
+    return (obj != null) && (obj.priority != null) && (typeof obj.act == "function");
 };
 
 /**
@@ -167,91 +175,97 @@ function ActorScheduler() {
      * @type Array[Actor]
      */
     self.actorQueue = [];
-
-    /**
-     * Schedules the specified actor.
-     *
-     * @method schedule
-     * @param actor {Actor}
-     *     The actor to be scheduled.
-     */
-    self.schedule = function(actor) {
-	self.actorQueue.push(actor);
-    };
-
-    /**
-     * Runs scheduled actors.
-     *
-     * Runs actors which satisfies one of the following conditions,
-     * - has negative priority
-     * - has the highes priority (>=0) among the scheduled actors
-     *
-     * Executed actors will be deleted from the queue of this actor scheduler.
-     *
-     * @method run
-     */
-    self.run = function() {
-	// checks if any actor is scheduled
-	if (self.actorQueue.length > 0) {
-	    // spares the actor queue
-	    var actorQueue = self.actorQueue;
-	    self.actorQueue = [];
-	    // sorts actors by priorities (a higher priority comes earlier)
-	    actorQueue.sort(Actor.comparePriorities);
-	    // runs actors which have negative priorities
-	    // lower bound of priority=0
-	    // => upper bound of negative priorities
-	    var upper = Search.lowerBound(actorQueue,
-					  { priority: 0 },
-					  Actor.comparePriorities);
-	    // and runs actors which have the highest priority (>= 0)
-	    if (upper < actorQueue.length) {
-		upper = Search.upperBound(actorQueue,
-					  actorQueue[upper],
-					  Actor.comparePriorities);
-	    }
-	    actorQueue.slice(0, upper).forEach(function(a) {
-		a.act(self);
-	    });
-	    // reschedules actors which have lower priorities
-	    self.actorQueue = self.actorQueue.concat(actorQueue.slice(upper));
-	}
-    };
 }
 
 /**
- * Makes the specified object an actor scheduler.
+ * Schedules the specified actor.
  *
- * Overwrites the following properties,
- * - actorQueue
- * - schedule
- * - run
- *
- * @method makeActorScheduler
- * @static
- * @param self {Object}
- *     The object to be an actor scheduler.
- * @return {ActorScheduler}  `self`.
+ * @method schedule
+ * @param actor {Actor}
+ *     The actor to be scheduled.
+ * @chainable
  */
-ActorScheduler.makeActorScheduler = function(self) {
-    ActorScheduler.call(self);
+ActorScheduler.prototype.schedule = function(actor) {
+    this.actorQueue.push(actor);
+    return this;
+};
+
+/**
+ * Runs scheduled actors.
+ *
+ * Runs actors which satisfies one of the following conditions,
+ * - has negative priority
+ * - has the highes priority (>=0) among the scheduled actors
+ *
+ * Executed actors will be deleted from the queue of this actor scheduler.
+ *
+ * @method run
+ * @chainable
+ */
+ActorScheduler.prototype.run = function() {
+    var self = this;
+    // checks if any actor is scheduled
+    if (self.actorQueue.length > 0) {
+	// spares the actor queue
+	var actorQueue = self.actorQueue;
+	self.actorQueue = [];
+	// sorts actors by priorities (a higher priority comes earlier)
+	actorQueue.sort(Actor.comparePriorities);
+	// runs actors which have negative priorities
+	// lower bound of priority=0
+	// => upper bound of negative priorities
+	var upper = Search.lowerBound(actorQueue,
+				      { priority: 0 },
+				      Actor.comparePriorities);
+	// and runs actors which have the highest priority (>= 0)
+	if (upper < actorQueue.length) {
+	    upper = Search.upperBound(actorQueue,
+				      actorQueue[upper],
+				      Actor.comparePriorities);
+	}
+	actorQueue.slice(0, upper).forEach(function(a) {
+	    a.act(self);
+	});
+	// reschedules actors which have lower priorities
+	self.actorQueue = self.actorQueue.concat(actorQueue.slice(upper));
+    }
     return self;
 };
 
 /**
  * Returns whether the specified object is an actor scheduler.
  *
- * An actor scheduler must have the following properties,
+ * An actor scheduler must have the following property.
  * - actorQueue
- * - schedule: function
- * - run: function
  *
  * @method isActorScheduler
  * @static
  * @param obj {Object}
  *     The object to be tested.
- * @return {Boolean}  Whether `obj` is an actor scheduler.
+ * @return {Boolean}
+ *     Whether `obj` is an actor scheduler.
+ *     `false` if `obj` is `null` or `undefined`.
  */
 ActorScheduler.isActorScheduler = function(obj) {
-    return (obj != null) && (obj.actorQueue !== undefined) && (typeof obj.schedule == "function") && (typeof obj.run == "function");
+    return (obj != null) && (obj.actorQueue != null);
+};
+
+/**
+ * Wraps the specified object with functionalities of `ActorScheduler`.
+ *
+ * Overwrites the following properties.
+ * - schedule
+ * - run
+ *
+ * @method wrap
+ * @static
+ * @param obj {Object}
+ *     The object to be wrapped with functionalities of `ActorScheduler`.
+ * @return {Object}  `obj`.
+ */
+ActorScheduler.wrap = function(obj) {
+    for (prop in ActorScheduler.prototype) {
+	obj[prop] = ActorScheduler.prototype[prop];
+    }
+    return obj;
 };

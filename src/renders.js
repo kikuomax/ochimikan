@@ -33,33 +33,18 @@ function Renderable(render) {
 }
 
 /**
- * Makes the specified object renderable.
- *
- * @method makeRenderable
- * @static
- * @param self {Object}
- *     The object to be renderable.
- * @param render {Function(Context)}
- *     The rendering function which performs rendering in a specified context.
- * @return {Renderable}  `self`.
- */
-Renderable.makeRenderable = function(self, render) {
-    Renderable.call(self, render);
-    return self;
-};
-
-/**
  * Returns whetehr the specified object is a `Renderable`.
  *
- * A `Renderable` must have the following property,
- *
- * - `render`: function 
+ * A `Renderable` have the following property.
+ * - render: Function 
  *
  * @method isRenderable
  * @static
  * @param obj {Object}
  *     The object to be tested.
- * @return {Boolean}  Whether `obj` is a `Renderable`.
+ * @return {Boolean}
+ *     Whether `obj` is a `Renderable`.
+ *     `false` if `obj` is `null` or `undefined`.
  */
 Renderable.isRenderable = function(obj) {
     return (obj != null) && (typeof obj.render == "function");

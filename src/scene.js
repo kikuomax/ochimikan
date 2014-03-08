@@ -85,6 +85,29 @@
  * 1. The `Scene` renders its mikan box, controlled mikans and
  *    renderable actors scheduled in it.
  *
+ * ## Spawning controlled mikans
+ *
+ * 1. A `Scene` runs its `mikanSpawner`.
+ * 1. The `mikanSpawner` creates two mikans and makes them controlled
+ *    in the `Scene`.
+ * 1. The `mikanSpawner` schedules an actor which moves the controlled mikans
+ *    downward (`mikanController`).
+ * 1. The `mikanSpawner` reschedules itself in the `Scene`.
+ *
+ * ## Moving controlled mikans downward
+ *
+ * 1. A `Scene` runs its `mikanController`.
+ * 1. The `mikanController` moves controlled mikans downward.
+ * 1. The `mikanController` reschedules itself in the `Scene`.
+ *
+ * ### Derivatives
+ *
+ * - 2 Either or both of the controlled mikans have reached the ground.
+ *   1. The `mikanController` asks its `MikanBox` to place each controlled
+ *      mikan in it.
+ *   1. The `mikanController` asks its `MikanBox` to drop all mikans.
+ *   1. The `mikanController` stops.
+ *
  * @class Scene
  * @contructor
  * @extends ActorScheduler
@@ -94,14 +117,63 @@ function Scene() {
     var self = this;
 
     // makes this scene an actor scheduler
-    ActorScheduler.makeActorScheduler(self);
+    ActorScheduler.call(self);
 
-    var _mikanBox = new MikanBox(Scene.COLUMN_COUNT, Scene.ROW_COUNT, Scene.SQUARE_SIZE);
+    var mikanBox = new MikanBox(Scene.COLUMN_COUNT, Scene.ROW_COUNT, Scene.SQUARE_SIZE);
 
-    // schedules an actor which spawns a pair of two mikans
+    /**
+     * The actor which spawns controlled mikans.
+     *
+     * `mikanSpwaner.priority = ActorPriorities.SPAWN`
+     *
+     * The mikans to be spawned have the following properties.
+     * - x: (COLUMN_COUNT / 2) * SQUARE_SIZE
+     * - y: -(SQUARE_SIZE * i), i=1,2
+     * - damage: randomly chosen
+     *
+     * @property mikanSpawner
+     * @type {Actor, Renderable}
+     * @final
+     */
+    var _controlledMikans;
     var _mikanSpawner = new Actor(ActorPriorities.SPAWN, function(scheduler) {
+	_controlledMikans = new Array(2);
+	var x = (Scene.COLUMN_COUNT / 2) * Scene.SQUARE_SIZE;
+	for (var i = 0; i < 2; ++i) {
+	    _controlledMikans[i] = new Mikan(0);
+	    _controlledMikans[i].locate(x, -(Scene.SQUARE_SIZE * (i + 1)));
+	}
+	self.schedule(_mikanController);
+	self.schedule(_mikanSpawner);
     });
+    Object.defineProperty(self, 'mikanSpawner', { value: _mikanSpawner });
+    // schedules an actor which spawns a pair of two mikans
     self.schedule(_mikanSpawner);
+
+    /**
+     * An actor which moves controlled mikans downward.
+     *
+     * `mikanController.priority = ActorPriorities.CONTROL`
+     *
+     * Also is a renderable which renders controlled mikans.
+     *
+     * @property mikanController
+     * @type {Actor, Renderable}
+     * @final
+     */
+    var speed = 1;
+    var _mikanController = new Actor(ActorPriorities.CONTROL, function(scheduler) {
+	_controlledMikans.forEach(function(mikan) {
+	    mikan.y += speed;
+	});
+	self.schedule(this);
+    });
+    Renderable.call(_mikanController, function(context) {
+	_controlledMikans.forEach(function(mikan) {
+	    mikan.render(context);
+	});
+    });
+    Object.defineProperty(self, 'mikanController', { value: _mikanController });
 
     /**
      * The width of this scene.
@@ -110,7 +182,7 @@ function Scene() {
      * @type {Number}
      * @final
      */
-    Object.defineProperty(self, 'width', { value: _mikanBox.width });
+    Object.defineProperty(self, 'width', { value: mikanBox.width });
 
     /**
      * The height of this scene.
@@ -119,7 +191,7 @@ function Scene() {
      * @type {Number}
      * @final
      */
-    Object.defineProperty(self, 'height', { value: _mikanBox.height });
+    Object.defineProperty(self, 'height', { value: mikanBox.height });
 
     /**
      * The canvas associated with this scene.
@@ -165,6 +237,22 @@ function Scene() {
     });
 
     /**
+     * Renders this scene.
+     *
+     * @method render
+     */
+    self.render = function() {
+	_context.clearRect(0, 0, self.width, self.height);
+	mikanBox.render(_context);
+	// renders renderable actors
+	self.actorQueue.forEach(function(actor) {
+	    if (Renderable.isRenderable(actor)) {
+		actor.render(_context);
+	    }
+	});
+    };
+
+    /**
      * Handles a 'touchstart' event.
      *
      * @method touchStarted
@@ -195,32 +283,35 @@ function Scene() {
     };
 
     /**
-     * The actor which spawns controlled mikans.
+     * Adds listeners to the specified canvas.
      *
-     * `act` schedules an actor which controls a pair of mikans.
-     *
-     * @property mikanSpawner
-     * @type {Actor}
-     * @final
+     * @method addListeners
+     * @private
+     * @param canvas {Element}
+     *     The canvas to which listeners are to be added.
      */
-    Object.defineProperty(self, 'mikanSpawner', {
-	get: function() { return _mikanSpawner; }
-    });
-
-    /** Adds listeners to the specified canvas. */
     function addListeners(canvas) {
 	canvas.addEventListener('touchstart', self.touchStarted, false);
 	canvas.addEventListener('touchmove', self.touchMoved, false);
 	canvas.addEventListener('touchend', self.touchEnded, false);
     }
 
-    /** Removes listeners from the specified canvas. */
+    /**
+     * Removes listeners from the specified canvas.
+     *
+     * @method removeListeners
+     * @private
+     * @param canvas {Element}
+     *     The canvas from which listeners are to be removed.
+     */
     function removeListeners(canvas) {
 	canvas.removeEventListener('touchstart', self.touchStarted, false);
 	canvas.removeEventListener('touchmove', self.touchMoved, false);
 	canvas.removeEventListener('touchend', self.touchEnded, false);
     }
 }
+// extends ActorScheduler
+ActorScheduler.wrap(Scene.prototype);
 
 /**
  * The number of columns in a mikan box.

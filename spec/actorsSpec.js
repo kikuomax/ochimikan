@@ -1,5 +1,5 @@
 describe('Actor', function() {
-    it('should have a priority', function() {
+    it('Should have a priority', function() {
 	var actor = new Actor(0, function(s){});
 	expect(actor.priority).toBe(0);
 	actor = new Actor(1, function(s){});
@@ -8,16 +8,22 @@ describe('Actor', function() {
 	expect(actor.priority).toBe(-1);
     });
 
-    it('should have a specified action', function() {
+    it('Should have a specified action', function() {
 	var act = function(s) {};
 	var actor = new Actor(1, act);
 	expect(actor.act).toBe(act);
     });
 
-    it('should throw an exception if act is not a function', function() {
+    it('Should throw an exception if priority is not specified', function() {
+	expect(function(){
+	    new Actor(undefined, function(s) {});
+	}).toThrow();
+    });
+
+    it('Should throw an exception if act is not a function', function() {
 	expect(function() {
 	    new Actor(0, {});
-	}).toThrow("act must be a function");
+	}).toThrow();
     });
 
     it(':isActor should be true for an actor', function() {
@@ -41,32 +47,6 @@ describe('Actor', function() {
 
     it(':isActor should be false for undefined', function() {
 	expect(Actor.isActor(undefined)).toBe(false);
-    });
-
-    it(':makeActor should make an object an actor', function() {
-	var obj = {};
-	var act = function(s) {};
-	expect(Actor.makeActor(obj, 0, act)).toBe(obj);
-	expect(Actor.isActor(obj)).toBe(true);
-	expect(obj.priority).toBe(0);
-	expect(obj.act).toBe(act);
-    });
-
-    it(':makeActor should overwrite properties of the target', function() {
-	var obj = {
-	    priority: 0,
-	    act: function(s) {}
-	};
-	var act = function(s) { return 0; };
-	expect(Actor.makeActor(obj, 1, act)).toBe(obj);
-	expect(obj.priority).toBe(1);
-	expect(obj.act).toBe(act);
-    });
-
-    it(':makeActor should throw an exception if act is not a function', function() {
-	expect(function() {
-	    Actor.makeActor({}, 0, {});
-	}).toThrow();
     });
 
     it(':comparePriorities should return 0 if lhs.priority == rhs.priority', function() {
@@ -95,15 +75,15 @@ describe('Actor', function() {
 });
 
 describe('ActorScheduler', function() {
-    it('should have an empty actor queue', function() {
+    it('Should have an empty actor queue', function() {
 	var scheduler = new ActorScheduler();
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('can schedule an actor', function() {
+    it('Can schedule an actor', function() {
 	var scheduler = new ActorScheduler();
 	var actor = new Actor(0, function(s) {});
-	scheduler.schedule(actor);
+	expect(scheduler.schedule(actor)).toBe(scheduler);
 	expect(scheduler.actorQueue.length).toBe(1);
 	expect(scheduler.actorQueue).toContain(actor);
     });
@@ -113,22 +93,9 @@ describe('ActorScheduler', function() {
 	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(true);
     });
 
-    it(':isActorScheduler should be false for an object which lacks actorQueue', function() {
-	var scheduler = new ActorScheduler();
-	scheduler.actorQueue = undefined;
-	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
-    });
-
-    it(':isActorScheduler should be false for an object which lacks schedule', function() {
-	var scheduler = new ActorScheduler();
-	scheduler.schedule = undefined;
-	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
-    });
-
-    it(':isActorScheduler should be false for an object which lacks run', function() {
-	var scheduler = new ActorScheduler();
-	scheduler.run = undefined;
-	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(false);
+    it(':isActorScheduler should be true for an object like an actor scheduler', function() {
+	var schedulerLike = { actorQueue: [] };
+	expect(ActorScheduler.isActorScheduler(schedulerLike)).toBe(true);
     });
 
     it(':isActorScheduler should be false for null', function() {
@@ -139,22 +106,32 @@ describe('ActorScheduler', function() {
 	expect(ActorScheduler.isActorScheduler(undefined)).toBe(false);
     });
 
-    it(':makeActorScheduler should make an object an actor scheduler', function() {
+    it(':isActorScheduler should be false for an object which lacks actorQueue', function() {
 	var obj = {};
-	expect(ActorScheduler.makeActorScheduler(obj)).toBe(obj);
-	expect(ActorScheduler.isActorScheduler(obj)).toBe(true);
+	expect(ActorScheduler.isActorScheduler(obj)).toBe(false);
     });
 
-    it(':makeActorScheduler should replace properties of the target', function() {
-	var obj = {
-	    actorQueue: [{}]
-	};
-	expect(ActorScheduler.makeActorScheduler(obj)).toBe(obj);
-	expect(obj.actorQueue.length).toBe(0);
+    it(':run should be chainable', function() {
+	var scheduler = new ActorScheduler();
+	expect(scheduler.run()).toBe(scheduler);
+    });
+
+    it(':wrap should add ActorScheduler functionalities to a specified object', function() {
+	var obj = { actorQueue: [] };
+	expect(ActorScheduler.wrap(obj)).toBe(obj);
+	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
+	expect(obj.run).toBe(ActorScheduler.prototype.run);
+    });
+
+    it(':wrap should overwrite properties of a tagert', function() {
+	var obj = { actorQueue: [], schedule: "schedule", run: "run" };
+	expect(ActorScheduler.wrap(obj)).toBe(obj);
+	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
+	expect(obj.run).toBe(ActorScheduler.prototype.run);
     });
 });
 
-describe('running scheduled actors:', function() {
+describe('Running scheduled actors:', function() {
     var act1, act2, act3;
     var scheduler;
 
@@ -172,14 +149,14 @@ describe('running scheduled actors:', function() {
 	scheduler = undefined;
     });
 
-    it('actor scheduler should run a scheduled actor and delete it from the queue. priority = 0', function() {
+    it('Actor scheduler should run a scheduled actor and delete it from the queue. priority = 0', function() {
 	scheduler.schedule(new Actor(0, act1));
 	scheduler.run();
 	expect(act1).toHaveBeenCalledWith(scheduler);
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('actor scheduler should run scheduled actors and delete them from the queue. priorities = 0, 0, 0', function() {
+    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = 0, 0, 0', function() {
 	scheduler.schedule(new Actor(0, act1));
 	scheduler.schedule(new Actor(0, act2));
 	scheduler.schedule(new Actor(0, act3));
@@ -190,7 +167,7 @@ describe('running scheduled actors:', function() {
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('actor scheduler should run scheduled actors and delete them from the queue. priorities = 1, 2, 1', function() {
+    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = 1, 2, 1', function() {
 	var leftActor;
 	scheduler.schedule(new Actor(1, act1));
 	scheduler.schedule(leftActor = new Actor(2, act2));
@@ -201,7 +178,7 @@ describe('running scheduled actors:', function() {
 	expect(scheduler.actorQueue).toEqual([leftActor]);
     });
 
-    it('actor scheduler should run scheduled actors and delete them from the queue. priorities = -1, 0, 1', function() {
+    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = -1, 0, 1', function() {
 	var leftActor;
 	scheduler.schedule(new Actor(-1, act1));
 	scheduler.schedule(new Actor(0, act2));

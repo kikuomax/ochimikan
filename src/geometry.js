@@ -42,53 +42,66 @@ function Located(x, y) {
 	get: function() { return _y; },
 	set: function(y) { _y = y; }
     });
-
-    /**
-     * Returns the location as a two dimensional array like `[x, y]`.
-     *
-     * @propety xy
-     * @type {[Number, Number]}
-     */
-    Object.defineProperty(self, "xy", {
-	configurable: true,
-	get: function() { return [_x, _y]; }
-    });
-
-    /**
-     * Locates at another location.
-     *
-     * @method locate
-     * @param x {Number}
-     *     The x-coordinate value of the new location.
-     * @param y {Number}
-     *     The y-coordinate value of the new location.
-     * @chainable
-     */
-    self.locate = function(x, y) {
-	self.x = x;
-	self.y = y;
-	return self;
-    };
 }
 
 /**
- * Makes an existing object a located object.
+ * Locates at another location.
  *
- * Overwrites the following properties,
+ * @method locate
+ * @param x {Number}
+ *     The x-coordinate value of the new location.
+ * @param y {Number}
+ *     The y-coordinate value of the new location.
+ * @chainable
+ */
+Located.prototype.locate = function(x, y) {
+    this.x = x;
+    this.y = y;
+    return this;
+};
+
+/**
+ * Returns the location as a two dimensional array like `[x, y]`.
+ *
+ * @method xy
+ * @return {[Number, Number]}  The location of this `Located`.
+ */
+Located.prototype.xy = function() {
+    return [this.x, this.y];
+};
+
+/**
+ * Returns whether the specified object is a `Located`.
+ *
+ * A `Located` has the following properties.
  * - x
  * - y
  *
- * @method makeLocated
+ * @method isLocated
  * @static
- * @param self {Object}
- *     The object to be a located object.
- * @param x {Number}
- *     The x-coordinate value of the initial location.
- * @param y {Number}
- *     The y-coordinate value of the initial location.
- * @return {Located}  `self`.
+ * @param obj {Object}
+ *     The object to be tested.
+ * @return {Boolean}
+ *     Whether `obj` is a `Located`. `false` if `obj` is `null` or `undefined`.
  */
-Located.makeLocated = function(self, x, y) {
-    Located.call(self, x, y);
-    return self;
+Located.isLocated = function(obj) {
+    return (obj != null) && (obj.x != null) && (obj.y != null);
+};
+
+/**
+ * Wraps the specified object with functionalities of `Located`.
+ *
+ * Overwrites the following property.
+ * - xy
+ * - locate
+ *
+ * @param obj {Object}
+ *     The object to be wrapped with `Located`.
+ * @return {Object}  `obj`.
+ */
+Located.wrap = function(obj) {
+    for (prop in Located.prototype) {
+	obj[prop] = Located.prototype[prop];
+    }
+    return obj;
 };

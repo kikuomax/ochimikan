@@ -19,6 +19,30 @@ describe('Scene without a canvas', function() {
 	var scene = new Scene();
 	expect(scene.actorQueue).toEqual([scene.mikanSpawner]);
     });
+
+    it(':mikanSpawner should have priority SPAWN', function() {
+	var scene = new Scene();
+	expect(scene.mikanSpawner.priority).toBe(ActorPriorities.SPAWN);
+    });
+
+    it(':mikanSpawner should schedule a mikanController and itself', function() {
+	var scene = new Scene();
+	scene.run();
+	expect(scene.actorQueue.length).toBe(2);
+	expect(scene.actorQueue).toContain(scene.mikanController);
+	expect(scene.actorQueue).toContain(scene.mikanSpawner);
+    });
+
+    it(':mikanController should have priority CONTROL', function() {
+	var scene = new Scene();
+	expect(scene.mikanController.priority).toBe(ActorPriorities.CONTROL);
+    });
+
+    it(':mikanController should schedule itself', function() {
+	var scene = new Scene();
+	scene.run().run();
+	expect(scene.actorQueue).toContain(scene.mikanController);
+    });
 });
 
 describe('Scene associated with a canvas', function() {

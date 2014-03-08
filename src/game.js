@@ -57,6 +57,8 @@ Game.start = function() {
     // runs the game
     window.setInterval(function() {
 	// runs and renders a frame
+	scene.run();
+	scene.render();
     }, Game.FRAME_INTERVAL);
 };
 

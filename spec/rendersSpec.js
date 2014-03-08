@@ -16,11 +16,6 @@ describe('Renderable', function() {
 	expect(Renderable.isRenderable(renderable)).toBe(true);
     });
 
-    it(':isRenderable should be false for an object which lacks render', function() {
-	var obj = {};
-	expect(Renderable.isRenderable(obj)).toBe(false);
-    });
-
     it(':isRenderable should be false for null', function() {
 	expect(Renderable.isRenderable(null)).toBe(false);
     });
@@ -29,6 +24,11 @@ describe('Renderable', function() {
 	expect(Renderable.isRenderable(undefined)).toBe(false);
     });
 
+    it(':isRenderable should be false for an object which lacks render', function() {
+	var obj = {};
+	expect(Renderable.isRenderable(obj)).toBe(false);
+    });
+/*
     it(':makeRenderable should make an object renderable', function() {
 	var obj = {};
 	var render = function(c) {};
@@ -48,5 +48,5 @@ describe('Renderable', function() {
 	expect(function() {
 	    Renderable.makeRenderable({}, {});
 	}).toThrow();
-    });
+    });*/
 });

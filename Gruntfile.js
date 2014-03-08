@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 		'url': '',
 		options: {
 		    paths: './src/',
-		    outdir: './out/yuidoc/'
+		    outdir: './out/doc/'
 		}
 	    }
 	}

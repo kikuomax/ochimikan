@@ -425,6 +425,225 @@ describe('Dropping mikans in a mikan box:', function() {
     });
 });
 
+describe('Chaining mikans in a mikan box:', function() {
+    var mikanBox;
+    var mikans;
+
+    beforeEach(function() {
+	mikanBox = new MikanBox(8, 12, 32);
+	mikans = [];
+	for (var i = 0; i < 8; ++i) {
+	    mikans.push(new Mikan(Mikan.MAX_DAMAGE));
+	}
+    });
+
+    it('Mikan box should make a horiztontal chain comprising 4 mikans', function() {
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 1, 0);
+	mikanBox.place(mikans[2], 2, 0);
+	mikanBox.place(mikans[3], 3, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(4);
+	expect(chains[0]).toContain([0, 0]);
+	expect(chains[0]).toContain([1, 0]);
+	expect(chains[0]).toContain([2, 0]);
+	expect(chains[0]).toContain([3, 0]);
+    });
+
+    it('Mikan box should make a chain comprising 4 mikans at the top-right corner', function() {
+	mikanBox.place(mikans[0], 6, 10);
+	mikanBox.place(mikans[1], 7, 10);
+	mikanBox.place(mikans[2], 6, 11);
+	mikanBox.place(mikans[3], 7, 11);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(4);
+	expect(chains[0]).toContain([6, 10]);
+	expect(chains[0]).toContain([7, 10]);
+	expect(chains[0]).toContain([6, 11]);
+	expect(chains[0]).toContain([7, 11]);
+    });
+
+    it('Mikan box should make a vertical chain comprising 4 mikans', function() {
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 0, 1);
+	mikanBox.place(mikans[2], 0, 2);
+	mikanBox.place(mikans[3], 0, 3);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(4);
+	expect(chains[0]).toContain([0, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([0, 2]);
+	expect(chains[0]).toContain([0, 3]);
+    });
+
+    it('Mikan box should make a chain comprising 5 mikans (crank 1)', function() {
+	// - - o
+	// o o o
+	// o - -
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 0, 1);
+	mikanBox.place(mikans[2], 1, 1);
+	mikanBox.place(mikans[3], 2, 1);
+	mikanBox.place(mikans[4], 2, 2);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(5);
+	expect(chains[0]).toContain([0, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([1, 1]);
+	expect(chains[0]).toContain([2, 1]);
+	expect(chains[0]).toContain([2, 2]);
+    });
+
+    it('Mikan box should make a chain comprising 5 mikans (crank 2)', function() {
+	// o - -
+	// o o o
+	// - - o
+	mikanBox.place(mikans[0], 2, 0);
+	mikanBox.place(mikans[1], 0, 1);
+	mikanBox.place(mikans[2], 1, 1);
+	mikanBox.place(mikans[3], 2, 1);
+	mikanBox.place(mikans[4], 0, 2);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(5);
+	expect(chains[0]).toContain([2, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([1, 1]);
+	expect(chains[0]).toContain([2, 1]);
+	expect(chains[0]).toContain([0, 2]);
+    });
+
+    it('Mikan box should make a chain comprising 5 mikans (cross)', function() {
+	// - o -
+	// o o o
+	// - o -
+	mikanBox.place(mikans[0], 3, 4);
+	mikanBox.place(mikans[1], 2, 5);
+	mikanBox.place(mikans[2], 3, 5);
+	mikanBox.place(mikans[3], 4, 5);
+	mikanBox.place(mikans[4], 3, 6);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(5);
+	expect(chains[0]).toContain([3, 4]);
+	expect(chains[0]).toContain([2, 5]);
+	expect(chains[0]).toContain([3, 5]);
+	expect(chains[0]).toContain([4, 5]);
+	expect(chains[0]).toContain([3, 6]);
+    });
+
+    it('Mikan box should make a chain comprising 6 mikans (eta)', function() {
+	// o o o
+	// o   o
+	//     o
+	mikanBox.place(mikans[0], 2, 0);
+	mikanBox.place(mikans[3], 0, 1);
+	mikanBox.place(mikans[1], 2, 1);
+	mikanBox.place(mikans[2], 0, 2);
+	mikanBox.place(mikans[4], 1, 2);
+	mikanBox.place(mikans[5], 2, 2);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(6);
+	expect(chains[0]).toContain([2, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([2, 1]);
+	expect(chains[0]).toContain([0, 2]);
+	expect(chains[0]).toContain([1, 2]);
+	expect(chains[0]).toContain([2, 2]);
+    });
+
+    it('Mikan box should not make a chain comprising 2 mikans', function() {
+	// o o
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 1, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains).toEqual([]);
+    });
+
+    it('Mikan box should not make a chain comprising 3 mikans', function() {
+	// o o o
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 1, 0);
+	mikanBox.place(mikans[2], 2, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains).toEqual([]);
+    });
+
+    it('Mikan box should not chain mikans which are not damaged', function() {
+	// x x x x
+	mikanBox.place(new Mikan(0), 0, 0);
+	mikanBox.place(new Mikan(0), 1, 0);
+	mikanBox.place(new Mikan(0), 2, 0);
+	mikanBox.place(new Mikan(0), 3, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains).toEqual([]);
+    });
+
+    it('Mikan box should not chain mikans which are not maximally damaged', function() {
+	// x x x x
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 0);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 0);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 3, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains).toEqual([]);
+    });
+
+    it('Mikan box should avoid chaining mikans which are not maximally damaged', function() {
+	// o x x
+	// o x o
+	// o o x
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 1, 0);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0);
+	mikanBox.place(mikans[2], 0, 1);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 1);
+	mikanBox.place(mikans[3], 2, 1);
+	mikanBox.place(mikans[4], 0, 2);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 2);
+	mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 2);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(1);
+	expect(chains[0].length).toBe(4);
+	expect(chains[0]).toContain([0, 0]);
+	expect(chains[0]).toContain([1, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([0, 2]);
+    });
+
+    it('Mikan box should make two mikan chains', function() {
+	// o
+	// o
+	// o
+	// o - o o o o
+	mikanBox.place(mikans[0], 0, 0);
+	mikanBox.place(mikans[1], 0, 1);
+	mikanBox.place(mikans[2], 0, 2);
+	mikanBox.place(mikans[3], 0, 3);
+	mikanBox.place(mikans[4], 2, 0);
+	mikanBox.place(mikans[5], 3, 0);
+	mikanBox.place(mikans[6], 4, 0);
+	mikanBox.place(mikans[7], 5, 0);
+	var chains = mikanBox.chainMikans();
+	expect(chains.length).toBe(2);
+	expect(chains[0].length).toBe(4);
+	expect(chains[0]).toContain([0, 0]);
+	expect(chains[0]).toContain([0, 1]);
+	expect(chains[0]).toContain([0, 2]);
+	expect(chains[0]).toContain([0, 3]);
+	expect(chains[1].length).toBe(4);
+	expect(chains[1]).toContain([2, 0]);
+	expect(chains[1]).toContain([3, 0]);
+	expect(chains[1]).toContain([4, 0]);
+	expect(chains[1]).toContain([5, 0]);
+    });
+});
+
 describe('Rendering a mikan:', function() {
     var spiedSprites;
 

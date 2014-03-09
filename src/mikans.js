@@ -555,6 +555,59 @@ function MikanBox(columnCount, rowCount, squareSize) {
     };
 
     /**
+     * Chains mikans in this box.
+     *
+     * A chain is composed of at least `MikanBox.CHAIN_LENGTH`
+     * maximally damaged mikans.
+     *
+     * @method chainMikans
+     * @return {Array}
+     *     An array of chains. Each chain comprising an array of
+     *     locations (column, row) of chained mikans.
+     */
+    self.chainMikans = function() {
+	var chainGrid = new Array(columnCount * rowCount);
+	var chains = [];
+	for (var c = 0; c < columnCount; ++c) {
+	    for (var r = 0; r < rowCount; ++r) {
+		// starts chaining from a maximally damaged mikan
+		// but avoids chaining already chained mikans
+		var idx = indexOf(c, r);
+		if (isMaxDamaged(mikanGrid[idx])) {
+		    if (chainGrid[idx] == null) {
+			// creates a new chain
+			var chain = [[c, r]];
+			chainGrid[idx] = chain;
+			propagate(c, r);
+			if (chain.length >= MikanBox.CHAIN_LENGTH) {
+			    chains.push(chain);
+			}
+			function propagate(c2, r2) {
+			    tryToChain(c2 - 1, r2);
+			    tryToChain(c2 + 1, r2);
+			    tryToChain(c2, r2 - 1);
+			    tryToChain(c2, r2 + 1);
+			}
+			function tryToChain(c2, r2) {
+			    if (isValidSquare(c2, r2)) {
+				var idx2 = indexOf(c2, r2);
+				if (isMaxDamaged(mikanGrid[idx2])) {
+				    if (chainGrid[idx2] == null) {
+					chain.push([c2, r2]);
+					chainGrid[idx2] = chain;
+					propagate(c2, r2);
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+	return chains;
+    };
+
+    /**
      * Returns the index of the specified square.
      *
      * @method indexOf
@@ -567,6 +620,25 @@ function MikanBox(columnCount, rowCount, squareSize) {
      */
     function indexOf(column, row) {
 	return row + (column * rowCount);
+    }
+
+    /**
+     * Returns whether the specified column and row are valid.
+     *
+     * A valid square is
+     * - `0 <= column < columnCount`
+     * - `0 <= row < rowCount`
+     *
+     * @method isValidSquare
+     * @private
+     * @param column {Number}
+     *     The column to be tested.
+     * @param row {Number}
+     *     The row to be tested.
+     * @return {Boolean}  Whether (`column`, `row`) is a valid square.
+     */
+    function isValidSquare(column, row) {
+	return (column >= 0) && (column < columnCount) && (row >= 0) && (row < rowCount)
     }
 
     /**
@@ -591,4 +663,30 @@ function MikanBox(columnCount, rowCount, squareSize) {
 	    throw "row must be in [0, " + (rowCount - 1) + "] but " + row;
 	}
     }
+
+    /**
+     * Returns whether the specified mikan is maximally damaged.
+     *
+     * @method isMaxDamaged
+     * @private
+     * @param mikan {Mikan}
+     *     The mikan to be tested.
+     * @return {Boolean}
+     *     Whether `mikan` has `damage=Mikan.MAX_DAMAGE`.
+     *     `false` if `mikan` is `null` or `undefined`.
+     */
+    function isMaxDamaged(mikan) {
+	return (mikan != null) && (mikan.damage == Mikan.MAX_DAMAGE);
+    }
 }
+
+/**
+ * The minimum length of a chain.
+ *
+ * `CHAIN_LENGTH = 4`
+ *
+ * @property CHAIN_LENGTH
+ * @type {Number}
+ * @final
+ */
+Object.defineProperty(MikanBox, 'CHAIN_LENGTH', { value: 4 });

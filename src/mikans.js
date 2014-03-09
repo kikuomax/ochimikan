@@ -13,45 +13,48 @@
  * 1. A user determines the number of columns and rows in a mikan box.
  * 1. The user creates a `MikanBox` with the size (# of column, # of row).
  *
- * ## Creating a mikan in a mikan box
- *
- * 1. A `MikanBox` is given.
- * 1. A user asks the `MikanBox` to create a `Mikan` in it.
- * 1. The new `Mikan` belongs to the `MikanBox` but not placed yet.
- *
- * ## Drops a mikan
- *
- * 1. A `Mikan` is given.
- * 1. A `MikanBox` is given.
- * 1. A user drops the `Mikan` in the `MikanBox`.
- * 1. The `Mikan` starts falling in the `MikanBox`.
- *
  * ## Placing a mikan
  *
  * 1. A `Mikan` is given.
  * 1. A `MikanBox` is given.
  * 1. A user places the `Mikan` somewhere in the `MikanBox`.
  *
+ * ## Dropping mikans
+ *
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to drop `Mikan`s in it.
+ * 1. The `Mikan`s in the `MikanBox` which aren't placed on the ground
+ *    fall towards the ground.
+ *
+ * ## Erasing mikans
+ *
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to chain and erase `Mikan`s in it
+ *    which are maximally damaged.
+ * 1. The chained `Mikan`s explode with `Spray`s.
+ * 1. The explosion spoils surrounding `Mikan`s.
+ * 1. `Mikan`s remaining in the `MikanBox` fall towards the ground.
+ *
+ * ## Rendering a mikan box
+ *
+ * 1. A context is given.
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to render in the context.
+ * 1. The user can see the `MikanBox` in the context.
+ *
  * ## Rendering a mikan
  *
  * 1. A context is given.
  * 1. A `Mikan` is given.
  * 1. A user asks the `Mikan` to render in the context.
- * 1. The user can see the `Mikan` in the context. It's placed at its location
- *    and has appearance reflecting its degree of damage.
+ * 1. The user can see the `Mikan` in the context.
  *
- * ## Chaining damaged mikans in a mikan box
+ * ## Rendering a spray
  *
- * 1. A `MikanBox` is given.
- * 1. A user asks the `MikanBox` to chain damaged mikans.
- * 1. Maximumly damaged `Mikan`s in the `MikanBox` are chained. And `Mikan`s
- *    composing each chain explodes if the size of the chain reaches the limit.
- * 1. The explosion erases the `Mikan`s in that chain and spoils surrounding
- *    `Mikan`s. The explosion can be seen as `Spray`s.
- * 1. `Mikan`s remaining in the `MikanBox` fall under gravity
- *    (move to another place).
- * 1. Further more chaining may happen after every `Mikan` is sticked
- *    in the `MikanBox`.
+ * 1. A context is given.
+ * 1. A `Spray` is given.
+ * 1. A user asks the `Spray` to render in the context.
+ * 1. The user can see the `Spray` in the context.
  *
  * @module mikans
  */
@@ -59,18 +62,28 @@
 /**
  * Defines priorities of actors.
  *
+ * `SPRAY < MOVE < CONTROL < SPAWN`
+ *
  * @class ActorPriorities
  * @static
  */
 const ActorPriorities = {
     /**
-     * A priority of an actor which draps mikans.
+     * A priority of actors which spread sprays.
      *
-     * @property DROP
+     * @property SPRAY
      * @type {Number}
      * @final
      */
-    DROP: 0,
+    SPRAY: 0,
+    /**
+     * A priority of actors which drop mikans.
+     *
+     * @property MOVE
+     * @type {Number}
+     * @final
+     */
+    MOVE: 1,
     /**
      * A priority of an actor which controls mikans.
      *
@@ -78,7 +91,7 @@ const ActorPriorities = {
      * @type {Number}
      * @final
      */
-    CONTROL: 1,
+    CONTROL: 2,
     /**
      * A priority of an actor which spawns mikans.
      *
@@ -86,7 +99,7 @@ const ActorPriorities = {
      * @type {Number}
      * @final
      */
-    SPAWN: 2
+    SPAWN: 3
 };
 
 /**
@@ -101,14 +114,14 @@ const ActorPriorities = {
  * ## Rendering a mikan
  *
  * 1. A context is given.
- * 1. A `Mikan` asks for the `Resources` for a mikan sprite corresponding to
+ * 1. A `Mikan` asks the `Resources` for a mikan sprite corresponding to
  *    its degree of damage.
  * 1. The `Mikan` renders the sprite at its location in the context.
  *
  * @class Mikan
  * @constructor
- * @extends Located
- * @extends Renderable
+ * @uses Located
+ * @uses Renderable
  * @param damage {Number}
  *     The degree of damage to set. A float value is to be floored.
  */
@@ -205,6 +218,127 @@ Mikan.isMikan = function(obj) {
 };
 
 /**
+ * A spray.
+ *
+ * Is an actor which has a priority = `ActorPriorities.SPRAY`.
+ *
+ * # Scenarios
+ *
+ * ## Spreading
+ *
+ * 1. A `Spray` is asked to act.
+ * 1. The `Spray` decrements `ttl`.
+ * 1. The `Spray` moves the specified amount (`dX`, `dY`)
+ * 1. The `Spray` increments its frame index.
+ * 1. The `Spray` reschedules itself in a given actor scheduler.
+ *
+ * ### Stop spreading
+ *
+ * - 2 The time to live expired (`ttl <= 0`)
+ *   1. The `Spray` stops.
+ * - 4 The frame index is `Spray.FRAME_COUNT`.
+ *   1. The `Spray` resets the frame index (`=0`)
+ *   1. Proceeds to the step 5.
+ *
+ * ## Rendering a `Spray`
+ *
+ * 1. A context is given.
+ * 1. A `Spray` asks the `Resources` for a spray sprite corresponding to
+ *    its frame index.
+ * 1. The `Spray` renders the sprite at its location in the context.
+ *
+ * @class Spray
+ * @constructor
+ * @uses Located
+ * @uses Actor
+ * @uses Renderable
+ * @param x {Number}
+ *     The x-coordinate value of the initial location.
+ * @param y {Number}
+ *     The y-coordinate value of the initial location.
+ * @param dX {Number}
+ *     The speed along in the x-coordinate.
+ * @param dY {Number}
+ *     The speed along in the y-coordinate.
+ * @param ttl {Number}
+ *     The time to live.
+ */
+function Spray(x, y, dX, dY, ttl) {
+    var self = this;
+
+    Located.call(self, x, y);
+
+    Actor.call(self, ActorPriorities.SPRAY, function(scheduler) {
+	// moves and reschedules if ttl hasn't expired
+	if (ttl > 0) {
+	    --ttl;
+	    self.x += dX;
+	    self.y += dY;
+	    ++frameIndex;
+	    if (frameIndex == Spray.FRAME_COUNT) {
+		frameIndex = 0;
+	    }
+	    scheduler.schedule(self);
+	}
+    });
+
+    Renderable.call(self, function(context) {
+	Resources.SPRITES['spray'][frameIndex].render(context, self.x, self.y);
+    });
+
+    /**
+     * The speed along in the x-coordinate.
+     *
+     * @property dX
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'dX', { value: dX });
+
+    /**
+     * The speed along in the y-coordinate.
+     *
+     * @property dY
+     * @type {Number}
+     * @final
+     */
+    Object.defineProperty(self, 'dY', { value: dY });
+
+    /**
+     * The time to live.
+     *
+     * @property ttl
+     * @type {Number}
+     */
+    Object.defineProperty(self, 'ttl', {
+	get: function() { return ttl; }
+    });
+
+    /**
+     * The frame index.
+     *
+     * @property frameIndex
+     * @type {Number}
+     */
+    var frameIndex = 0;
+    Object.defineProperty(self, 'frameIndex', {
+	get: function() { return frameIndex; }
+    });
+};
+Located.wrap(Spray.prototype);
+
+/**
+ * The frame count of a spray.
+ *
+ * `FRAME_COUNT = 4`
+ *
+ * @property FRAME_COUNT
+ * @type {Number}
+ * @final
+ */
+Object.defineProperty(Spray, 'FRAME_COUNT', { value: 4 });
+
+/**
  * A mikan box.
  *
  * No mikans are placed initially.
@@ -224,14 +358,6 @@ Mikan.isMikan = function(obj) {
  *
  * 1. A context is given.
  * 1. A `MikanBox` asks each `Mikan` in it to render the `Mikan` in the context.
- *
- * ## Dropping mikans in a mikan box
- *
- * 1. A `ActorScheduler` is given.
- * 1. A `MikanBox` collects `Mikan`s in it which aren't placed on the ground.
- * 1. For each of those `Mikan`s, the `MikanBox` makes it float
- *    and schedules it as an actor in the `ActorScheduler` as an actor
- *    which moves downward until it reaches the ground.
  *
  * @class MikanBox
  * @constructor
@@ -378,10 +504,10 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * Drops mikans in this mikan box.
      *
      * For each mikan in this mikan box which isn't placed on the ground,
-     * 1. Releases the mikan from this mikan box
+     * 1. Releases the mikan from this mikan box.
      * 1. Makes the mikan an actor which moves toward the ground
-     *    (ActorPriorities.DROP)
-     * 1. Schedules the mikan in `scheduler`
+     *    (ActorPriorities.MOVE).
+     * 1. Schedules the mikan in `scheduler`.
      * 
      * @method dropMikans
      * @param scheduler {ActorScheduler}
@@ -394,9 +520,10 @@ function MikanBox(columnCount, rowCount, squareSize) {
 		var idx = indexOf(c, r);
 		var mikan = mikanGrid[idx];
 		if (mikan != null) {
-		    // drops the mikan if it's not on the ground
+		    // moves the mikan toward the ground
+		    // if it's not on the ground
 		    if (r > height) {
-			Actor.call(mikan, ActorPriorities.DROP, function(scheduler) {
+			Actor.call(mikan, ActorPriorities.MOVE, function(scheduler) {
 			});
 			scheduler.schedule(mikan);
 			mikanGrid[idx] = null;
@@ -405,6 +532,26 @@ function MikanBox(columnCount, rowCount, squareSize) {
 		}
 	    }
 	}
+    };
+
+    /**
+     * Erases chained mikans in this box.
+     *
+     * Collects chained mikans and
+     * 1. For each mikan chain whose length >= `MikanBox.CHAIN_LENGTH`.
+     *    1. Erases mikans composing the chain.
+     *    1. Creates sprays spreading (in 8 directions) from the chained mikans
+     *       and schedules them in `scheduler`.
+     *    1. Creates an actor which spoils mikans surrounding the chained mikans
+     *       and schedules it in `scheduler` (ActorPriorities.SPOIL).
+     *    1. Creates an actor which drops mikans and schedules it in `scheduler`
+     *       (ActorPriorities.DROP).
+     *
+     * @method eraseMikans
+     * @param scheduler {ActorScheduler}
+     *     The actor scheduler in which actors are to be scheduled.
+     */
+    self.eraseMikans = function(scheduler) {
     };
 
     /**

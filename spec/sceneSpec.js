@@ -43,6 +43,9 @@ describe('Scene without a canvas', function() {
 	scene.run().run();
 	expect(scene.actorQueue).toContain(scene.mikanController);
     });
+
+    it(':mikanController should stop when controlled mikans reach the ground', function() {
+    });
 });
 
 describe('Scene associated with a canvas', function() {
@@ -94,5 +97,13 @@ describe('Scene associated with a canvas', function() {
     it('Should stop refering to the context if the canvas is unset', function() {
 	scene.canvas = null;
 	expect(scene.context).toBeNull();
+    });
+
+    it(':render should render a renderable actor', function() {
+	var actor = new Actor(-1, function(s) {});
+	Renderable.call(actor, jasmine.createSpy('render'));
+	scene.schedule(actor);
+	scene.render();
+	expect(actor.render).toHaveBeenCalledWith(scene.context);
     });
 });

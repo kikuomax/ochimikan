@@ -1,9 +1,7 @@
 describe('ActorPriorities', function() {
-    it('DROP < CONTROL', function() {
-	expect(ActorPriorities.DROP).toBeLessThan(ActorPriorities.CONTROL);
-    });
-
-    it('CONTROL < SPAWN', function() {
+    it('SPRAY < MOVE < CONTROL < SPAWN', function() {
+	expect(ActorPriorities.SPRAY).toBeLessThan(ActorPriorities.MOVE);
+	expect(ActorPriorities.MOVE).toBeLessThan(ActorPriorities.CONTROL);
 	expect(ActorPriorities.CONTROL).toBeLessThan(ActorPriorities.SPAWN);
     });
 });
@@ -32,6 +30,10 @@ describe('Mikan', function() {
 	expect(mikan.x).toBe(0);
 	expect(mikan.y).toBe(0);
 	expect(mikan.xy()).toEqual([0, 0]);
+    });
+
+    it('Should be renderable', function() {
+	expect(Renderable.isRenderable(new Mikan(0))).toBe(true);
     });
 
     it('Can be located', function() {
@@ -106,6 +108,108 @@ describe('Mikan', function() {
     });
 });
 
+describe('Spray', function() {
+    it('Should be located', function() {
+	var spray = new Spray(0, 0, 2, 2, 15);
+	expect(Located.isLocated(spray)).toBe(true);
+	expect(spray.x).toBe(0);
+	expect(spray.y).toBe(0);
+	expect(spray.xy()).toEqual([0, 0]);
+	// another spray
+	spray = new Spray(-10, 8, 2, 2, 15);
+	expect(Located.isLocated(spray)).toBe(true);
+	expect(spray.x).toBe(-10);
+	expect(spray.y).toBe(8);
+	expect(spray.xy()).toEqual([-10, 8]);
+    });
+
+    it('Should have a speed', function() {
+	var spray = new Spray(0, 0, 0, 0, 15);
+	expect(spray.dX).toBe(0);
+	expect(spray.dY).toBe(0);
+	// another spray
+	spray = new Spray(0, 0, 1, 0, 15);
+	expect(spray.dX).toBe(1);
+	expect(spray.dY).toBe(0);
+	// one more spray
+	spray = new Spray(0, 0, 0, 1, 15);
+	expect(spray.dX).toBe(0);
+	expect(spray.dY).toBe(1);
+	// yet another spray
+	spray = new Spray(0, 0, 0.7, -1.2, 15);
+	expect(spray.dX).toBe(0.7);
+	expect(spray.dY).toBe(-1.2);
+    });
+
+    it('Should have a time to live', function() {
+	var spray = new Spray(0, 0, 1, 1, 0);
+	expect(spray.ttl).toBe(0);
+	// another spray
+	spray = new Spray(0, 0, 1, 1, 15);
+	expect(spray.ttl).toBe(15);
+    });
+
+    it('Should be an actor of priority=SPRAY', function() {
+	var spray = new Spray(0, 0, 2, 2, 15);
+	expect(Actor.isActor(spray)).toBe(true);
+	expect(spray.priority).toBe(ActorPriorities.SPRAY);
+    });
+
+    it('Should be renderable', function() {
+	var spray = new Spray(0, 0, 2, 2, 15);
+	expect(Renderable.isRenderable(spray)).toBe(true);
+    });
+
+    it('Should have a frame index', function() {
+	var spray = new Spray(0, 0, 2, 2, 15);
+	expect(spray.frameIndex).toBe(0);
+    });
+
+    it(':act should move and reschedule itself unless ttl <= 0', function() {
+	var scheduler = new ActorScheduler();
+	var spray = new Spray(0, 0, 2, 2, 15);
+	spray.act(scheduler);
+	expect(scheduler.actorQueue).toEqual([spray]);
+	expect(spray.xy()).toEqual([2, 2]);
+	expect(spray.ttl).toBe(14);
+	expect(spray.frameIndex).toBe(1);
+	// acts one more time
+	scheduler = new ActorScheduler();
+	spray.act(scheduler);
+	expect(scheduler.actorQueue).toEqual([spray]);
+	expect(spray.xy()).toEqual([4, 4]);
+	expect(spray.ttl).toBe(13);
+	expect(spray.frameIndex).toBe(2);
+    });
+
+    it(':act should reset a frame index to 0 if it is FRAME_COUNT', function() {
+	var scheduler = new ActorScheduler();
+	var spray = new Spray(0, 0, 2, 2, 15);
+	// frameIndex -> FRAME_COUNT-1
+	for (var i = 1; i < Spray.FRAME_COUNT; ++i) {
+	    spray.act(scheduler);
+	}
+	expect(spray.frameIndex).toBe(Spray.FRAME_COUNT - 1);
+	spray.act(scheduler);
+	expect(spray.frameIndex).toBe(0);
+    });
+
+    it(':act should stop moving and rescheduling itself if ttl <= 0', function() {
+	var scheduler = new ActorScheduler();
+	var spray = new Spray(0, 0, 2, 2, 0);
+	spray.act(scheduler);
+	expect(scheduler.actorQueue).toEqual([]);
+	expect(spray.xy()).toEqual([0, 0]);
+	expect(spray.frameIndex).toBe(0);
+	// another spray
+	spray = new Spray(0, 0, 2, 2, -1);
+	spray.act(scheduler);
+	expect(scheduler.actorQueue).toEqual([]);
+	expect(spray.xy()).toEqual([0, 0]);
+	expect(spray.frameIndex).toBe(0);
+    });
+});
+
 describe('MikanBox', function() {
     it('Should have columns and rows', function() {
 	var mikanBox = new MikanBox(8, 12, 32);
@@ -174,6 +278,11 @@ describe('MikanBox', function() {
 		expect(mikanBox.mikanAt(c, r)).toBeNull();
 	    }
 	}
+    });
+
+    it('Should be renderable', function() {
+	var mikanBox = new MikanBox(8, 12, 32);
+	expect(Renderable.isRenderable(mikanBox)).toBe(true);
     });
 
     it(':mikanAt should throw an exception if a specified square is not in it', function() {
@@ -251,7 +360,7 @@ describe('Dropping mikans in a mikan box:', function() {
 	mikanBox.dropMikans(scheduler);
 	expect(scheduler.actorQueue).toEqual([mikan1]);
 	expect(Actor.isActor(mikan1)).toBe(true);
-	expect(mikan1.priority).toBe(ActorPriorities.DROP);
+	expect(mikan1.priority).toBe(ActorPriorities.MOVE);
 	expect(mikanBox.mikanAt(0, 1)).toBeNull();
     });
 
@@ -275,9 +384,9 @@ describe('Dropping mikans in a mikan box:', function() {
 	expect(Actor.isActor(mikan1)).toBe(true);
 	expect(Actor.isActor(mikan2)).toBe(true);
 	expect(Actor.isActor(mikan3)).toBe(true);
-	expect(mikan1.priority).toBe(ActorPriorities.DROP);
-	expect(mikan2.priority).toBe(ActorPriorities.DROP);
-	expect(mikan3.priority).toBe(ActorPriorities.DROP);
+	expect(mikan1.priority).toBe(ActorPriorities.MOVE);
+	expect(mikan2.priority).toBe(ActorPriorities.MOVE);
+	expect(mikan3.priority).toBe(ActorPriorities.MOVE);
 	expect(mikanBox.mikanAt(0, 1)).toBeNull();
 	expect(mikanBox.mikanAt(7, 11)).toBeNull();
 	expect(mikanBox.mikanAt(3, 5)).toBeNull();
@@ -294,8 +403,8 @@ describe('Dropping mikans in a mikan box:', function() {
 	expect(Actor.isActor(mikan1)).toBe(false);
 	expect(Actor.isActor(mikan2)).toBe(true);
 	expect(Actor.isActor(mikan3)).toBe(true);
-	expect(mikan2.priority).toBe(ActorPriorities.DROP);
-	expect(mikan3.priority).toBe(ActorPriorities.DROP);
+	expect(mikan2.priority).toBe(ActorPriorities.MOVE);
+	expect(mikan3.priority).toBe(ActorPriorities.MOVE);
 	expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
 	expect(mikanBox.mikanAt(0, 2)).toBeNull();
 	expect(mikanBox.mikanAt(0, 3)).toBeNull();
@@ -317,54 +426,92 @@ describe('Dropping mikans in a mikan box:', function() {
 });
 
 describe('Rendering a mikan:', function() {
-    var savedSprites;
-    var dummySprites;
+    var spiedSprites;
 
     // fakes the sprite resources
     beforeEach(function() {
-	savedSprites = Resources.SPRITES['mikan'];
-	spySprites = [
-	    { render: jasmine.createSpy("dmg0") },
-	    { render: jasmine.createSpy("dmg1") },
-	    { render: jasmine.createSpy("dmg2") },
-	    { render: jasmine.createSpy("dmg3") }
-	];
-	Resources.SPRITES['mikan'] = spySprites;
-    });
-
-    // restores the sprite resources
-    afterEach(function() {
-	Resources.SPRITES.mikan = savedSprites;
+	spiedSprites = Resources.SPRITES['mikan'];
+	spiedSprites.forEach(function(sprite) {
+	    spyOn(sprite, 'render');
+	});
     });
 
     it('Mikan can be rendered', function() {
 	var mikan = new Mikan(0);
 	var context = {};
 	mikan.render(context);
-	expect(spySprites[0].render).toHaveBeenCalledWith(context, 0, 0);
-	expect(spySprites[1].render).not.toHaveBeenCalled();
-	expect(spySprites[2].render).not.toHaveBeenCalled();
-	expect(spySprites[3].render).not.toHaveBeenCalled();
+	expect(spiedSprites[0].render).toHaveBeenCalledWith(context, 0, 0);
+	expect(spiedSprites[1].render).not.toHaveBeenCalled();
+	expect(spiedSprites[2].render).not.toHaveBeenCalled();
+	expect(spiedSprites[3].render).not.toHaveBeenCalled();
     });
 
     it('Damaged mikan can be rendered', function() {
 	var mikan = new Mikan(Mikan.MAX_DAMAGE);
 	var context = {};
 	mikan.render(context);
-	expect(spySprites[0].render).not.toHaveBeenCalled();
-	expect(spySprites[1].render).not.toHaveBeenCalled();
-	expect(spySprites[2].render).not.toHaveBeenCalled();
-	expect(spySprites[3].render).toHaveBeenCalledWith(context, 0, 0);
+	expect(spiedSprites[0].render).not.toHaveBeenCalled();
+	expect(spiedSprites[1].render).not.toHaveBeenCalled();
+	expect(spiedSprites[2].render).not.toHaveBeenCalled();
+	expect(spiedSprites[3].render).toHaveBeenCalledWith(context, 0, 0);
     });
 
     it('Mikan can be rendered at a specified location', function() {
 	var mikan = new Mikan(0).locate(10, -5);
 	var context = {};
 	mikan.render(context);
-	expect(spySprites[0].render).toHaveBeenCalledWith(context, 10, -5);
-	expect(spySprites[1].render).not.toHaveBeenCalled();
-	expect(spySprites[2].render).not.toHaveBeenCalled();
-	expect(spySprites[3].render).not.toHaveBeenCalled();
+	expect(spiedSprites[0].render).toHaveBeenCalledWith(context, 10, -5);
+	expect(spiedSprites[1].render).not.toHaveBeenCalled();
+	expect(spiedSprites[2].render).not.toHaveBeenCalled();
+	expect(spiedSprites[3].render).not.toHaveBeenCalled();
+    });
+});
+
+describe('Rendering a spray:', function() {
+    var spiedSprites;
+
+    // spies on the sprite resources
+    beforeEach(function() {
+	spiedSprites = Resources.SPRITES['spray'];
+	spiedSprites.forEach(function(sprite) {
+	    spyOn(sprite, 'render');
+	});
+    });
+
+    it('Spray can be rendered', function() {
+	var context = {};
+	var spray = new Spray(0, 0, 2, 2, 15);
+	spray.render(context);
+	expect(spiedSprites[0].render).toHaveBeenCalledWith(context, 0, 0);
+    });
+
+    it('Spray should be rendered at a specified location', function() {
+	var context = {};
+	var spray = new Spray(-10, 9, 2, 2, 15);
+	spray.render(context);
+	expect(spiedSprites[0].render).toHaveBeenCalledWith(context, -10, 9);
+    });
+
+    it('A sprite corresponding to a frame index of a spray should be rendered', function() {
+	var scheduler = new ActorScheduler();
+	var context = {};
+	var spray = new Spray(0, 0, 0, 0, 15);
+	spray.act(scheduler);
+	expect(spiedSprites[1].render).not.toHaveBeenCalled();
+	spray.render(context);
+	expect(spiedSprites[1].render).toHaveBeenCalledWith(context, 0, 0);
+	spray.act(scheduler);
+	expect(spiedSprites[2].render).not.toHaveBeenCalled();
+	spray.render(context);
+	expect(spiedSprites[2].render).toHaveBeenCalledWith(context, 0, 0);
+	// makes the frame index wraps around
+	for (var i = 2; i < Spray.FRAME_COUNT; ++i) {
+	    spray.act(scheduler);
+	}
+	expect(spray.frameIndex).toBe(0);
+	expect(spiedSprites[0].render).not.toHaveBeenCalled();
+	spray.render(context);
+	expect(spiedSprites[0].render).toHaveBeenCalledWith(context, 0, 0);
     });
 });
 

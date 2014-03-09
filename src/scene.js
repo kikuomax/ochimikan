@@ -106,12 +106,24 @@
  *   1. The `mikanController` asks its `MikanBox` to place each controlled
  *      mikan in it.
  *   1. The `mikanController` asks its `MikanBox` to drop all mikans.
+ *   1. The `mikanController` schedules an actor which erases chained mikans
+ *      ('mikanChainer').
  *   1. The `mikanController` stops.
+ *
+ * ## Erasing chained mikans
+ *
+ * 1. A `Scene` runs its `mikanChainer`.
+ * 1. The `mikanChainer` asks its `MikanBox` to erases chained mikans.
+ * 1. The `mikanChainer` reschedules itself in the `Scene`.
+ *
+ * ### Derivatives
+ *
+ * - 2 No mikans have been erased.
+ *   1. The `mikanChainer` stops.
  *
  * @class Scene
  * @contructor
  * @extends ActorScheduler
- * @extends Renderable
  */
 function Scene() {
     var self = this;
@@ -136,18 +148,19 @@ function Scene() {
      * @final
      */
     var _controlledMikans;
+        // NOTE: _controlledMikans[0].x <= _controlledMikans[1].x
+        //       _controlledMikans[0].y <= _controlledMikans[1].y
     var _mikanSpawner = new Actor(ActorPriorities.SPAWN, function(scheduler) {
 	_controlledMikans = new Array(2);
 	var x = (Scene.COLUMN_COUNT / 2) * Scene.SQUARE_SIZE;
 	for (var i = 0; i < 2; ++i) {
 	    _controlledMikans[i] = new Mikan(0);
-	    _controlledMikans[i].locate(x, -(Scene.SQUARE_SIZE * (i + 1)));
+	    _controlledMikans[i].locate(x, -(Scene.SQUARE_SIZE * (2 - i)));
 	}
 	self.schedule(_mikanController);
 	self.schedule(_mikanSpawner);
     });
     Object.defineProperty(self, 'mikanSpawner', { value: _mikanSpawner });
-    // schedules an actor which spawns a pair of two mikans
     self.schedule(_mikanSpawner);
 
     /**

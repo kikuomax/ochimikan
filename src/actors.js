@@ -51,10 +51,10 @@
  *
  * @class Actor
  * @constructor
- * @param priority {int}
+ * @param priority {Number}
  *     The priority of the actor.
  *     The lower this number is, the higher priority is.
- * @param act {Function(ActorScheduler)}
+ * @param act {Function}
  *     The action of the actor.
  */
 function Actor(priority, act) {
@@ -75,7 +75,8 @@ function Actor(priority, act) {
      * The lower this number is, the higher priority is.
      *
      * @property priority
-     * @type int
+     * @type {Number}
+     * @final
      */
     self.priority = priority;
 
@@ -90,31 +91,6 @@ function Actor(priority, act) {
      */
     self.act = act;
 }
-
-/**
- * Makes the specified object an actor.
- *
- * Overwrites the following properties.
- * - priority
- * - act
- *
- * Throws an exception if `act` isn't a function.
- *
- * @method makeActor
- * @static
- * @param self {Object}
- *     The object to be an actor.
- * @param priority {Number}
- *     The priority of the actor.
- * @param act {Function(ActorScheduler)}
- *     The the action of the actor.
- * @retrun {Actor}  `self`.
- */
-/*
-Actor.makeActor = function(self, priority, act) {
-    Actor.call(self, priority, act);
-    return self;
-};*/
 
 /**
  * Returns whether the specified object is an actor.
@@ -142,7 +118,7 @@ Actor.isActor = function(obj) {
  *     The left hand side of comparison.
  * @param rhs {Actor}
  *     The right hand side of comparison.
- * @return {int}
+ * @return {Number}
  *     - negative number if `lhs.priority < rhs.priority`
  *     - 0 if `lhs.priority == rhs.priority`
  *     - positive number if `lhs.priority > rhs.priority`

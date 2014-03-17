@@ -99,14 +99,15 @@ function Actor(priority, act) {
  * - priority
  * - act: Function
  *
- * @method isActor
+ * @method isClassOf
  * @static
  * @param obj {Object}
  *     The object to be tested.
- * @return {Boolean}  Whether `obj` is an actor.
+ * @return {Boolean}
+ *     Whether `obj` is an actor. `false` if `obj` isn't specified.
  */
-Actor.isActor = function(obj) {
-    return (obj != null) && (obj.priority != null) && (typeof obj.act == "function");
+Actor.isClassOf = function(obj) {
+    return (obj != null) && (obj.priority != null) && (typeof obj.act == 'function');
 };
 
 /**

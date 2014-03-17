@@ -162,7 +162,7 @@ describe('Spray', function() {
 
     it('Should be an actor of priority=SPRAY', function() {
 	var spray = new Spray(0, 0, 2, 2, 15);
-	expect(Actor.isActor(spray)).toBe(true);
+	expect(Actor.isClassOf(spray)).toBe(true);
 	expect(spray.priority).toBe(ActorPriorities.SPRAY);
     });
 
@@ -370,7 +370,7 @@ describe('Dropping mikans in a mikan box:', function() {
 	mikanBox.place(mikan1, 0, 1);
 	mikanBox.dropMikans(scheduler);
 	expect(scheduler.actorQueue).toEqual([mikan1]);
-	expect(Actor.isActor(mikan1)).toBe(true);
+	expect(Actor.isClassOf(mikan1)).toBe(true);
 	expect(mikan1.priority).toBe(ActorPriorities.MOVE);
 	expect(mikanBox.mikanAt(0, 1)).toBeNull();
     });
@@ -379,7 +379,7 @@ describe('Dropping mikans in a mikan box:', function() {
 	mikanBox.place(mikan1, 0, 0);
 	mikanBox.dropMikans(scheduler);
 	expect(scheduler.actorQueue).toEqual([]);
-	expect(Actor.isActor(mikan1)).toBe(false);
+	expect(Actor.isClassOf(mikan1)).toBe(false);
 	expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
     });
 
@@ -392,9 +392,9 @@ describe('Dropping mikans in a mikan box:', function() {
 	expect(scheduler.actorQueue).toContain(mikan1);
 	expect(scheduler.actorQueue).toContain(mikan2);
 	expect(scheduler.actorQueue).toContain(mikan3);
-	expect(Actor.isActor(mikan1)).toBe(true);
-	expect(Actor.isActor(mikan2)).toBe(true);
-	expect(Actor.isActor(mikan3)).toBe(true);
+	expect(Actor.isClassOf(mikan1)).toBe(true);
+	expect(Actor.isClassOf(mikan2)).toBe(true);
+	expect(Actor.isClassOf(mikan3)).toBe(true);
 	expect(mikan1.priority).toBe(ActorPriorities.MOVE);
 	expect(mikan2.priority).toBe(ActorPriorities.MOVE);
 	expect(mikan3.priority).toBe(ActorPriorities.MOVE);
@@ -411,9 +411,9 @@ describe('Dropping mikans in a mikan box:', function() {
 	expect(scheduler.actorQueue.length).toBe(2);
 	expect(scheduler.actorQueue).toContain(mikan2);
 	expect(scheduler.actorQueue).toContain(mikan3);
-	expect(Actor.isActor(mikan1)).toBe(false);
-	expect(Actor.isActor(mikan2)).toBe(true);
-	expect(Actor.isActor(mikan3)).toBe(true);
+	expect(Actor.isClassOf(mikan1)).toBe(false);
+	expect(Actor.isClassOf(mikan2)).toBe(true);
+	expect(Actor.isClassOf(mikan3)).toBe(true);
 	expect(mikan2.priority).toBe(ActorPriorities.MOVE);
 	expect(mikan3.priority).toBe(ActorPriorities.MOVE);
 	expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
@@ -427,9 +427,9 @@ describe('Dropping mikans in a mikan box:', function() {
 	mikanBox.place(mikan3, 0, 2);
 	mikanBox.dropMikans();
 	expect(scheduler.actorQueue).toEqual([]);
-	expect(Actor.isActor(mikan1)).toBe(false);
-	expect(Actor.isActor(mikan2)).toBe(false);
-	expect(Actor.isActor(mikan3)).toBe(false);
+	expect(Actor.isClassOf(mikan1)).toBe(false);
+	expect(Actor.isClassOf(mikan2)).toBe(false);
+	expect(Actor.isClassOf(mikan3)).toBe(false);
 	expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
 	expect(mikanBox.mikanAt(0, 1)).toBe(mikan2);
 	expect(mikanBox.mikanAt(0, 2)).toBe(mikan3);

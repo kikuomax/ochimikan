@@ -7,7 +7,7 @@
 /**
  * The interface of a renderable object.
  *
- * Throws "render must be a function" if `render` isn't a function.
+ * Throws an exception if `render` isn't a function.
  *
  * @class Renderable
  * @constructor
@@ -33,19 +33,18 @@ function Renderable(render) {
 }
 
 /**
- * Returns whetehr the specified object is a `Renderable`.
+ * Returns whether the specified object is a `Renderable`.
  *
- * A `Renderable` have the following property.
+ * A `Renderable` must have the following property.
  * - render: Function 
  *
- * @method isRenderable
+ * @method isClassOf
  * @static
  * @param obj {Object}
  *     The object to be tested.
  * @return {Boolean}
- *     Whether `obj` is a `Renderable`.
- *     `false` if `obj` is `null` or `undefined`.
+ *     Whether `obj` is a `Renderable`. `false` if `obj` isn't specified.
  */
-Renderable.isRenderable = function(obj) {
+Renderable.isClassOf = function(obj) {
     return (obj != null) && (typeof obj.render == "function");
 };

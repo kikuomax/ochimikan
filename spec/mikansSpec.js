@@ -45,7 +45,7 @@ describe('Mikan', function() {
     });
 
     it('Should be renderable', function() {
-	expect(Renderable.isRenderable(new Mikan(0))).toBe(true);
+	expect(Renderable.isClassOf(new Mikan(0))).toBe(true);
     });
 
     it('Can be located at another location', function() {
@@ -168,7 +168,7 @@ describe('Spray', function() {
 
     it('Should be renderable', function() {
 	var spray = new Spray(0, 0, 2, 2, 15);
-	expect(Renderable.isRenderable(spray)).toBe(true);
+	expect(Renderable.isClassOf(spray)).toBe(true);
     });
 
     it('Should have a frame index', function() {
@@ -293,7 +293,7 @@ describe('MikanBox', function() {
 
     it('Should be renderable', function() {
 	var mikanBox = new MikanBox(8, 12, 32);
-	expect(Renderable.isRenderable(mikanBox)).toBe(true);
+	expect(Renderable.isClassOf(mikanBox)).toBe(true);
     });
 
     it(':mikanAt should throw an exception if a specified square is not in it', function() {

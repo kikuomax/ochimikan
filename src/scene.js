@@ -259,7 +259,7 @@ function Scene() {
 	mikanBox.render(_context);
 	// renders renderable actors
 	self.actorQueue.forEach(function(actor) {
-	    if (Renderable.isRenderable(actor)) {
+	    if (Renderable.isClassOf(actor)) {
 		actor.render(_context);
 	    }
 	});

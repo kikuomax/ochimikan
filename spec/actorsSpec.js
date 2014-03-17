@@ -143,16 +143,16 @@ describe('ActorScheduler', function() {
 	expect(scheduler.run()).toBe(scheduler);
     });
 
-    it(':wrap should add ActorScheduler functionalities to a specified object', function() {
+    it(':augment should add ActorScheduler functionalities to a specified object', function() {
 	var obj = { actorQueue: [] };
-	expect(ActorScheduler.wrap(obj)).toBe(obj);
+	expect(ActorScheduler.augment(obj)).toBe(obj);
 	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
 	expect(obj.run).toBe(ActorScheduler.prototype.run);
     });
 
-    it(':wrap should overwrite properties of a tagert', function() {
+    it(':augment should overwrite properties of a tagert', function() {
 	var obj = { actorQueue: [], schedule: "schedule", run: "run" };
-	expect(ActorScheduler.wrap(obj)).toBe(obj);
+	expect(ActorScheduler.augment(obj)).toBe(obj);
 	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
 	expect(obj.run).toBe(ActorScheduler.prototype.run);
     });

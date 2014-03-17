@@ -235,19 +235,20 @@ ActorScheduler.isClassOf = function(obj) {
 };
 
 /**
- * Wraps the specified object with functionalities of `ActorScheduler`.
+ * Augments the specified object with functionalities of the `ActorScheduler`.
  *
  * Overwrites the following properties.
  * - schedule
  * - run
  *
- * @method wrap
+ * @method augment
  * @static
  * @param obj {Object}
- *     The object to be wrapped with functionalities of `ActorScheduler`.
- * @return {Object}  `obj`.
+ *     The object to be augmented with functionalities of `ActorScheduler`.
+ * @return {Object}
+ *     The augmented object. `obj`.
  */
-ActorScheduler.wrap = function(obj) {
+ActorScheduler.augment = function(obj) {
     for (prop in ActorScheduler.prototype) {
 	obj[prop] = ActorScheduler.prototype[prop];
     }

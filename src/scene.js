@@ -324,7 +324,7 @@ function Scene() {
     }
 }
 // extends ActorScheduler
-ActorScheduler.wrap(Scene.prototype);
+ActorScheduler.augment(Scene.prototype);
 
 /**
  * The number of columns in a mikan box.

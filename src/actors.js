@@ -148,8 +148,11 @@ function ActorScheduler() {
     /**
      * The queue of the scheduled actors.
      *
+     * NOTE: for internal use. please use `schedule` or `run` instead.
+     *
      * @property actorQueue
-     * @type Array[Actor]
+     * @protected
+     * @type Array
      */
     self.actorQueue = [];
 }
@@ -210,21 +213,25 @@ ActorScheduler.prototype.run = function() {
 };
 
 /**
- * Returns whether the specified object is an actor scheduler.
+ * Returns whether the specified object is an `ActorScheduler`.
  *
- * An actor scheduler must have the following property.
- * - actorQueue
+ * An `ActorScheduler` must have the following property.
+ * - schedule: Function
+ * - run: Function
  *
- * @method isActorScheduler
+ * NOTE: `actorQueue` isn't a necessary property of an `ActorScheduler`.
+ *
+ * @method isClassOf
  * @static
  * @param obj {Object}
  *     The object to be tested.
  * @return {Boolean}
- *     Whether `obj` is an actor scheduler.
- *     `false` if `obj` is `null` or `undefined`.
+ *     Whether `obj` is an actor scheduler. `false` if `obj` isn't specified.
  */
-ActorScheduler.isActorScheduler = function(obj) {
-    return (obj != null) && (obj.actorQueue != null);
+ActorScheduler.isClassOf = function(obj) {
+    return (obj != null) &&
+	(typeof obj.schedule == 'function') &&
+	(typeof obj.run == 'function');
 };
 
 /**

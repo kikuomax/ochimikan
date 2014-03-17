@@ -88,9 +88,23 @@ describe('Actor', function() {
 });
 
 describe('ActorScheduler', function() {
+    var schedulerLike;
+
+    beforeEach(function() {
+	schedulerLike = {
+	    schedule: function() {},
+	    run: function() {}
+	};
+    });
+
     it('Should have an empty actor queue', function() {
 	var scheduler = new ActorScheduler();
 	expect(scheduler.actorQueue.length).toBe(0);
+    });
+
+    it('Should be an ActorScheduler (isClassOf)', function() {
+	var scheduler = new ActorScheduler();
+	expect(ActorScheduler.isClassOf(scheduler)).toBe(true);
     });
 
     it('Can schedule an actor', function() {
@@ -101,27 +115,27 @@ describe('ActorScheduler', function() {
 	expect(scheduler.actorQueue).toContain(actor);
     });
 
-    it(':isActorScheduler should be true for an actor scheduler', function() {
-	var scheduler = new ActorScheduler();
-	expect(ActorScheduler.isActorScheduler(scheduler)).toBe(true);
+    it(':isClassOf should be true for an object like an actor scheduler', function() {
+	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(true);
     });
 
-    it(':isActorScheduler should be true for an object like an actor scheduler', function() {
-	var schedulerLike = { actorQueue: [] };
-	expect(ActorScheduler.isActorScheduler(schedulerLike)).toBe(true);
+    it(':isClassOf should be false if no object is specified', function() {
+	expect(ActorScheduler.isClassOf(null)).toBe(false);
+	expect(ActorScheduler.isClassOf()).toBe(false);
     });
 
-    it(':isActorScheduler should be false for null', function() {
-	expect(ActorScheduler.isActorScheduler(null)).toBe(false);
+    it(':isClassOf should be false for an object whose schedule is not a function', function() {
+	schedulerLike.schedule = 'schedule';
+	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(false);
+	delete schedulerLike.schedule;
+	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(false);
     });
 
-    it(':isActorScheduler should be false for undefined', function() {
-	expect(ActorScheduler.isActorScheduler(undefined)).toBe(false);
-    });
-
-    it(':isActorScheduler should be false for an object which lacks actorQueue', function() {
-	var obj = {};
-	expect(ActorScheduler.isActorScheduler(obj)).toBe(false);
+    it(':isClassOf should be false for an object whose run is not a function', function() {
+	schedulerLike.run = 'run';
+	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(false);
+	delete schedulerLike.run;
+	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(false);
     });
 
     it(':run should be chainable', function() {

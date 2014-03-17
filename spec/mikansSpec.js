@@ -7,6 +7,18 @@ describe('ActorPriorities', function() {
 });
 
 describe('Mikan', function() {
+    var mikanLike;
+
+    beforeEach(function() {
+	mikanLike = {
+	    x: 0,
+	    y: 0,
+	    damage: 0,
+	    xy: function() {},
+	    locate: function() {}
+	};
+    });
+
     it('Should have damage', function() {
 	expect(new Mikan(0).damage).toBe(0);
 	expect(new Mikan(Mikan.MAX_DAMAGE).damage).toBe(Mikan.MAX_DAMAGE);
@@ -36,7 +48,7 @@ describe('Mikan', function() {
 	expect(Renderable.isRenderable(new Mikan(0))).toBe(true);
     });
 
-    it('Can be located', function() {
+    it('Can be located at another location', function() {
 	var mikan = new Mikan(0);
 	expect(mikan.locate(-1, 1)).toBe(mikan);
 	expect(mikan.x).toBe(-1);
@@ -50,7 +62,6 @@ describe('Mikan', function() {
     });
 
     it(':isMikan should be true for a mikan like object', function() {
-	var mikanLike = { x: 0, y: 0, damage: 0 };
 	expect(Mikan.isMikan(mikanLike)).toBe(true);
     });
 
@@ -111,13 +122,13 @@ describe('Mikan', function() {
 describe('Spray', function() {
     it('Should be located', function() {
 	var spray = new Spray(0, 0, 2, 2, 15);
-	expect(Located.isLocated(spray)).toBe(true);
+	expect(Located.isClassOf(spray)).toBe(true);
 	expect(spray.x).toBe(0);
 	expect(spray.y).toBe(0);
 	expect(spray.xy()).toEqual([0, 0]);
 	// another spray
 	spray = new Spray(-10, 8, 2, 2, 15);
-	expect(Located.isLocated(spray)).toBe(true);
+	expect(Located.isClassOf(spray)).toBe(true);
 	expect(spray.x).toBe(-10);
 	expect(spray.y).toBe(8);
 	expect(spray.xy()).toEqual([-10, 8]);

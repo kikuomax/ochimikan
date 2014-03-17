@@ -1,4 +1,20 @@
 describe('Located', function() {
+    var locatedLike;
+    var augmentable;
+
+    beforeEach(function() {
+	locatedLike = {
+	    x: 0,
+	    y: 0,
+	    xy: function() {},
+	    locate: function() {}
+	};
+	augmentable = {
+	    x: 0,
+	    y: 0
+	};
+    });
+
     it('Should have (x, y)', function() {
 	var loc = new Located(0, 0);
 	expect(loc.x).toBe(0);
@@ -10,30 +26,72 @@ describe('Located', function() {
 	expect(loc.xy()).toEqual([-1, 2]);
     });
 
-    it(':isLocated should be true for a Located', function() {
-	expect(Located.isLocated(new Located(0, 0))).toBe(true);
-	expect(Located.isLocated(new Located(1, -1))).toBe(true);
+    it('Should be a Located (isClassOf)', function() {
+	expect(Located.isClassOf(new Located(0, 0))).toBe(true);
+	expect(Located.isClassOf(new Located(1, -1))).toBe(true);
     });
 
-    it(':isLocated should be true for a Located like object', function() {
-	var locatedLike = { x: 0, y: 0 };
-	expect(Located.isLocated(locatedLike)).toBe(true);
+    it('Can be a Located (canAugment)', function() {
+	expect(Located.canAugment(new Located(0, 0))).toBe(true);
+	expect(Located.canAugment(new Located(1, -1))).toBe(true);
     });
 
-    it(':isLocated should be false for null', function() {
-	expect(Located.isLocated(null)).toBe(false);
+    it(':isClassOf should be true for an object like a Located', function() {
+	expect(Located.isClassOf(locatedLike)).toBe(true);
     });
 
-    it(':isLocated should be false for undefined', function() {
-	expect(Located.isLocated(undefined)).toBe(false);
+    it(':isClassOf should be false if no object is specified', function() {
+	expect(Located.isClassOf(null)).toBe(false);
+	expect(Located.isClassOf()).toBe(false);
     });
 
-    it(':isLocated should be false for an object which lacks x', function() {
-	expect(Located.isLocated({ y: 0 })).toBe(false);
+    it(':isClassOf should be false for an object which lacks x', function() {
+	locatedLike.x = null;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+	delete locatedLike.x;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
     });
 
-    it(':isLocated should be false for an object which lacks y', function() {
-	expect(Located.isLocated({ x: 0 })).toBe(false);
+    it(':isClassOf should be false for an object which lacks y', function() {
+	locatedLike.y = null;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+	delete locatedLike.y;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+    });
+
+    it(':isClassOf should be false for an object whose xy is not a function', function() {
+	locatedLike.xy = 'xy';
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+	delete locatedLike.xy;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+    });
+
+    it(':isClassOf should be false for an object whose xy is not a function', function() {
+	locatedLike.locate = 'locate';
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+	delete locatedLike.locate;
+	expect(Located.isClassOf(locatedLike)).toBe(false);
+    });
+
+    it(':canAugment should be false if no object is specified', function() {
+	expect(Located.canAugment(null)).toBe(false);
+	expect(Located.canAugment()).toBe(false);
+    });
+
+    it(':canAugment should be false for an object which lacks x', function() {
+	var obj = augmentable;
+	obj.x = null;
+	expect(Located.canAugment(obj)).toBe(false);
+	delete obj.x;
+	expect(Located.canAugment(obj)).toBe(false);
+    });
+
+    it(':canAugment should be false for an object which lacks y', function() {
+	var obj = augmentable;
+	obj.y = null;
+	expect(Located.canAugment(obj)).toBe(false);
+	delete obj.y;
+	expect(Located.canAugment(obj)).toBe(false);
     });
 
     it(':x can be changed to another value', function() {
@@ -68,9 +126,9 @@ describe('Located', function() {
 	expect(loc.xy()).toEqual([-10, -5]);
     });
 
-    it(':wrap should add Located functionalities to the specified object', function() {
+    it(':augment should make an object a Located', function() {
 	var obj = { x: 0, y: 0 };
-	expect(Located.wrap(obj)).toBe(obj);
+	expect(Located.augment(obj)).toBe(obj);
 	expect(obj.xy).toBe(Located.prototype.xy);
 	expect(obj.locate).toBe(Located.prototype.locate);
 	expect(obj.xy()).toEqual([0, 0]);
@@ -80,9 +138,9 @@ describe('Located', function() {
 	expect(obj.xy()).toEqual([1, 2]);
     });
 
-    it(':wrap should overwrite properties of a target', function() {
+    it(':augment should overwrite properties of a target', function() {
 	var obj = { x: 0, y: 0, xy: "xy", locate: "locate" };
-	expect(Located.wrap(obj)).toBe(obj);
+	expect(Located.augment(obj)).toBe(obj);
 	expect(obj.xy).toBe(Located.prototype.xy);
 	expect(obj.locate).toBe(Located.prototype.locate);
 	expect(obj.xy()).toEqual([0, 0]);

@@ -171,8 +171,7 @@ function Mikan(damage) {
 	}
     }
 }
-// extends Located
-Located.wrap(Mikan.prototype);
+Located.augment(Mikan.prototype);
 
 /**
  * Spoils this mikan.
@@ -201,10 +200,12 @@ Mikan.prototype.spoil = function() {
 Object.defineProperty(Mikan, 'MAX_DAMAGE', { value: 3, writable: false });
 
 /**
- * Returns whether the specified object is a mikan.
+ * Returns whether the specified object is a `Mikan`.
  *
- * A mikan is a `Located` and has the following property.
- * - damage
+ * A `Mikan` must satisfies the following conditions,
+ * - is a `Located`
+ * - has the following property,
+ *   - damage
  *
  * @method isMikan
  * @static
@@ -214,7 +215,7 @@ Object.defineProperty(Mikan, 'MAX_DAMAGE', { value: 3, writable: false });
  *     Whether `obj` is a mikan. `false` if `obj` is `null` or `undefined`.
  */
 Mikan.isMikan = function(obj) {
-    return Located.isLocated(obj) && (obj.damage != null);
+    return Located.isClassOf(obj) && (obj.damage != null);
 };
 
 /**
@@ -325,7 +326,7 @@ function Spray(x, y, dX, dY, ttl) {
 	get: function() { return frameIndex; }
     });
 };
-Located.wrap(Spray.prototype);
+Located.augment(Spray.prototype);
 
 /**
  * The frame count of a spray.

@@ -76,20 +76,44 @@ Located.prototype.xy = function() {
  * A `Located` has the following properties.
  * - x
  * - y
+ * - xy: Function
+ * - locate: Function
  *
- * @method isLocated
+ * @method isClassOf
  * @static
  * @param obj {Object}
  *     The object to be tested.
  * @return {Boolean}
- *     Whether `obj` is a `Located`. `false` if `obj` is `null` or `undefined`.
+ *     Whether `obj` is a `Located`. `false` if `obj` isn't specified.
  */
-Located.isLocated = function(obj) {
+Located.isClassOf = function(obj) {
+    return (obj != null) &&
+	(obj.x != null) &&
+	(obj.y != null) &&
+	(typeof obj.xy == 'function') &&
+	(typeof obj.locate == 'function');
+};
+
+/**
+ * Returns whether the specified object can be a `Located`.
+ *
+ * An object which has all of the following properties can be a `Located`.
+ * - x
+ * - y
+ *
+ * @method canAugment
+ * @static
+ * @param obj {Object}
+ *     The object to be tested.
+ * @return {Boolean}
+ *     Whether `obj` can be a `Located`. `false` if `obj` isn't specified.
+ */
+Located.canAugment = function(obj) {
     return (obj != null) && (obj.x != null) && (obj.y != null);
 };
 
 /**
- * Wraps the specified object with functionalities of `Located`.
+ * Augments the specified object with functionalities of the `Located`.
  *
  * Overwrites the following property.
  * - xy
@@ -99,7 +123,7 @@ Located.isLocated = function(obj) {
  *     The object to be wrapped with `Located`.
  * @return {Object}  `obj`.
  */
-Located.wrap = function(obj) {
+Located.augment = function(obj) {
     for (prop in Located.prototype) {
 	obj[prop] = Located.prototype[prop];
     }

@@ -46,7 +46,7 @@
  * An actor.
  *
  * Throws an exception if,
- * - `priority` is `null` or `undefined`
+ * - `priority` isn't specified
  * - `act` isn't a function
  *
  * @class Actor
@@ -175,7 +175,7 @@ ActorScheduler.prototype.schedule = function(actor) {
  *
  * Runs actors which satisfies one of the following conditions,
  * - has negative priority
- * - has the highes priority (>=0) among the scheduled actors
+ * - has the highest priority (>=0) among the scheduled actors
  *
  * Executed actors will be deleted from the queue of this actor scheduler.
  *

@@ -1,7 +1,6 @@
 module.exports = function(grunt) {
     grunt.initConfig({
 	pkg: grunt.file.readJSON('package.json'),
-	fragments: './build/fragments/',
 	build: {
 	    debug: './dist/mikan.debug.js'
 	},
@@ -9,7 +8,7 @@ module.exports = function(grunt) {
 	    mikan: {
 		src: './dist/mikan.debug.js',
 		options: {
-		    specs: './spec/*Spec.js'
+		    specs: './spec/**/*Spec.js'
 		}
 	    }
 	},
@@ -37,8 +36,7 @@ module.exports = function(grunt) {
 	function linkMikanSources(filenames) {
 	    sourceFilenames = filenames;
 	}
-	var fragments = grunt.config('fragments');
-	eval(grunt.file.read(fragments + 'sources.js'));
+	eval(grunt.file.read('./build/sources.js'));
 	return sourceFilenames;
     }
 

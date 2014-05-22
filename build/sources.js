@@ -1,0 +1,14 @@
+linkMikanSources([
+    "./src/util/Search.js",
+    "./src/Sprite.js",
+    "./src/Actor.js",
+    "./src/ActorScheduler.js",
+    "./src/Renderable.js",
+    "./src/Located.js",
+    "./src/resources.js",
+    "./src/ActorPriorities.js",
+    "./src/Mikan.js",
+    "./src/MikanBox.js",
+    "./src/Scene.js",
+    "./src/Game.js"
+]);

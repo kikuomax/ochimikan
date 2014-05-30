@@ -8,7 +8,8 @@ module.exports = function(grunt) {
 	    mikan: {
 		src: './dist/mikan.debug.js',
 		options: {
-		    specs: './spec/**/*Spec.js'
+		    specs: './spec/**/*Spec.js',
+		    helpers: './spec/**/*Helper.js'
 		}
 	    }
 	},

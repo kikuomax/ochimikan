@@ -1,10 +1,14 @@
 describe('ActorScheduler', function() {
     var schedulerLike;
+    var augmentable;
 
     beforeEach(function() {
 	schedulerLike = {
 	    schedule: function() {},
 	    run: function() {}
+	};
+	augmentable = {
+	    actorQueue: []
 	};
     });
 
@@ -13,26 +17,18 @@ describe('ActorScheduler', function() {
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('Should be an ActorScheduler (isClassOf)', function() {
+    it('Should be an ActorScheduler', function() {
 	var scheduler = new ActorScheduler();
 	expect(ActorScheduler.isClassOf(scheduler)).toBe(true);
     });
 
-    it('Can schedule an actor', function() {
+    it('Can be an ActorScheduler', function() {
 	var scheduler = new ActorScheduler();
-	var actor = new Actor(0, function(s) {});
-	expect(scheduler.schedule(actor)).toBe(scheduler);
-	expect(scheduler.actorQueue.length).toBe(1);
-	expect(scheduler.actorQueue).toContain(actor);
+	expect(ActorScheduler.canAugment(scheduler)).toBe(true);
     });
 
-    it(':isClassOf should be true for an object like an actor scheduler', function() {
-	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(true);
-    });
-
-    it(':isClassOf should be false if no object is specified', function() {
-	expect(ActorScheduler.isClassOf(null)).toBe(false);
-	expect(ActorScheduler.isClassOf()).toBe(false);
+    defineIsClassOfSpec(ActorScheduler, function() {
+	return schedulerLike;
     });
 
     it(':isClassOf should be false for an object whose schedule is not a function', function() {
@@ -49,27 +45,42 @@ describe('ActorScheduler', function() {
 	expect(ActorScheduler.isClassOf(schedulerLike)).toBe(false);
     });
 
-    it(':run should be chainable', function() {
+    defineCanAugmentSpec(ActorScheduler, function() {
+	return augmentable;
+    });
+
+    it(':canAugment should be false for an object whose actorQueue is not an Array', function() {
+	augmentable.actorQueue = 'actorQueue';
+	expect(ActorScheduler.canAugment(augmentable)).toBe(false);
+	delete augmentable.actorQueue;
+	expect(ActorScheduler.canAugment(augmentable)).toBe(false);
+    });
+
+    defineAugmentSpec(ActorScheduler, function() {
+	return augmentable;
+    });
+
+    it(':augment should overwrite properties of a specified object', function() {
+	augmentable.schedule = 'schedule';
+	augmentable.run = 'run';
+	expect(ActorScheduler.augment(augmentable)).toBe(augmentable);
+	expect(ActorScheduler.isClassOf(augmentable)).toBe(true);
+    });
+
+    it('Should not schedule a non-Actor object', function() {
 	var scheduler = new ActorScheduler();
-	expect(scheduler.run()).toBe(scheduler);
+	expect(function() { scheduler.schedule({}) }).toThrow();
+	expect(function() { scheduler.schedule(null) }).toThrow();
+	expect(function() { scheduler.schedule() }).toThrow();
     });
 
-    it(':augment should add ActorScheduler functionalities to a specified object', function() {
-	var obj = { actorQueue: [] };
-	expect(ActorScheduler.augment(obj)).toBe(obj);
-	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
-	expect(obj.run).toBe(ActorScheduler.prototype.run);
-    });
-
-    it(':augment should overwrite properties of a tagert', function() {
-	var obj = { actorQueue: [], schedule: "schedule", run: "run" };
-	expect(ActorScheduler.augment(obj)).toBe(obj);
-	expect(obj.schedule).toBe(ActorScheduler.prototype.schedule);
-	expect(obj.run).toBe(ActorScheduler.prototype.run);
+    it('Can run even if it is empty', function() {
+	var scheduler = new ActorScheduler();
+	expect(function() { scheduler.run() }).not.toThrow();
     });
 });
 
-describe('Running scheduled actors:', function() {
+describe('ActorScheduler running Actors:', function() {
     var act1, act2, act3;
     var scheduler;
 

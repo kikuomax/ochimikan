@@ -1,11 +1,21 @@
 describe('Actor', function() {
     var actorLike;
+    var augmentable;
 
     beforeEach(function() {
 	actorLike = {
 	    priority: 0,
 	    act: function() {}
 	};
+	augmentable = {
+	    priority: 0,
+	    act: function() {}
+	};
+    });
+
+    it('Should be an Actor', function() {
+	var actor = new Actor(0, function(s){});
+	expect(Actor.isClassOf(actor)).toBe(true);
     });
 
     it('Should have a priority', function() {
@@ -23,15 +33,8 @@ describe('Actor', function() {
 	expect(actor.act).toBe(act);
     });
 
-    it('Should be an Actor (isClassOf)', function() {
-	var actor = new Actor(0, function(s){});
-	expect(Actor.isClassOf(actor)).toBe(true);
-    });
-
     it('Should throw an exception if priority is not specified', function() {
-	expect(function(){
-	    new Actor(undefined, function(s) {});
-	}).toThrow();
+	expect(function(){ new Actor(undefined, function(s) {}) }).toThrow();
     });
 
     it('Should throw an exception if act is not a function', function() {
@@ -39,17 +42,12 @@ describe('Actor', function() {
 	expect(function() { new Actor(0) }).toThrow();
     });
 
-    it(':isClassOf should be true for an object like an actor', function() {
-	expect(Actor.isClassOf(actorLike)).toBe(true);
+    defineIsClassOfSpec(Actor, function() {
+	return actorLike;
     });
 
-    it(':isClassOf should be false if no object is specified', function() {
-	expect(Actor.isClassOf(null)).toBe(false);
-	expect(Actor.isClassOf()).toBe(false);
-    });
-
-    it(':isClassOf should be false for an object which lacks priority', function() {
-	actorLike.priority = null;
+    it(':isClassOf should be false for an object whose priority is not a number', function() {
+	actorLike.priority = 'priority';
 	expect(Actor.isClassOf(actorLike)).toBe(false);
 	delete actorLike.priority;
 	expect(Actor.isClassOf(actorLike)).toBe(false);
@@ -60,6 +58,28 @@ describe('Actor', function() {
 	expect(Actor.isClassOf(actorLike)).toBe(false);
 	delete actorLike.act;
 	expect(Actor.isClassOf(actorLike)).toBe(false);
+    });
+
+    defineCanAugmentSpec(Actor, function() {
+	return augmentable;
+    });
+
+    it(':canAugment should be false for an object whose priority is not a number', function() {
+	augmentable.priority = 'priority';
+	expect(Actor.canAugment(augmentable)).toBe(false);
+	delete augmentable.priority;
+	expect(Actor.canAugment(augmentable)).toBe(false);
+    });
+
+    it(':canAugment should be false for an object whose act is not a function', function() {
+	augmentable.act = 'act';
+	expect(Actor.canAugment(augmentable)).toBe(false);
+	delete augmentable.act;
+	expect(Actor.canAugment(augmentable)).toBe(false);
+    });
+
+    defineAugmentSpec(Actor, function() {
+	return augmentable;
     });
 
     it(':comparePriorities should return 0 if lhs.priority == rhs.priority', function() {

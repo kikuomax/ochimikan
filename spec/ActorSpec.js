@@ -33,15 +33,6 @@ describe('Actor', function() {
 	expect(actor.act).toBe(act);
     });
 
-    it('Should throw an exception if priority is not specified', function() {
-	expect(function(){ new Actor(undefined, function(s) {}) }).toThrow();
-    });
-
-    it('Should throw an exception if act is not a function', function() {
-	expect(function() { new Actor(0, {}) }).toThrow();
-	expect(function() { new Actor(0) }).toThrow();
-    });
-
     defineIsClassOfSpec(Actor, function() {
 	return actorLike;
     });
@@ -80,6 +71,18 @@ describe('Actor', function() {
 
     defineAugmentSpec(Actor, function() {
 	return augmentable;
+    });
+
+    it('Should not have a non-number priority', function() {
+	expect(function() { new Actor(null, nop) }).toThrow();
+	expect(function() { new Actor(undefined, nop) }).toThrow();
+	expect(function() { new Actor('priority', nop) }).toThrow();
+    });
+
+    it('Should not have a non-function act', function() {
+	expect(function() { new Actor(0, {}) }).toThrow();
+	expect(function() { new Actor(0, null) }).toThrow();
+	expect(function() { new Actor(0) }).toThrow();
     });
 
     it(':comparePriorities should return 0 if lhs.priority == rhs.priority', function() {

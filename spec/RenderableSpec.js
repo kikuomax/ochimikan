@@ -1,29 +1,59 @@
 describe('Renderable', function() {
+    var renderableLike;
+    var augmentable;
+
+    beforeEach(function() {
+	renderableLike = {
+	    render: function() {}
+	};
+	augmentable = {
+	    render: function() {}
+	};
+    });
+
+    it('Should be a Renderable', function() {
+	var renderable = new Renderable(function(c) {});
+	expect(Renderable.isClassOf(renderable)).toBe(true);
+    });
+
     it('Should have render', function() {
 	var render = function(c) {};
 	var renderable = new Renderable(render);
 	expect(renderable.render).toBe(render);
     });
 
-    it('Should be a Renderable (isClassOf)', function() {
-	var renderable = new Renderable(function(c) {});
-	expect(Renderable.isClassOf(renderable)).toBe(true);
-    });
-
-    it('Should throw an exception if render is not a function', function() {
-	expect(function() { new Renderable({}) }).toThrow();
-	expect(function() { new Renderable() }).toThrow();
-    });
-
-    it(':isClassOf should be false if no object is specified', function() {
-	expect(Renderable.isClassOf(null)).toBe(false);
-	expect(Renderable.isClassOf()).toBe(false);
+    defineIsClassOfSpec(Renderable, function() {
+	return renderableLike;
     });
 
     it(':isClassOf should be false for an object whose render is not a function', function() {
-	var obj = { render: 'render' };
-	expect(Renderable.isClassOf(obj)).toBe(false);
-	delete obj.render;
-	expect(Renderable.isClassOf(obj)).toBe(false);
+	renderableLike.render = 'render';
+	expect(Renderable.isClassOf(renderableLike)).toBe(false);
+	delete renderableLike.render;
+	expect(Renderable.isClassOf(renderableLike)).toBe(false);
+    });
+
+    defineCanAugmentSpec(Renderable, function() {
+	return augmentable;
+    });
+
+    it(':canAugment should be false for an object whose render is not a function', function() {
+	augmentable.render = 'render';
+	expect(Renderable.canAugment(augmentable)).toBe(false);
+	delete augmentable.render;
+	expect(Renderable.canAugment(augmentable)).toBe(false);
+    });
+
+    defineAugmentSpec(Renderable, function() {
+	return augmentable;
+    });
+
+    it('Should not have a non-function render', function() {
+	expect(function() { new Renderable({}) }).toThrow();
+    });
+
+    it('Should not have a render unspecified', function() {
+	expect(function() { new Renderable(null) }).toThrow();
+	expect(function() { new Renderable() }).toThrow();
     });
 });

@@ -2,7 +2,7 @@
  * An actor.
  *
  * Throws an exception
- * - if `priority` is not specified
+ * - if `priority` is not a number
  * - or if `act` is not a function
  *
  * @class Actor
@@ -17,11 +17,10 @@
 function Actor(priority, act) {
     var self = this;
 
-    // makes sure that priority is specified
-    if (priority == null) {
+    // verifies arguments
+    if (typeof priority != 'number') {
 	throw "priority must be specified"
     }
-    // makes sure that act is a function
     if (typeof act != "function") {
 	throw "act must be a function";
     }

@@ -1,56 +1,59 @@
 /**
- * Provides a geometry in the game.
- *
- * @module geometry
- */
-
-/**
  * A located object which has a location (`x`, `y`).
+ *
+ * Throws an exception
+ * - if `x` is not a number
+ * - or if `y` is not a number
  *
  * @class Located
  * @constructor
- * @param x {Number}
+ * @param x {number}
  *     The x-coordinate value of the initial location.
- * @param y {Number}
+ * @param y {number}
  *     The y-coordinate value of the initial location.
  */
 function Located(x, y) {
     var self = this;
 
+    // verifies arguments
+    if (typeof x != 'number') {
+	throw 'x must be a number';
+    }
+    if (typeof y != 'number') {
+	throw 'y must be a number';
+    }
+
     /**
      * The x-coordinate value of the location.
      *
+     * Do not set this property to a non-number.
+     *
      * @property x
-     * @type {Number}
+     * @type {number}
      */
-    var _x = x;
-    Object.defineProperty(self, "x", {
-	configurable: true,
-	get: function() { return _x; },
-	set: function(x) { _x = x; }
-    });
+    self.x = x;
 
     /**
      * The y-coordinate value of the location.
      *
+     * Do not set this property to a non-number.
+     *
      * @property y
-     * @type {Number}
+     * @type {number}
      */
-    var _y = y;
-    Object.defineProperty(self, "y", {
-	configurable: true,
-	get: function() { return _y; },
-	set: function(y) { _y = y; }
-    });
+    self.y = y;
 }
 
 /**
  * Locates at another location.
  *
+ * NOTE: never checks if `x` and `y` is a number because location will
+ *       frequently be updated.
+ *
  * @method locate
- * @param x {Number}
+ * @param x {number}
  *     The x-coordinate value of the new location.
- * @param y {Number}
+ * @param y {number}
  *     The y-coordinate value of the new location.
  * @chainable
  */
@@ -61,67 +64,64 @@ Located.prototype.locate = function(x, y) {
 };
 
 /**
- * Returns the location as a two dimensional array like `[x, y]`.
+ * Returns whether a specified object is a `Located`.
  *
- * @method xy
- * @return {[Number, Number]}  The location of this `Located`.
- */
-Located.prototype.xy = function() {
-    return [this.x, this.y];
-};
-
-/**
- * Returns whether the specified object is a `Located`.
- *
- * A `Located` has the following properties.
- * - x
- * - y
- * - xy: Function
- * - locate: Function
+ * A `Located` must have the following properties.
+ * - x: number
+ * - y: number
+ * - locate: function
  *
  * @method isClassOf
  * @static
- * @param obj {Object}
+ * @param obj {object}
  *     The object to be tested.
- * @return {Boolean}
- *     Whether `obj` is a `Located`. `false` if `obj` isn't specified.
+ * @return {boolean}
+ *     Whether `obj` is a `Located`. `false` if `obj` is not specified.
  */
 Located.isClassOf = function(obj) {
     return (obj != null) &&
-	(obj.x != null) &&
-	(obj.y != null) &&
-	(typeof obj.xy == 'function') &&
+	(typeof obj.x == 'number') &&
+	(typeof obj.y == 'number') &&
 	(typeof obj.locate == 'function');
 };
 
 /**
- * Returns whether the specified object can be a `Located`.
+ * Returns whether a specified object can be a `Located`.
  *
  * An object which has all of the following properties can be a `Located`.
- * - x
- * - y
+ * - x: number
+ * - y: number
  *
  * @method canAugment
  * @static
- * @param obj {Object}
+ * @param obj {object}
  *     The object to be tested.
  * @return {Boolean}
- *     Whether `obj` can be a `Located`. `false` if `obj` isn't specified.
+ *     Whether `obj` can be a `Located`. `false` if `obj` is not specified.
  */
 Located.canAugment = function(obj) {
-    return (obj != null) && (obj.x != null) && (obj.y != null);
+    return (obj != null) &&
+	(typeof obj.x == 'number') &&
+	(typeof obj.y == 'number');
 };
 
 /**
- * Augments the specified object with functionalities of the `Located`.
+ * Augments a specified object with features of the `Located`.
  *
- * Overwrites the following property.
- * - xy
+ * The following property of `obj` will be overwritten.
  * - locate
  *
- * @param obj {Object}
- *     The object to be wrapped with `Located`.
- * @return {Object}  `obj`.
+ * Throws an exception if `obj` is not specified.
+ *
+ * Never checks if `obj` actually can be a `Located` because this method may be
+ * applied to incomplete objects; i.e., prototypes.
+ *
+ * @method augment
+ * @static
+ * @param obj {object}
+ *     The object to be augmented.
+ * @return {object}
+ *     `obj`.
  */
 Located.augment = function(obj) {
     for (prop in Located.prototype) {

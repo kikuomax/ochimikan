@@ -1,18 +1,13 @@
 /**
- * Defines the render system.
- *
- * @module renders
- */
-
-/**
  * The interface of a renderable object.
  *
  * Throws an exception if `render` isn't a function.
  *
  * @class Renderable
  * @constructor
- * @param render {Function(Context)}
+ * @param render {function}
  *     The rendering function which performs rendering in a specified context.
+ *     Takes a canvas context.
  */
 function Renderable(render) {
     var self = this;
@@ -26,25 +21,64 @@ function Renderable(render) {
      * Renders this `Renderable`.
      *
      * @method render
-     * @param context {Context}
+     * @param context {canvas context}
      *     The context in which the rendering is to be performed.
      */
     self.render = render;
 }
 
 /**
- * Returns whether the specified object is a `Renderable`.
+ * Returns whether a specified object is a `Renderable`.
  *
  * A `Renderable` must have the following property.
- * - render: Function 
+ * - render: function 
  *
  * @method isClassOf
  * @static
- * @param obj {Object}
+ * @param obj {object}
  *     The object to be tested.
- * @return {Boolean}
- *     Whether `obj` is a `Renderable`. `false` if `obj` isn't specified.
+ * @return {boolean}
+ *     Whether `obj` is a `Renderable`. `false` if `obj` is not specified.
  */
 Renderable.isClassOf = function(obj) {
     return (obj != null) && (typeof obj.render == "function");
+};
+
+/**
+ * Returns whether a specified object can be a `Renderable`.
+ *
+ * An object which has the following property can be a `Renderable`.
+ * - render: function
+ *
+ * @method canAugment
+ * @static
+ * @param obj {object}
+ *     The object to be tested.
+ * @return {boolean}
+ *     Whether `obj` can be a `Renderable`. `false` if `obj` is not specified.
+ */
+Renderable.canAugment = function(obj) {
+    return (obj != null) && (typeof obj.render == 'function');
+};
+
+/**
+ * Augments a specified object with features of the `Renderable`.
+ *
+ * Throws an exception if `obj` is not specified.
+ *
+ * Never checks if `obj` can actually be a `Renderable` because this method may
+ * be applied to incomplete objects; i.e., prototypes.
+ *
+ * @method augment
+ * @static
+ * @param obj {object}
+ *     The object to be augmented.
+ * @return {object}
+ *     `obj`.
+ */
+Renderable.augment = function(obj) {
+    if (obj == null) {
+	throw 'obj must be specified';
+    }
+    return obj;
 };

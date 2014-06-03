@@ -12,11 +12,6 @@ describe('ActorScheduler', function() {
 	};
     });
 
-    it('Should have an empty actor queue', function() {
-	var scheduler = new ActorScheduler();
-	expect(scheduler.actorQueue.length).toBe(0);
-    });
-
     it('Should be an ActorScheduler', function() {
 	var scheduler = new ActorScheduler();
 	expect(ActorScheduler.isClassOf(scheduler)).toBe(true);
@@ -74,13 +69,13 @@ describe('ActorScheduler', function() {
 	expect(function() { scheduler.schedule() }).toThrow();
     });
 
-    it('Can run even if it is empty', function() {
+    it('Can run even if no Actor is scheduled', function() {
 	var scheduler = new ActorScheduler();
 	expect(function() { scheduler.run() }).not.toThrow();
     });
 });
 
-describe('ActorScheduler running Actors:', function() {
+describe('ActorScheduler working with Actors:', function() {
     var act1, act2, act3;
     var scheduler;
 
@@ -91,21 +86,14 @@ describe('ActorScheduler running Actors:', function() {
 	scheduler = new ActorScheduler();
     });
 
-    afterEach(function() {
-	act1 = undefined;
-	act2 = undefined;
-	act3 = undefined;
-	scheduler = undefined;
-    });
-
-    it('Actor scheduler should run a scheduled actor and delete it from the queue. priority = 0', function() {
+    it('Should run a scheduled Actor and delete it from the queue. priority = 0', function() {
 	scheduler.schedule(new Actor(0, act1));
 	scheduler.run();
 	expect(act1).toHaveBeenCalledWith(scheduler);
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = 0, 0, 0', function() {
+    it('Should run scheduled Actors and delete them from the queue. priorities = 0, 0, 0', function() {
 	scheduler.schedule(new Actor(0, act1));
 	scheduler.schedule(new Actor(0, act2));
 	scheduler.schedule(new Actor(0, act3));
@@ -116,7 +104,7 @@ describe('ActorScheduler running Actors:', function() {
 	expect(scheduler.actorQueue.length).toBe(0);
     });
 
-    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = 1, 2, 1', function() {
+    it('Should run scheduled Actors and delete them from the queue. priorities = 1, 2, 1', function() {
 	var leftActor;
 	scheduler.schedule(new Actor(1, act1));
 	scheduler.schedule(leftActor = new Actor(2, act2));
@@ -127,7 +115,7 @@ describe('ActorScheduler running Actors:', function() {
 	expect(scheduler.actorQueue).toEqual([leftActor]);
     });
 
-    it('Actor scheduler should run scheduled actors and delete them from the queue. priorities = -1, 0, 1', function() {
+    it('Should run scheduled Actors and delete them from the queue. priorities = -1, 0, 1', function() {
 	var leftActor;
 	scheduler.schedule(new Actor(-1, act1));
 	scheduler.schedule(new Actor(0, act2));

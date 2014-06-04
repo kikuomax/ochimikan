@@ -8,6 +8,7 @@ linkMikanSources([
     "./src/resources.js",
     "./src/ActorPriorities.js",
     "./src/Mikan.js",
+    "./src/Spray.js",
     "./src/MikanBox.js",
     "./src/Scene.js",
     "./src/Game.js"

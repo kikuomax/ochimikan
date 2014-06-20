@@ -1,23 +1,9 @@
 /**
- * Provides the instance of the game.
- *
- * # Use Cases
- *
- * ## Booting the game
- *
- * 1. A document is given.
- * 1. A user asks the `Game` to start.
- * 1. The game is associated with the document and runs on it.
- *
- * @module game
- */
-
-/**
  * The instance of the game.
  *
- * # Scenarios
+ * ## Scenarios
  *
- * ## Starting the game
+ * ### Starting the game
  *
  * 1. A document is given.
  * 1. The `Game` locates an element (canvas) in the document
@@ -37,14 +23,15 @@ function Game() {}
 /**
  * Starts the game.
  *
- * Throws an exception if there's no element whose ID is `CANVAS_ID`
+ * Throws an exception if there's no element whose ID is `CANVAS_ID`.
  *
  * @method start
+ * @static
  */
 Game.start = function() {
     // locates the canvas
     var canvas = document.getElementById(Game.CANVAS_ID);
-    if (canvas === null) {
+    if (canvas == null) {
 	throw 'Document must have a canvas';
     }
     // loads the resources
@@ -69,16 +56,18 @@ Game.start = function() {
  *
  * @property CANVAS_ID
  * @type {String}
+ * @static
  * @final
  */
 Object.defineProperty(Game, 'CANVAS_ID', { value: 'mikanCanvas' });
 
 /**
- * The interval between frames.
+ * The interval between frames (in milliseconds).
  *
  * `FRAME_INTERVAL = 50`
  *
  * @property FRAME_INTERVAL
+ * @static
  * @type {Number}
  * @final
  */

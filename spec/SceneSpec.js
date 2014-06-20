@@ -40,7 +40,8 @@ describe('Scene without a canvas', function() {
 
     it(':mikanController should schedule itself', function() {
 	var scene = new Scene();
-	scene.run().run();
+	scene.run();
+	scene.run();
 	expect(scene.actorQueue).toContain(scene.mikanController);
     });
 

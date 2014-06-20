@@ -12,37 +12,64 @@
  * - or if `rowCount` <= 0
  * - or if `squareSize` <= 0
  *
- * # Scenarios
+ * ## Scenarios
  *
- * ## Rendering a mikan box
+ * ### Placing a mikan
  *
- * 1. A context is given.
- * 1. A `MikanBox` asks each `Mikan` in it to render the `Mikan` in the context.
+ * 1. A `Mikan` is given.
+ * 1. A `MikanBox` is given.
+ * 1. A user places the `Mikan` somewhere in the `MikanBox`.
+ *
+ * ### Dropping mikans
+ *
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to drop `Mikan`s in it.
+ * 1. The `Mikan`s in the `MikanBox` which are not stable fall towards
+ *    the ground.
+ *
+ * ### Erasing mikans
+ *
+ * 1. A `MikanBox` is given.
+ * 1. A user asks the `MikanBox` to chain and erase `Mikan`s in it
+ *    which are maximally damaged.
+ * 1. The chained `Mikan`s explode with `Spray`s.
+ * 1. The explosion spoils surrounding `Mikan`s.
+ * 1. Unstable `Mikan`s remaining in the `MikanBox` fall towards the ground.
  *
  * @class MikanBox
  * @constructor
- * @extends Renderable
- * @param columnCount {Number}
- *     The number of columns in the mikan box. Any float value will be floored.
- * @param rowCount {Number}
- *     The number of rows in the mikan box. Any float value will be floored.
- * @param squareSize {Number}
+ * @uses Renderable
+ * @param columnCount {number}
+ *     The number of columns in the mikan box.
+ * @param rowCount {number}
+ *     The number of rows in the mikan box.
+ * @param squareSize {number}
  *     The size (in pixels) of each square in the mikan box.
  */
 function MikanBox(columnCount, rowCount, squareSize) {
     var self = this;
 
-    // makes sure that columnCount > 0
+    // a table to access surrounding location.
+    var SURROUNDINGS = [
+	[-1, -1], [0, -1], [1, -1],
+	[-1,  0],          [1,  0],
+	[-1,  1], [0,  1], [1,  1]
+    ];
+    // a unit velocities of spreading sprays.
+    var VELOCITIES = SURROUNDINGS.map(function(v) {
+	norm = Math.sqrt(v[0]*v[0] + v[1]*v[1]);
+	return [ v[0]/norm, v[1]/norm ]
+    });
+
+    // verifies arguments
     if (columnCount <= 0) {
-	throw "columnCount must be > 0 but " + columnCount;
+	throw 'columnCount must be > 0 but ' + columnCount;
     }
-    // makes sure that rowCount > 0
     if (rowCount <= 0) {
-	throw "rowCount must be > 0 but " + rowCount;
+	throw 'rowCount must be > 0 but ' + rowCount;
     }
-    // makes sure that squareSize > 0
     if (squareSize <= 0) {
-	throw "squareSize must be > 0 but " + squareSize;
+	throw 'squareSize must be > 0 but ' + squareSize;
     }
 
     // floors the parameters
@@ -50,7 +77,15 @@ function MikanBox(columnCount, rowCount, squareSize) {
     rowCount = Math.floor(rowCount);
     squareSize = Math.floor(squareSize);
 
-    // makes mikan box renderable
+    /**
+     * Renders this mikan box.
+     *
+     * Renders each mikan in this mikan box.
+     *
+     * @method render
+     * @param context {canvas context}
+     *     The context in which this mikan box is rendered.
+     */
     Renderable.call(self, function(context) {
 	mikanGrid.forEach(function(mikan) {
 	    if (mikan !== null) {
@@ -69,7 +104,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * The number of columns in this mikan box.
      *
      * @property columnCount
-     * @type {Number}
+     * @type {number}
      * @final
      */
     Object.defineProperty(self, 'columnCount', { value: columnCount });
@@ -78,7 +113,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * The number of rows in this mikan box.
      *
      * @property rowCount
-     * @type {Number}
+     * @type {number}
      * @final
      */
     Object.defineProperty(self, 'rowCount', { value: rowCount });
@@ -87,7 +122,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * The size (in pixels) of each square in this mikan box.
      *
      * @property squareSize
-     * @type {Number}
+     * @type {number}
      * @final
      */
     Object.defineProperty(self, 'squareSize', { value: squareSize });
@@ -96,7 +131,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * The width (in pixels) of this mikan box.
      *
      * @property width
-     * @type {Number}
+     * @type {number}
      * @final
      */
     Object.defineProperty(self, 'width', { value: columnCount * squareSize });
@@ -105,7 +140,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * The height (in pixels) of this mikan box.
      *
      * @property height
-     * @type {Number}
+     * @type {number}
      * @final
      */
     Object.defineProperty(self, 'height', { value: rowCount * squareSize });
@@ -114,13 +149,13 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * Returns the mikan in the specified square in this mikan box.
      *
      * Throws an exception
-     * - if `column < 0` or `column >= columnCount`
-     * - or if `row < 0` or `row >= rowCount`
+     * - if `column` < 0 or `column` >= `columnCount`
+     * - or if `row` < 0 or `row` >= `rowCount`
      *
      * @method mikanAt
-     * @param column {Number}
+     * @param column {number}
      *     The column of the square from which a mikan is to be obtained.
-     * @param row {Number}
+     * @param row {number}
      *     The row of the square from which a mikan is to be obtained.
      * @return {Mikan}
      *     The mikan at (`column`, `row`). `null` if no mikan is in the square.
@@ -144,9 +179,9 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * @method place
      * @param mikan {Mikan}
      *     The mikan to be placed.
-     * @param column {Number}
+     * @param column {number}
      *     The column of the square in which the mikan is to be placed.
-     * @param row {Number}
+     * @param row {number}
      *     The row of the square in which the mikan is to be placed.
      */
     self.place = function(mikan, column, row) {
@@ -157,7 +192,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
 	    throw "square [" + column + ", " + row + "] isn't vacant";
 	}
 	mikanGrid[idx] = mikan;
-	mikan.locate(column * squareSize, (rowCount - row - 1) * squareSize);
+	mikan.locate(columnToX(column), rowToY(row));
     };
 
     /**
@@ -197,15 +232,17 @@ function MikanBox(columnCount, rowCount, squareSize) {
     /**
      * Erases chained mikans in this box.
      *
-     * Collects chained mikans and
-     * 1. For each mikan chain whose length >= `MikanBox.CHAIN_LENGTH`.
+     * ## Behavior
+     *
+     * 1. Collects chained mikans.
+     * 1. For each mikan chain
      *    1. Erases mikans composing the chain.
      *    1. Creates sprays spreading (in 8 directions) from the chained mikans
      *       and schedules them in `scheduler`.
-     *    1. Creates an actor which spoils mikans surrounding the chained mikans
-     *       and schedules it in `scheduler` (ActorPriorities.SPOIL).
-     *    1. Creates an actor which drops mikans and schedules it in `scheduler`
-     *       (ActorPriorities.DROP).
+     * 1. Creates an actor which spoils mikans surrounding the chained mikans
+     *    and schedules it in `scheduler` (ActorPriorities.SPOIL).
+     * 1. Creates an actor which drops mikans and schedules it in `scheduler`
+     *    (ActorPriorities.DROP).
      *
      * @method eraseMikans
      * @param scheduler {ActorScheduler}
@@ -268,15 +305,91 @@ function MikanBox(columnCount, rowCount, squareSize) {
     };
 
     /**
+     * Creates and schedules `Spray`s spreading from specified chains.
+     *
+     * Creates and schedules `Spray`s spreading, toward 8 directions, from each
+     * mikan composing `chains`.
+     *
+     * @method scheduleSprays
+     * @param chains {Array}
+     *     The array of chains from which sprays spread.
+     *     Each element is an array of [column, row] locations.
+     * @param scheduler {ActorScheduler}
+     *     The `ActorScheduler` in which `Spray`s are to be scheduled.
+     */
+    self.scheduleSprays = function(chains, scheduler) {
+	chains.forEach(function(c) {
+	    c.forEach(function(loc) {
+		VELOCITIES.forEach(function(v) {
+		    var x = columnToX(loc[0]);
+		    var y = rowToY(loc[1]);
+		    scheduler.schedule(new Spray(x, y, v[0], v[1], 15));
+		});
+	    });
+	});
+    };
+
+    /**
+     * Creates an `Actor` which spoils mikans surrounding specified chains.
+     *
+     * A spoiler `Actor` has the following properites,
+     * - priority = SPOIL
+     * - targets:
+     *   The array of squares (column, row) to be spoiled.
+     *   Surrounding squares of `chains`.
+     *
+     * @method scheduleSpoiler
+     * @param chains {Array}
+     *     The array of chains whose surrounding mikans are to be spoiled.
+     *     Each element is an array of [column, row] locations.
+     * @param scheduler {ActorScheduler}
+     *     The `ActorScheduler` in which the spoiler `Actor` is to be scheduled.
+     */
+    self.scheduleSpoiler = function(chains, scheduler) {
+	var targets = [];
+	var spoilMap = new Array(columnCount * rowCount);
+	// never spoils chains
+	chains.forEach(function(chain) {
+	    chain.forEach(function(loc) {
+		spoilMap[indexOf(loc[0], loc[1])] = true;
+	    });
+	});
+	// spoils surrounding mikans
+	chains.forEach(function(chain) {
+	    chain.forEach(function(loc) {
+		SURROUNDINGS.forEach(function(d) {
+		    var c = loc[0] + d[0];
+		    var r = loc[1] + d[1];
+		    if (0 <= c && c < columnCount &&
+			0 <= r && r < rowCount)
+		    {
+			var idx = indexOf(c, r);
+			if (!spoilMap[idx]) {
+			    targets.push([c, r]);
+			    spoilMap[idx] = true;
+			}
+		    }
+		});
+	    });
+	});
+	scheduler.schedule(Actor.augment({
+	    priority: ActorPriorities.SPOIL,
+	    act: function() {},
+	    targets: targets
+	}));
+    };
+
+    /**
      * Returns the index of the specified square.
      *
      * @method indexOf
      * @private
-     * @param column {Number}
+     * @param column {number}
      *     The column of the square.
-     * @param row {Number}
+     * @param row {number}
      *     The row of the square.
-     * @return {Number}  The index of the square (`column`, `row`).
+     * @return {number}
+     *     The index of the square (`column`, `row`).
      */
     function indexOf(column, row) {
 	return row + (column * rowCount);
@@ -286,16 +399,17 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * Returns whether the specified column and row are valid.
      *
      * A valid square is
-     * - `0 <= column < columnCount`
-     * - `0 <= row < rowCount`
+     * - 0 <= `column` < `columnCount`
+     * - 0 <= `row` < `rowCount`
      *
      * @method isValidSquare
      * @private
-     * @param column {Number}
+     * @param column {number}
      *     The column to be tested.
-     * @param row {Number}
+     * @param row {number}
      *     The row to be tested.
-     * @return {Boolean}  Whether (`column`, `row`) is a valid square.
+     * @return {boolean}
+     *     Whether (`column`, `row`) is a valid square.
      */
     function isValidSquare(column, row) {
 	return (column >= 0) && (column < columnCount) && (row >= 0) && (row < rowCount)
@@ -305,14 +419,14 @@ function MikanBox(columnCount, rowCount, squareSize) {
      * Checks if the specified column and row are valid.
      *
      * Throws an exception
-     * - if `column < 0` or `column >= columnCount`
-     * - or if `row < 0` or `row >= rowCount`
+     * - if `column` < 0 or `column` >= `columnCount`
+     * - or if `row` < 0 or `row` >= `rowCount`
      *
      * @method checkSquare
      * @private
-     * @param column {Number}
+     * @param column {number}
      *     The column to be tested.
-     * @param row {Number}
+     * @param row {number}
      *     The row to be tested.
      */
     function checkSquare(column, row) {
@@ -325,13 +439,41 @@ function MikanBox(columnCount, rowCount, squareSize) {
     }
 
     /**
+     * Returns the left location of a specified column.
+     *
+     * @method columnToX
+     * @param column {number}
+     *     The column to be converted.
+     * @return {number}
+     *     The left location of the column.
+     * @private
+     */
+    function columnToX(column) {
+	return column * squareSize;
+    }
+
+    /**
+     * Returns the top location of a specified row.
+     *
+     * @method rowToY
+     * @param row {number}
+     *     The row to be converted.
+     * @return {number}
+     *     The top location of the row.
+     * @private
+     */
+    function rowToY(row) {
+	return (rowCount - row - 1) * squareSize;
+    }
+
+    /**
      * Returns whether the specified mikan is maximally damaged.
      *
      * @method isMaxDamaged
      * @private
      * @param mikan {Mikan}
      *     The mikan to be tested.
-     * @return {Boolean}
+     * @return {boolean}
      *     Whether `mikan` has `damage=Mikan.MAX_DAMAGE`.
      *     `false` if `mikan` is `null` or `undefined`.
      */
@@ -346,7 +488,7 @@ function MikanBox(columnCount, rowCount, squareSize) {
  * `CHAIN_LENGTH = 4`
  *
  * @property CHAIN_LENGTH
- * @type {Number}
+ * @type {number}
  * @final
  */
 Object.defineProperty(MikanBox, 'CHAIN_LENGTH', { value: 4 });

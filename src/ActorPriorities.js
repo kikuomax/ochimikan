@@ -1,7 +1,7 @@
 /**
  * Defines priorities of actors.
  *
- * `SPRAY` < `MOVE` < `CONTROL` < `SPAWN`
+ * `SPRAY` < `SPOIL` < `MOVE` < `CONTROL` < `SPAWN`
  *
  * @class ActorPriorities
  * @static
@@ -16,13 +16,21 @@ const ActorPriorities = {
      */
     SPRAY: 0,
     /**
+     * A priority of actors which spoil mikans.
+     *
+     * @property SPOIL
+     * @type number
+     * @final
+     */
+    SPOIL: 1,
+    /**
      * A priority of actors which drop mikans.
      *
      * @property MOVE
      * @type number
      * @final
      */
-    MOVE: 1,
+    MOVE: 2,
     /**
      * A priority of an actor which controls mikans.
      *
@@ -30,7 +38,7 @@ const ActorPriorities = {
      * @type number
      * @final
      */
-    CONTROL: 2,
+    CONTROL: 3,
     /**
      * A priority of an actor which spawns mikans.
      *
@@ -38,5 +46,5 @@ const ActorPriorities = {
      * @type number
      * @final
      */
-    SPAWN: 3
+    SPAWN: 4
 };

@@ -14,11 +14,11 @@
   <!-- include source files here... -->
   <script type="text/javascript">
     function addScript(url) {
-        document.write('\u003cscript type="text/javascript" src="' + url + '"\u003e\u003c/scr' + 'ipt\u003e');
+        document.write('\u003cscript type="text/javascript" src="' + url + '"\u003e\u003c/script\u003e');
     }
     function linkMikanSources(filenames) {
-        filenames.forEach(function(fn) {
-            addScript('../' + fn);
+        filenames.forEach(function(name) {
+            addScript('../' + name);
         });
     }
     addScript('../build/sources.js');
@@ -30,12 +30,14 @@
 
   <!-- include spec files here... -->
   <script type="text/javascript" src="util/SearchSpec.js"></script>
+  <script type="text/javascript" src="util/PropertiesSpec.js"></script>
+  <script type="text/javascript" src="ResourceManagerSpec.js"></script>
   <script type="text/javascript" src="SpriteSpec.js"></script>
+  <script type="text/javascript" src="ResourcesSpec.js"></script>
   <script type="text/javascript" src="RenderableSpec.js"></script>
   <script type="text/javascript" src="ActorSpec.js"></script>
   <script type="text/javascript" src="ActorSchedulerSpec.js"></script>
   <script type="text/javascript" src="LocatedSpec.js"></script>
-  <script type="text/javascript" src="ResourcesSpec.js"></script>
   <script type="text/javascript" src="ActorPrioritiesSpec.js"></script>
   <script type="text/javascript" src="MikanSpec.js"></script>
   <script type="text/javascript" src="SpraySpec.js"></script>

@@ -23,43 +23,31 @@ function Game() {}
 /**
  * Starts the game.
  *
- * Throws an exception if there's no element whose ID is `CANVAS_ID`.
+ * Throws an exception
+ * - if `canvas` is not a `GameCanvas`
+ * - or if `resourceManager` is not a `ResourceManager`
  *
  * @method start
  * @static
+ * @param canvas {GameCanvas}
+ *     The `GameCanvas` on which the game runs.
+ * @param resourceManager {ResourceManager}
+ *     The `ResouceManager` which resolves resources.
  */
-Game.start = function() {
-    // locates the canvas
-    var canvas = document.getElementById(Game.CANVAS_ID);
-    if (canvas == null) {
-	throw 'Document must have a canvas';
-    }
-    // loads the resources
-    Resources.loadSprites();
-    // creates a Scene associated with the canvas
-    var scene = new Scene();
-    canvas.width = scene.width;
-    canvas.height = scene.height;
-    scene.canvas = canvas;
-    // runs the game
-    window.setInterval(function() {
-	// runs and renders a frame
-	scene.run();
-	scene.render();
-    }, Game.FRAME_INTERVAL);
+Game.start = function (canvas, resourceManager) {
+	// loads the resources
+	Resources.loadSprites(resourceManager);
+	// creates a Scene associated with the canvas
+	var scene = new Scene(canvas);
+	canvas.width = scene.width;
+	canvas.height = scene.height;
+	// runs the game
+	window.setInterval(function () {
+		// runs and renders a frame
+		scene.run();
+		scene.render();
+	}, Game.FRAME_INTERVAL);
 };
-
-/**
- * The ID of a canvas to be associated with the game.
- *
- * `CANVAS_ID = mikanCanvas`
- *
- * @property CANVAS_ID
- * @type {String}
- * @static
- * @final
- */
-Object.defineProperty(Game, 'CANVAS_ID', { value: 'mikanCanvas' });
 
 /**
  * The interval between frames (in milliseconds).
@@ -68,7 +56,7 @@ Object.defineProperty(Game, 'CANVAS_ID', { value: 'mikanCanvas' });
  *
  * @property FRAME_INTERVAL
  * @static
- * @type {Number}
+ * @type {number}
  * @final
  */
 Object.defineProperty(Game, 'FRAME_INTERVAL', { value: 50 });

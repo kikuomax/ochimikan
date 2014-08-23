@@ -1,0 +1,54 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="../dist/mikan.debug.js"></script>
+  <script type="text/javascript">
+    function SpecResourceManager() {
+        var self = this;
+
+        ResourceManager.call(self);
+
+        Properties.override(self, 'loadImage', function (path) {
+            return self.loadImage._super('../dist/' + path);
+        });
+    }
+    ResourceManager.augment(SpecResourceManager.prototype);
+
+    var directionListeners = [];
+    function TestCanvas() {}
+    TestCanvas.augment = function(canvas) {
+        canvas.addDirectionListener = function(listener) {
+            directionListeners.push(listener);
+        };
+        canvas.removeDirectionListener = function(listener) {
+            var idx = directionListeners.indexOf(listener);
+            if (idx != -1) {
+                directionListener.splice(idx, 1);
+            }
+        };
+        return canvas;
+    };
+
+    function startGame() {
+        var canvas = document.getElementById('mikanCanvas');
+        TestCanvas.augment(canvas);
+        Game.start(canvas, new SpecResourceManager());
+        window.setInterval(function() {
+            var directionId = Math.floor(4 * Math.random());
+            var direction = [
+                'moveLeft', 'moveRight',
+                'rotateClockwise', 'rotateCounterClockwise'
+            ][directionId];
+            directionListeners.forEach(function(listener) {
+                listener[direction](canvas);
+            });
+        }, 10);
+    }
+  </script>
+  <title>落ちみかん(セレンディピティ)</title>
+</head>
+<body onload="startGame()">
+  <canvas id="mikanCanvas">
+  </canvas>
+</body>
+</html>

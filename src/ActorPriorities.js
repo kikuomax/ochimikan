@@ -1,7 +1,7 @@
 /**
  * Defines priorities of actors.
  *
- * `SPRAY` < `SPOIL` < `DROP` < `MOVE` < `ERASE` < `CONTROL` < `SPAWN`
+ * `SPRAY` < `SPOIL` < `DROP` < `FALL` < `ERASE` < `CONTROL` < `SPAWN`
  *
  * @class ActorPriorities
  * @static
@@ -34,11 +34,11 @@ const ActorPriorities = {
     /**
      * A priority of falling mikans.
      *
-     * @property MOVE
+     * @property FALL
      * @type number
      * @final
      */
-    MOVE: 3,
+    FALL: 3,
 	/**
 	 * A priority of actors which erase mikans.
 	 *

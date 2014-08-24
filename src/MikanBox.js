@@ -236,7 +236,7 @@ MikanBox = (function () {
 		 *     the ground,
 		 *     1. Releases the mikan from this mikan box.
 		 *     2. Makes the mikan an actor which moves toward the ground
-		 *        (ActorPriorities.MOVE).
+		 *        (ActorPriorities.FALL).
 		 *     3. Schedules the mikan in `scheduler`.
 		 *
 		 * @method scheduleToDrop
@@ -298,7 +298,7 @@ MikanBox = (function () {
 						});
 					});
 					// sprays
-					self.createSprays(chains, scheduler);
+					self.scheduleSprays(chains, scheduler);
 					// schedules to spoil mikans
 					self.scheduleToSpoil(chains, scheduler);
 					// schedules to drop mikans
@@ -370,14 +370,14 @@ MikanBox = (function () {
 		 * Creates and schedules `Spray`s spreading, toward 8 directions,
 		 * from each mikan composing `chains`.
 		 *
-		 * @method createSprays
+		 * @method scheduleSprays
 		 * @param chains {Array}
 		 *     The array of chains from which sprays spread.
 		 *     Each element is an array of [column, row] locations.
 		 * @param scheduler {ActorScheduler}
 		 *     The `ActorScheduler` in which `Spray`s are to be scheduled.
 		 */
-		self.createSprays = function (chains, scheduler) {
+		self.scheduleSprays = function (chains, scheduler) {
 			chains.forEach(function (c) {
 				c.forEach(function (loc) {
 					VELOCITIES.forEach(function (v) {
@@ -577,7 +577,7 @@ MikanBox = (function () {
 		 *     `mikan` as an Actor.
 		 */
 		function makeFall(mikan, dstRow) {
-			Actor.call(mikan, ActorPriorities.MOVE, function (scheduler) {
+			Actor.call(mikan, ActorPriorities.FALL, function (scheduler) {
 				var bottom = mikan.y + 10 + squareSize - 1;
 				var bottomRow = self.rowAt(bottom);
 				if (bottomRow >= dstRow) {

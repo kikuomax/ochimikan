@@ -107,7 +107,7 @@ describe('Spray working with ActorScheduler', function () {
 		expect(spray.x).toEqual(0);
 		expect(spray.y).toEqual(0);
 		expect(spray.frameIndex).toBe(0);
-		// another spray
+		// ttl < 0
 		spray = new Spray(0, 0, 2, 2, -1);
 		spray.act(scheduler);
 		expect(scheduler.schedule).not.toHaveBeenCalled();

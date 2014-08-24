@@ -192,7 +192,7 @@ describe('MikanBox dropping Mikans:', function () {
 		scheduler.run();
 		expect(scheduler.schedule).toHaveBeenCalledWith(mikan1);
 		expect(Actor.isClassOf(mikan1)).toBe(true);
-		expect(mikan1.priority).toBe(ActorPriorities.MOVE);
+		expect(mikan1.priority).toBe(ActorPriorities.FALL);
 		expect(mikanBox.mikanAt(0, 1)).toBeNull();
 	});
 
@@ -227,9 +227,9 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(Actor.isClassOf(mikan1)).toBe(true);
 		expect(Actor.isClassOf(mikan2)).toBe(true);
 		expect(Actor.isClassOf(mikan3)).toBe(true);
-		expect(mikan1.priority).toBe(ActorPriorities.MOVE);
-		expect(mikan2.priority).toBe(ActorPriorities.MOVE);
-		expect(mikan3.priority).toBe(ActorPriorities.MOVE);
+		expect(mikan1.priority).toBe(ActorPriorities.FALL);
+		expect(mikan2.priority).toBe(ActorPriorities.FALL);
+		expect(mikan3.priority).toBe(ActorPriorities.FALL);
 		expect(mikanBox.mikanAt(0, 1)).toBeNull();
 		expect(mikanBox.mikanAt(7, 11)).toBeNull();
 		expect(mikanBox.mikanAt(3, 5)).toBeNull();
@@ -256,8 +256,8 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(Actor.isClassOf(mikan1)).toBe(false);
 		expect(Actor.isClassOf(mikan2)).toBe(true);
 		expect(Actor.isClassOf(mikan3)).toBe(true);
-		expect(mikan2.priority).toBe(ActorPriorities.MOVE);
-		expect(mikan3.priority).toBe(ActorPriorities.MOVE);
+		expect(mikan2.priority).toBe(ActorPriorities.FALL);
+		expect(mikan3.priority).toBe(ActorPriorities.FALL);
 		expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
 		expect(mikanBox.mikanAt(0, 2)).toBeNull();
 		expect(mikanBox.mikanAt(0, 3)).toBeNull();
@@ -530,12 +530,12 @@ describe('MikanBox scheduling Sprays', function () {
 		// compares only signs for speeds and never compares ttls
 		jasmine.addCustomEqualityTester(function (lhs, rhs) {
 			if (Actor.isClassOf(lhs) && Actor.isClassOf(rhs)) {
-				if (lhs.priority == ActorPriorities.SPRAY &&
-					rhs.priority == ActorPriorities.SPRAY)
+				if (lhs.priority == ActorPriorities.SPRAY
+					&& rhs.priority == ActorPriorities.SPRAY)
 				{
-					return lhs.x == rhs.x && lhs.y == rhs.y &&
-						sign(lhs.dX) == sign(rhs.dX) &&
-						sign(lhs.dY) == sign(rhs.dY);
+					return lhs.x == rhs.x && lhs.y == rhs.y
+						&& sign(lhs.dX) == sign(rhs.dX)
+						&& sign(lhs.dY) == sign(rhs.dY);
 				}
 			}
 		});
@@ -545,20 +545,17 @@ describe('MikanBox scheduling Sprays', function () {
 		}
 	});
 
-	xit('Should schedule sprays spreading toward 8 directions from each mikan composing a chain', function () {
+	it('Should schedule 8 sprays for a single mikan', function () {
 		// o
 		chains = [ [ [0, 0] ] ];
 		mikanBox.scheduleSprays(chains, scheduler);
 		expect(scheduler.schedule.calls.count()).toBe(8);
-		expect(scheduler.actorQueue.length).toBe(8);
-		for (var i = 0; i < directions.length; ++i) {
-			dX = directions[i][0];
-			dY = directions[i][1];
-			expect(scheduler.actorQueue).toContain(new Spray(0, 11*32, dX, dY, 15));
+		for (var i = 0; i < 8; ++i) {
+			expect(scheduler.schedule.calls.argsFor(i)[0].priority).toBe(ActorPriorities.SPRAY);
 		}
 	});
 
-	xit('Should schedule sprays spreading toward 8 directions from each mikan composing chains', function () {
+	it('Should schedule 24 sprays for 4 mikans', function () {
 		// o . . .
 		// o . o o
 		chains = [
@@ -567,14 +564,8 @@ describe('MikanBox scheduling Sprays', function () {
 		];
 		mikanBox.scheduleSprays(chains, scheduler);
 		expect(scheduler.schedule.calls.count()).toBe(8 * 4);
-		expect(scheduler.actorQueue.length).toBe(8 * 4);
-		for (var i = 0; i < directions.length; ++i) {
-			dX = directions[i][0];
-			dY = directions[i][1];
-			expect(scheduler.actorQueue).toContain(new Spray(0, 11*32, dX, dY, 15));
-			expect(scheduler.actorQueue).toContain(new Spray(0, 10*32, dX, dY, 15));
-			expect(scheduler.actorQueue).toContain(new Spray(2*32, 11*32, dX, dY, 15));
-			expect(scheduler.actorQueue).toContain(new Spray(3*32, 11*32, dX, dY, 15));
+		for (var i = 0; i < 8 * 4; ++i) {
+			expect(scheduler.schedule.calls.argsFor(i)[0].priority).toBe(ActorPriorities.SPRAY);
 		}
 	});
 });
@@ -740,9 +731,9 @@ describe('MikanBox erasing Mikans', function () {
 		waitUntil(ActorPriorities.ERASE);
 	}
 
-	// waits until all of `ActorPriorities.MOVE`s have done
+	// waits until all of `ActorPriorities.FALL`s have done
 	function waitUntilMovesHaveDone() {
-		waitUntil(ActorPriorities.MOVE + 0.1);
+		waitUntil(ActorPriorities.FALL + 0.1);
 	}
 
 	// waits until `ActorPriorities.SPOIL` has done

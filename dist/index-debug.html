@@ -4,22 +4,22 @@
   <script type="text/javascript" src="mikan.debug.js"></script>
   <script type="text/javascript">
     function TestCanvas() {}
-    TestCanvas.augment = function(canvas) {
+    TestCanvas.augment = function (canvas) {
         var directionListeners = [];
-        canvas.addDirectionListener = function(listener) {
+        canvas.addDirectionListener = function (listener) {
             directionListeners.push(listener);
         };
-        canvas.removeDirectionListener = function(listener) {
+        canvas.removeDirectionListener = function (listener) {
             var idx = directionListeners.indexOf(listener);
             if (idx != -1) {
                 directionListener.splice(idx, 1);
             }
         };
 
-        canvas.addEventListener('mousedown', handleStart, false);
-        canvas.addEventListener('mousemove', handleMove, false);
-        canvas.addEventListener('mouseup', handleEnd, false);
-        canvas.addEventListener('mouseleave', handleEnd, false);
+        canvas.addEventListener('mousedown',  handleStart, false);
+        canvas.addEventListener('mousemove',  handleMove,  false);
+        canvas.addEventListener('mouseup',    handleEnd,   false);
+        canvas.addEventListener('mouseleave', handleEnd,   false);
 
         var isDown = false;
         var x, y;
@@ -35,23 +35,29 @@
                 var dY = evt.y - y;
                 var notification;
                 if (Math.abs(dX) > Math.abs(dY)) {
-                    if (dX < 0) {
-                        notification = 'moveLeft';
-                    } else {
-                        notification = 'moveRight';
+                    if (Math.abs(dX) > 15) {
+                        if (dX < 0) {
+                            notification = 'moveLeft';
+                        } else {
+                            notification = 'moveRight';
+                        }
                     }
                 } else {
-                    if (dY < 0) {
-                        notification = 'rotateCounterClockwise';
-                    } else {
-                        notification = 'rotateClockwise';
+                    if (Math.abs(dY) > 30) {
+                        if (dY < 0) {
+                            notification = 'rotateCounterClockwise';
+                        } else {
+                            notification = 'rotateClockwise';
+                        }
                     }
                 }
-                directionListeners.forEach(function(listener) {
-                    listener[notification](canvas);
-                });
-                x = evt.x;
-                y = evt.y;
+                if (notification) {
+                    directionListeners.forEach(function (listener) {
+                        listener[notification](canvas);
+                    });
+                    x = evt.x;
+                    y = evt.y;
+                }
             }
         }
 
@@ -70,7 +76,7 @@
   <title>落ちみかん</title>
 </head>
 <body onload="startGame()">
-  <canvas id="mikanCanvas">
+  <canvas id="mikanCanvas" style="background-image: url('imgs/background.png')">
   </canvas>
 </body>
 </html>

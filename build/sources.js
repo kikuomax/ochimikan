@@ -1,6 +1,7 @@
 linkMikanSources([
 	'src/util/Search.js',
 	'src/util/Properties.js',
+	'src/util/Observable.js',
 	'src/ResourceManager.js',
 	'src/Sprite.js',
 	'src/Resources.js',
@@ -13,6 +14,7 @@ linkMikanSources([
 	'src/Mikan.js',
 	'src/Spray.js',
 	'src/MikanBox.js',
+	'src/Score.js',
 	'src/Scene.js',
 	'src/Game.js'
 ]);

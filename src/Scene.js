@@ -97,12 +97,12 @@ Scene = (function () {
 		 *
 		 * Also is a renderable which renders controlled mikans.
 		 *
-		 * @property controller
+		 * @property gravity
 		 * @type {Actor, Renderable}
 		 * @private
 		 */
 		var speed = 3;
-		var controller = new Actor(ActorPriorities.CONTROL, function (scheduler) {
+		var gravity = new Actor(ActorPriorities.CONTROL, function (scheduler) {
 			// makes sure that the controlled mikan is reaching the bottom
 			var bottom = Math.max(grabbedMikans[0].y, grabbedMikans[1].y);
 			bottom += speed + mikanBox.squareSize - 1;
@@ -138,7 +138,7 @@ Scene = (function () {
 				mikanBox.scheduleToErase(self);
 			}
 		});
-		Renderable.call(controller, function (context) {
+		Renderable.call(gravity, function (context) {
 			grabbedMikans.forEach(function (mikan) {
 				mikan.render(context);
 			});
@@ -206,7 +206,7 @@ Scene = (function () {
 		};
 
 		// Moves grabbed mikans left.
-		function doMoveLeft = function () {
+		function doMoveLeft() {
 			if (grabbedMikans) {
 				// makes sure that the grabbed mikans are not on the left edge
 				var left = Math.min(grabbedMikans[0].x, grabbedMikans[1].x);
@@ -229,7 +229,7 @@ Scene = (function () {
 		};
 
 		// Moves grabbed mikans rights.
-		function doMoveRight = function () {
+		function doMoveRight() {
 			if (grabbedMikans) {
 				// makes sure that the grabbed mikans are not on the right edge
 				var right = Math.max(grabbedMikans[0].x, grabbedMikans[1].x);
@@ -252,12 +252,18 @@ Scene = (function () {
 		};
 
 		// Schedules a specified function as an input Actor.
-		function scheduleInput = function (input) {
-			self.schedule(new Actor(-1, input));
+		function scheduleInput(input) {
+			self.schedule(new Actor(-1, function () {
+				try {
+					input();
+				} catch (err) {
+					console.log(err);
+				}
+			}));
 		};
 
 		// Rotates grabbed mikans clockwise.
-		function doRotateClockwise = function () {
+		function doRotateClockwise() {
 			if (grabbedMikans) {
 				var newRotation = rotation + 1;
 				if (newRotation == 4) {
@@ -268,7 +274,7 @@ Scene = (function () {
 		};
 
 		// Rotates grabbed mikans counter-clockwise.
-		function doRotateCounterClockwise = function () {
+		function doRotateCounterClockwise() {
 			if (grabbedMikans) {
 				var newRotation = rotation - 1;
 				if (newRotation < 0) {

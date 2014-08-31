@@ -1,13 +1,14 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width; initial-scale=1.0">
   <script type="text/javascript" src="libs/jquery-1.11.1.min.js"></script>
   <script type="text/javascript" src="libs/knockout-3.2.0.js"></script>
   <script type="text/javascript" src="mikan.debug.js"></script>
   <script type="text/javascript">
     $(function () {
         function TestCanvas() {}
-        TestCanvas.augment = function (canvas) {
+            TestCanvas.augment = function (canvas) {
             var directionListeners = [];
             canvas.addDirectionListener = function (listener) {
                 directionListeners.push(listener);
@@ -19,21 +20,67 @@
                 }
             };
 
-            canvas.addEventListener('mousedown',  handleStart, false);
-            canvas.addEventListener('mousemove',  handleMove,  false);
-            canvas.addEventListener('mouseup',    handleEnd,   false);
-            canvas.addEventListener('mouseleave', handleEnd,   false);
+            if ('ontouchstart' in document.documentElement) {
+                canvas.addEventListener('touchstart',  handleTouchStart, false);
+                canvas.addEventListener('touchmove',   handleTouchMove,  false);
+                canvas.addEventListener('touchend',    handleTouchEnd,   false);
+                canvas.addEventListener('touchleave',  handleTouchEnd,   false);
+                canvas.addEventListener('touchcancel', handleTouchEnd,   false);
+            } else {
+                canvas.addEventListener('mousedown',  handleStart, false);
+                canvas.addEventListener('mousemove',  handleMove,  false);
+                canvas.addEventListener('mouseup',    handleEnd,   false);
+                canvas.addEventListener('mouseleave', handleEnd,   false);
+            }
 
+            var touchId = -1;
+            function handleTouchStart(evt) {
+                if (touchId === -1) {
+                    var touch = evt.changedTouches[0];
+                    touchId = touch.identifier;
+                    evt.x = touch.pageX;
+                    evt.y = touch.pageY;
+                    handleStart(evt);
+                }
+            }
+
+            function handleTouchMove(evt) {
+                var touches = evt.changedTouches;
+                for (var i = 0; i < touches.length; ++i) {
+                    var touch = touches[i];
+                    if (touch.identifier === touchId) {
+                        evt.x = touch.pageX;
+                        evt.y = touch.pageY;
+                        handleMove(evt);
+                    }
+                }
+            }
+
+            function handleTouchEnd(evt) {
+                var touches = evt.changedTouches;
+                for (var i = 0; i < touches.length; ++i) {
+                    var touch = touches[i];
+                    if (touch.identifier === touchId) {
+                        touchId = -1;
+                        evt.x = touch.pageX;
+                        evt.y = touch.pageY;
+                        handleEnd(evt);
+                    }
+                }
+            }
+ 
             var isDown = false;
             var x, y;
             function handleStart(evt) {
-                isDown = true;
+                evt.preventDefault();
+                isDown = true; 
                 x = evt.x;
                 y = evt.y;
             }
 
             function handleMove(evt) {
                 if (isDown) {
+                    evt.preventDefault();
                     var dX = evt.x - x;
                     var dY = evt.y - y;
                     var notification;
@@ -65,6 +112,7 @@
             }
 
             function handleEnd(evt) {
+                evt.preventDefault();
                 isDown = false;
             }
 

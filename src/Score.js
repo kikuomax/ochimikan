@@ -1,6 +1,14 @@
 /**
  * Score.
  *
+ * Everytime mikans are erased, the score increases. And the amount of increase
+ * is calculated by the following expression,
+ *
+ *     m * Score.getComboScore(c)
+ *
+ *     m: number of erased mikans
+ *     c: number of combos
+ *
  * Event
  * =====
  *
@@ -40,35 +48,80 @@ Score = (function () {
 		self.score = 0;
 
 		/**
+		 * The total number of erased mikans.
+		 *
+		 * Initially 0.
+		 *
+		 * @property erasedMikanCount
+		 * @type {number}
+		 */
+		self.erasedMikanCount = 0;
+
+		/**
+		 * The number of combos.
+		 *
+		 * Initially 0.
+		 *
+		 * @property comboCount
+		 * @type {number}
+		 */
+		self.comboCount = 0;
+
+		/**
 		 * Resets this `Score`.
 		 *
-		 * Sets `score` to 0.
+		 * Resets the following properties to 0,
+		 *  - score
+		 *  - erasedMikanCount
+		 *  - comboCount
 		 *
 		 * Notifies "scoreReset" to the observers.
 		 *
 		 * @method reset
 		 */
 		self.reset = function () {
-			self.score = 0;
+			self.score            = 0;
+			self.erasedMikanCount = 0;
+			self.comboCount       = 0;
 			self.notifyObservers('scoreReset', self);
 		};
 
 		/**
-		 * Adds score to this `Score`.
+		 * Adds the number of erased mikans.
 		 *
-		 * Notifies "scoreUpdated" to the observers unless `amount` is 0.
+		 * Increases the score and notifies "scoreUpdated" to the observers
+		 * unless `count` is 0.
 		 *
-		 * @method addScore
-		 * @param amount {number}
-		 *     The number to be added to this `Score`.
+		 * @method addErasedMikans
+		 * @param count {number}
+		 *     The number of erased mikans to be added.
 		 */
-		self.addScore = function (amount) {
-			if (amount !== 0) {
+		self.addErasedMikans = function (count) {
+			if (count != 0) {
+				self.erasedMikanCount += count;
 				var oldScore = self.score;
-				self.score += amount;
+				self.score += count * Score.getComboScore(self.comboCount);
 				self.notifyObservers('scoreUpdated', self,
 									 oldScore, self.score);
 			}
+		};
+
+		/**
+		 * Increments the number of combos.
+		 *
+		 * @method addCombo
+		 */
+		self.addCombo = function () {
+			++self.comboCount;
+		};
+
+		/**
+		 * Resets the number of combos to 0.
+		 *
+		 * @method resetCombo
+		 */
+		self.resetCombo = function () {
+			self.comboCount = 0;
 		};
 	}
 	Observable.augment(Score.prototype);
@@ -79,11 +132,16 @@ Score = (function () {
 	 * A `Score` must satisfy all of the following conditions,
 	 *  - is an `Observable`
 	 *  - has all of the following properties,
-	 *     - score:    number
-	 *     - addScore: function
-	 *     - reset:    function
+	 *     - score:            number
+	 *     - erasedMikanCount: number
+	 *     - comboCount:       number
+	 *     - reset:            function
+	 *     - addErasedMikans:  function
+	 *     - addCombo:         function
+	 *     - resetCombo:       function
 	 *
 	 * @method isClassOf
+	 * @static
 	 * @param obj {object}
 	 *     The object to be tested.
 	 * @return {boolean}
@@ -91,9 +149,31 @@ Score = (function () {
 	 */
 	Score.isClassOf = function (obj) {
 		return Observable.isClassOf(obj)
-			&& typeof obj.score === 'number'
-			&& typeof obj.reset === 'function'
-			&& typeof obj.addScore === 'function';
+			&& typeof obj.score            === 'number'
+			&& typeof obj.erasedMikanCount === 'number'
+			&& typeof obj.comboCount       === 'number'
+			&& typeof obj.reset            === 'function'
+			&& typeof obj.addErasedMikans  === 'function'
+			&& typeof obj.addCombo         === 'function'
+			&& typeof obj.resetCombo       === 'function';
+	};
+
+	/**
+	 * Returns the score for each of erased mikans at a specified combo count.
+	 *
+	 * The score is calculated by the following expression by default,
+	 *
+	 *     Math.round(10 * Math.pow(1.6, comboCount))
+	 *
+	 * @method getComboScore
+	 * @static
+	 * @param comboCount {number}
+	 *     The number of combos.
+	 * @return {number}
+	 *     The score for each of erased mikans at the current combo.
+	 */
+	Score.getComboScore = function (comboCount) {
+		return Math.round(10 * Math.pow(1.6, comboCount));
 	};
 
 	return Score;

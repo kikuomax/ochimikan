@@ -48,12 +48,14 @@ Game = (function () {
 	 *     The `GameCanvas` on which the game runs.
 	 * @param resourceManager {ResourceManager}
 	 *     The `ResouceManager` which resolves resources.
+	 * @param score {Score}
+	 *     The `Score`.
 	 */
-	Game.start = function (canvas, resourceManager) {
+	Game.start = function (canvas, resourceManager, score) {
 		// loads the resources
 		Resources.loadSprites(resourceManager);
 		// creates a Scene associated with the canvas
-		var scene = new Scene(canvas);
+		var scene = new Scene(canvas, score);
 		canvas.width = scene.width;
 		canvas.height = scene.height;
 		// runs the game

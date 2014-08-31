@@ -3,12 +3,16 @@ describe('Score', function () {
 
 	beforeEach(function () {
 		scoreLike = {
-			score:           0,
-			reset:           function () {},
-			addScore:        function () {},
-			addObserver:     function () {},
-			removeObserver:  function () {},
-			notifyObservers: function () {}
+			score:            0,
+			erasedMikanCount: 0,
+			comboCount:       0,
+			reset:            function () {},
+			addErasedMikans:  function () {},
+			addCombo:         function () {},
+			resetCombo:       function () {},
+			addObserver:      function () {},
+			removeObserver:   function () {},
+			notifyObservers:  function () {}
 		};
 	});
 
@@ -26,6 +30,16 @@ describe('Score', function () {
 		var score = new Score();
 		expect(score.score).toBe(0);
 	});
+	
+	it('Should initially have 0 erased mikans', function () {
+		var score = new Score();
+		expect(score.erasedMikanCount).toBe(0);
+	});
+
+	it('Should initially have 0 combos', function () {
+		var score = new Score();
+		expect(score.comboCount).toBe(0);
+	});
 
 	defineIsClassOfSpec(Score, function () {
 		return scoreLike;
@@ -42,6 +56,20 @@ describe('Score', function () {
 		expect(Score.isClassOf(scoreLike)).toBe(false);
 	});
 
+	it(':isClassOf should be false for an object whose erasedMikanCount is not a number', function () {
+		delete scoreLike.erasedMikanCount;
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+		scoreLike.erasedMikanCount = '0';
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+	});
+
+	it(':isClassOf should be false for an object whose comboCount is not a number', function () {
+		delete scoreLike.comboCount;
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+		scoreLike.comboCount = '0';
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+	});
+
 	it(':isClassOf should be false for an object whose reset is not a function', function () {
 		delete scoreLike.reset;
 		expect(Score.isClassOf(scoreLike)).toBe(false);
@@ -49,28 +77,73 @@ describe('Score', function () {
 		expect(Score.isClassOf(scoreLike)).toBe(false);
 	});
 
-	it(':isClassOf should be false for an object whose addScore is not a function', function () {
-		delete scoreLike.addScore;
+	it(':isClassOf should be false for an object whose addErasedMikans is not a function', function () {
+		delete scoreLike.addErasedMikans;
 		expect(Score.isClassOf(scoreLike)).toBe(false);
-		scoreLike.addScore = 'addScore';
+		scoreLike.addErasedMikans = 'addErasedMikans';
 		expect(Score.isClassOf(scoreLike)).toBe(false);
 	});
 
-	it(':addScore should add a specified number to score', function () {
-		var score = new Score();
-		score.addScore(100);
-		expect(score.score).toBe(100);
-		score.addScore(1);
-		expect(score.score).toBe(101);
+	it(':isClassOf should be false for an object whose addCombo is not a function', function () {
+		delete scoreLike.addCombo;
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+		scoreLike.addCombo = 'addCombo';
+		expect(Score.isClassOf(scoreLike)).toBe(false);
 	});
 
-	it(':reset should reset score to 0', function () {
+	it(':isClassOf should be false for an object whose resetCombo is not a function', function () {
+		delete scoreLike.resetCombo;
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+		scoreLike.resetCombo = 'resetCombo';
+		expect(Score.isClassOf(scoreLike)).toBe(false);
+	});
+
+	it(':addErasedMikans should add a specified number to erased mikan count', function () {
 		var score = new Score();
-		score.addScore(10);
+		score.addErasedMikans(4);
+		expect(score.erasedMikanCount).toBe(4);
+		score.addErasedMikans(10);
+		expect(score.erasedMikanCount).toBe(14);
+	});
+
+	it(':addErasedMikans should increase the score', function () {
+		var score = new Score();
+		score.addErasedMikans(1);
+		expect(score.score).toBeGreaterThan(0);
+	});
+
+	it(':addCombo should increment the number of combos', function () {
+		var score = new Score();
+		score.addCombo();
+		expect(score.comboCount).toBe(1);
+		score.addCombo();
+		expect(score.comboCount).toBe(2);
+	});
+
+	it(':reset should reset score, erased mikan count and combo count to 0', function () {
+		var score = new Score();
+		score.addErasedMikans(4);
+		score.addCombo();
 		score.reset();
 		expect(score.score).toBe(0);
+		expect(score.erasedMikanCount).toBe(0);
+		expect(score.comboCount).toBe(0);
 		score.reset();
 		expect(score.score).toBe(0);
+		expect(score.erasedMikanCount).toBe(0);
+		expect(score.comboCount).toBe(0);
+	});
+
+	it(':resetCombo should reset combo count to 0', function () {
+		var score = new Score();
+		score.addErasedMikans(4);
+		score.addCombo();
+		score.resetCombo();
+		expect(score.comboCount).toBe(0);
+		expect(score.score).not.toBe(0);
+		expect(score.erasedMikanCount).toBe(4);
+		score.resetCombo();
+		expect(score.comboCount).toBe(0);
 	});
 });
 
@@ -93,15 +166,20 @@ describe('Score working with events', function () {
 		expect(observer).toHaveBeenCalledWith('scoreReset', score);
 	});
 
-	it(':addScore should notify "scoreUpdated"', function () {
-		score.addScore(100);
-		expect(observer).toHaveBeenCalledWith('scoreUpdated', score, 0, 100);
-		score.addScore(1);
-		expect(observer).toHaveBeenCalledWith('scoreUpdated', score, 100, 101);
+	it(':addErasedMikans should notify "scoreUpdated"', function () {
+		var oldScore = 0;
+		score.addErasedMikans(1);
+		expect(observer).toHaveBeenCalledWith('scoreUpdated', score,
+											  oldScore, jasmine.any(Number));
+		expect(observer.calls.argsFor(0)[3]).toBe(score.score);
+		oldScore = score.score;
+		score.addErasedMikans(10);
+		expect(observer).toHaveBeenCalledWith('scoreUpdated', score,
+											  oldScore, jasmine.any(Number));
 	});
 
-	it(':addScore should not notify "scoreUpdated" if amount is 0', function () {
-		score.addScore(0);
+	it(':addErasedMikans should not notify "scoreUpdated" if count is 0', function () {
+		score.addErasedMikans(0);
 		expect(observer).not.toHaveBeenCalled();
 	});
 });

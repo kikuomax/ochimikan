@@ -19,16 +19,20 @@
  * @uses DirectionListener
  * @param canvas {GameCanvas}
  *     The `GameCanvas` to be associated with the `Scene`.
+ * @param score {Score}
+ *     The `Score`.
  */
 Scene = (function () {
-	function Scene(canvas) {
+	function Scene(canvas, score) {
 		var self = this;
 
 		ActorScheduler.call(self);
 
 		var mikanBox = new MikanBox(Scene.COLUMN_COUNT,
 									Scene.ROW_COUNT,
-									Scene.SQUARE_SIZE);
+									Scene.SQUARE_SIZE,
+									0,
+									score);
 
 		/**
 		 * The width of this scene.

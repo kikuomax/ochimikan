@@ -1,38 +1,42 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <script type="text/javascript" src="../dist/libs/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="../dist/libs/knockout-3.2.0.js"></script>
   <script type="text/javascript" src="../dist/mikan.debug.js"></script>
   <script type="text/javascript">
-    function SpecResourceManager() {
-        var self = this;
+    $(function () {
+        function SpecResourceManager() {
+            var self = this;
 
-        ResourceManager.call(self);
+            ResourceManager.call(self);
 
-        Properties.override(self, 'loadImage', function (path) {
-            return self.loadImage._super('../dist/' + path);
-        });
-    }
-    ResourceManager.augment(SpecResourceManager.prototype);
+            Properties.override(self, 'loadImage', function (path) {
+                return self.loadImage._super('../dist/' + path);
+            });
+        }
+        ResourceManager.augment(SpecResourceManager.prototype);
 
-    var directionListeners = [];
-    function TestCanvas() {}
-    TestCanvas.augment = function(canvas) {
-        canvas.addDirectionListener = function(listener) {
-            directionListeners.push(listener);
+        var directionListeners = [];
+        function TestCanvas() {}
+        TestCanvas.augment = function(canvas) {
+            canvas.addDirectionListener = function(listener) {
+                directionListeners.push(listener);
+            };
+            canvas.removeDirectionListener = function(listener) {
+                var idx = directionListeners.indexOf(listener);
+                if (idx != -1) {
+                    directionListener.splice(idx, 1);
+                }
+            };
+            return canvas;
         };
-        canvas.removeDirectionListener = function(listener) {
-            var idx = directionListeners.indexOf(listener);
-            if (idx != -1) {
-                directionListener.splice(idx, 1);
-            }
-        };
-        return canvas;
-    };
 
-    function startGame() {
+        var scoreObj = new Score();
+
         var canvas = document.getElementById('mikanCanvas');
         TestCanvas.augment(canvas);
-        Game.start(canvas, new SpecResourceManager());
+        Game.start(canvas, new SpecResourceManager(), scoreObj);
         window.setInterval(function() {
             var directionId = Math.floor(4 * Math.random());
             var direction = [
@@ -43,11 +47,26 @@
                 listener[direction](canvas);
             });
         }, 10);
-    }
-  </script>
+
+        function ViewModel() {
+            var self = this;
+
+            self.score = ko.observable(scoreObj.score);
+            scoreObj.addObserver(function () {
+                console.log('score updated: ' + scoreObj.score);
+                self.score(scoreObj.score);
+            });
+        }
+
+        ko.applyBindings(new ViewModel());
+    });
+ </script>
   <title>落ちみかん(セレンディピティ)</title>
 </head>
-<body onload="startGame()">
+<body>
+  <div>
+    Score: <span data-bind="text: score"></span>
+  </div>
   <canvas id="mikanCanvas"
           style="background-image: url('../dist/imgs/background.png')">
   </canvas>

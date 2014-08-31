@@ -1,81 +1,99 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <script type="text/javascript" src="libs/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="libs/knockout-3.2.0.js"></script>
   <script type="text/javascript" src="mikan.debug.js"></script>
   <script type="text/javascript">
-    function TestCanvas() {}
-    TestCanvas.augment = function (canvas) {
-        var directionListeners = [];
-        canvas.addDirectionListener = function (listener) {
-            directionListeners.push(listener);
-        };
-        canvas.removeDirectionListener = function (listener) {
-            var idx = directionListeners.indexOf(listener);
-            if (idx != -1) {
-                directionListener.splice(idx, 1);
+    $(function () {
+        function TestCanvas() {}
+        TestCanvas.augment = function (canvas) {
+            var directionListeners = [];
+            canvas.addDirectionListener = function (listener) {
+                directionListeners.push(listener);
+            };
+            canvas.removeDirectionListener = function (listener) {
+                var idx = directionListeners.indexOf(listener);
+                if (idx != -1) {
+                    directionListener.splice(idx, 1);
+                }
+            };
+
+            canvas.addEventListener('mousedown',  handleStart, false);
+            canvas.addEventListener('mousemove',  handleMove,  false);
+            canvas.addEventListener('mouseup',    handleEnd,   false);
+            canvas.addEventListener('mouseleave', handleEnd,   false);
+
+            var isDown = false;
+            var x, y;
+            function handleStart(evt) {
+                isDown = true;
+                x = evt.x;
+                y = evt.y;
             }
-        };
 
-        canvas.addEventListener('mousedown',  handleStart, false);
-        canvas.addEventListener('mousemove',  handleMove,  false);
-        canvas.addEventListener('mouseup',    handleEnd,   false);
-        canvas.addEventListener('mouseleave', handleEnd,   false);
-
-        var isDown = false;
-        var x, y;
-        function handleStart(evt) {
-            isDown = true;
-            x = evt.x;
-            y = evt.y;
-        }
-
-        function handleMove(evt) {
-            if (isDown) {
-                var dX = evt.x - x;
-                var dY = evt.y - y;
-                var notification;
-                if (Math.abs(dX) > Math.abs(dY)) {
-                    if (Math.abs(dX) > 15) {
-                        if (dX < 0) {
-                            notification = 'moveLeft';
-                        } else {
-                            notification = 'moveRight';
+            function handleMove(evt) {
+                if (isDown) {
+                    var dX = evt.x - x;
+                    var dY = evt.y - y;
+                    var notification;
+                    if (Math.abs(dX) > Math.abs(dY)) {
+                        if (Math.abs(dX) > 15) {
+                            if (dX < 0) {
+                                notification = 'moveLeft';
+                            } else {
+                                notification = 'moveRight';
+                            }
+                        }
+                    } else {
+                        if (Math.abs(dY) > 30) {
+                            if (dY < 0) {
+                                notification = 'rotateCounterClockwise';
+                            } else {
+                                notification = 'rotateClockwise';
+                            }
                         }
                     }
-                } else {
-                    if (Math.abs(dY) > 30) {
-                        if (dY < 0) {
-                            notification = 'rotateCounterClockwise';
-                        } else {
-                            notification = 'rotateClockwise';
-                        }
+                    if (notification) {
+                        directionListeners.forEach(function (listener) {
+                            listener[notification](canvas);
+                        });
+                        x = evt.x;
+                        y = evt.y;
                     }
                 }
-                if (notification) {
-                    directionListeners.forEach(function (listener) {
-                        listener[notification](canvas);
-                    });
-                    x = evt.x;
-                    y = evt.y;
-                }
             }
-        }
 
-        function handleEnd(evt) {
-            isDown = false;
-        }
+            function handleEnd(evt) {
+                isDown = false;
+            }
 
-        return canvas;
-    };
+            return canvas;
+        };
 
-    function startGame() {
+        var scoreObj = new Score();
+
         var canvas = document.getElementById('mikanCanvas');
-        Game.start(TestCanvas.augment(canvas), new ResourceManager());
-    }
+        Game.start(TestCanvas.augment(canvas), new ResourceManager(), scoreObj);
+
+        function ViewModel() {
+            var self = this;
+
+            self.score = ko.observable(scoreObj.score);
+
+            scoreObj.addObserver(function () {
+                self.score(scoreObj.score);
+            });
+        }
+        ko.applyBindings(new ViewModel());
+    })
   </script>
   <title>落ちみかん</title>
 </head>
-<body onload="startGame()">
+<body> 
+  <div>
+    Score: <span data-bind="text: score"></span>
+  </div>
   <canvas id="mikanCanvas" style="background-image: url('imgs/background.png')">
   </canvas>
 </body>

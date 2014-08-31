@@ -52,7 +52,7 @@ MikanBox = (function () {
 		return [ v[0]/norm, v[1]/norm ]
 	});
 
-	function MikanBox(columnCount, rowCount, squareSize, rowMargin) {
+	function MikanBox(columnCount, rowCount, squareSize, rowMargin, score) {
 		var self = this;
 
 		// verifies arguments
@@ -292,11 +292,15 @@ MikanBox = (function () {
 				var chains = self.chainMikans();
 				if (chains.length > 0) {
 					// erases the mikans in the chains
+					var numErased = 0;
 					chains.forEach(function (chain) {
 						chain.forEach(function (loc) {
 							mikanGrid[indexOf(loc[0], loc[1])] = null;
+							++numErased;
 						});
 					});
+					score.addErasedMikans(numErased);
+					score.addCombo();
 					// sprays
 					self.scheduleSprays(chains, scheduler);
 					// schedules to spoil mikans
@@ -305,6 +309,8 @@ MikanBox = (function () {
 					self.scheduleToDrop(scheduler);
 					// schedules itself again
 					scheduler.schedule(this);
+				} else {
+					score.resetCombo();
 				}
 			});
 			scheduler.schedule(eraser);

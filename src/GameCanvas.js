@@ -128,5 +128,14 @@ DirectionListener = (function () {
 	 */
 	DirectionListener.prototype.rotateCounterClockwise = function (canvas) {};
 
+	/**
+	 * Handles a release control direction from a `GameCanvas`.
+	 *
+	 * @method releaseControl
+	 * @param canvas {GameCanvas}
+	 *     The `GameCanvas` which is directing releasing.
+	 */
+	DirectionListener.prototype.releaseControl = function (canvas) {};
+
 	return DirectionListener;
 })();

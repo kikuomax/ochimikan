@@ -1,14 +1,14 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width; initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="text/javascript" src="libs/jquery-1.11.1.min.js"></script>
   <script type="text/javascript" src="libs/knockout-3.2.0.js"></script>
   <script type="text/javascript" src="mikan.debug.js"></script>
   <script type="text/javascript">
     $(function () {
         function TestCanvas() {}
-            TestCanvas.augment = function (canvas) {
+        TestCanvas.augment = function (canvas) {
             var directionListeners = [];
             canvas.addDirectionListener = function (listener) {
                 directionListeners.push(listener);
@@ -70,10 +70,14 @@
             }
  
             var isDown = false;
+            var downTimeStamp = 0;
+            var moved = false;
             var x, y;
             function handleStart(evt) {
                 evt.preventDefault();
                 isDown = true; 
+                downTimeStamp = evt.timeStamp;
+                moved = false;
                 x = evt.x;
                 y = evt.y;
             }
@@ -105,6 +109,7 @@
                         directionListeners.forEach(function (listener) {
                             listener[notification](canvas);
                         });
+                        moved = true;
                         x = evt.x;
                         y = evt.y;
                     }
@@ -114,6 +119,11 @@
             function handleEnd(evt) {
                 evt.preventDefault();
                 isDown = false;
+                if (!moved && evt.timeStamp - downTimeStamp < 200) {
+                    directionListeners.forEach(function (listener) {
+                        listener.releaseControl(canvas);
+                    });
+                }
             }
 
             return canvas;

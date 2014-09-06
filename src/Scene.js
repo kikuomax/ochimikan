@@ -107,39 +107,33 @@ Scene = (function () {
 		 */
 		var speed = 3;
 		var gravity = new Actor(ActorPriorities.CONTROL, function (scheduler) {
-			// makes sure that the controlled mikan is reaching the bottom
-			var bottom = Math.max(grabbedMikans[0].y, grabbedMikans[1].y);
-			bottom += speed + mikanBox.squareSize - 1;
-			bottomRow = mikanBox.rowAt(bottom);
-			var moved = false;
-			if (bottomRow >= 0) {
-				// makse sure that no mikan is placed under the grabbed mikans
-				var left = Math.min(grabbedMikans[0].x, grabbedMikans[1].x);
-				var right = Math.max(grabbedMikans[0].x, grabbedMikans[1].x);
-				var leftColumn = mikanBox.columnAt(left);
-				var rightColumn = mikanBox.columnAt(right);
-				if (!mikanBox.mikanAt(leftColumn, bottomRow)
-					&& !mikanBox.mikanAt(rightColumn, bottomRow))
-				{
-					grabbedMikans.forEach(function (mikan) {
-						mikan.y += speed;
-					});
-					moved = true;
-				}
-			}
-			if (moved) {
-				self.schedule(this);
-			} else {
-				// places the mikan
+			if (grabbedMikans) {
 				grabbedMikans.forEach(function (mikan) {
-					var column = mikanBox.columnAt(mikan.x);
-					var row = mikanBox.rowAt(mikan.y + speed);
-					mikanBox.place(mikan, column, row);
+					mikan.y += speed;
 				});
-				grabbedMikans = null;
-				// schedules to drop and erase mikans
-				mikanBox.scheduleToDrop(self);
-				mikanBox.scheduleToErase(self);
+				// releases grabbed mikans if they reach the ground
+				var bottom = Math.max(grabbedMikans[0].y, grabbedMikans[1].y);
+				bottom += mikanBox.squareSize - 1;
+				bottomRow = mikanBox.rowAt(bottom);
+				var moved = false;
+				if (bottomRow >= 0) {
+					// releases grabbed mikans if they reach the fixed mikans
+					var left = Math.min(grabbedMikans[0].x, grabbedMikans[1].x);
+					var right = Math.max(grabbedMikans[0].x,
+										 grabbedMikans[1].x);
+					var leftColumn = mikanBox.columnAt(left);
+					var rightColumn = mikanBox.columnAt(right);
+					if (!mikanBox.mikanAt(leftColumn, bottomRow)
+						&& !mikanBox.mikanAt(rightColumn, bottomRow))
+					{
+						moved = true;
+					}
+				}
+				if (moved) {
+					self.schedule(this);
+				} else {
+					doReleaseControl();
+				}
 			}
 		});
 		Renderable.call(gravity, function (context) {
@@ -207,6 +201,17 @@ Scene = (function () {
 		 */
 		self.rotateCounterClockwise = function () {
 			scheduleInput(doRotateCounterClockwise);
+		};
+
+		/**
+		 * Schedules to frees grabbed mikans.
+		 *
+		 * This method will be invoked from `GameCanvas`.
+		 *
+		 * @method releaseControl
+		 */
+		self.releaseControl = function () {
+			scheduleInput(doReleaseControl);
 		};
 
 		// Moves grabbed mikans left.
@@ -322,6 +327,22 @@ Scene = (function () {
 					grabbedMikans[0].y = newY;
 					rotation = newRotation;
 				}
+			}
+		}
+
+		// Releases control of grabbed mikans.
+		function doReleaseControl() {
+			if (grabbedMikans) {
+				// places the mikan
+				grabbedMikans.forEach(function (mikan) {
+					var column = mikanBox.columnAt(mikan.x);
+					var row    = mikanBox.rowAt(mikan.y);
+					mikanBox.place(mikan, column, row);
+				});
+				grabbedMikans = null;
+				// schedules to drop and erase mikans
+				mikanBox.scheduleToDrop(self);
+				mikanBox.scheduleToErase(self);
 			}
 		}
 	}

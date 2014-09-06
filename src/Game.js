@@ -75,7 +75,7 @@ Game = (function () {
 	 * @static
 	 * @type {number}
 	 */
-	Game.FRAME_INTERVAL = 50;
+	Game.FRAME_INTERVAL = 40;
 
 	return Game;
 })();

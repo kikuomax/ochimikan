@@ -12,6 +12,7 @@
  *  - or if `rowCount` is not a number
  *  - or if `squareSize` is not a number
  *  - or if `rowMargin` is not a number
+ *  - or if `score` is not a `Score`
  *  - or if `columnCount` <= 0
  *  - or if `rowCount` <= 0
  *  - or if `squareSize` <= 0
@@ -37,6 +38,8 @@
  *     The size (in pixels) of each square in the mikan box.
  * @param rowMargin {number}
  *     The number of extra rows which store mikans stacked above the mikan box.
+ * @param score {Score}
+ *     The score to be associated with the mikan box.
  */
 MikanBox = (function () {
 	// a table to access surrounding location.
@@ -52,6 +55,10 @@ MikanBox = (function () {
 		return [ v[0]/norm, v[1]/norm ]
 	});
 
+	// the speed of falling mikan
+	var FALLING_SPEED = 15;
+
+	// constructor
 	function MikanBox(columnCount, rowCount, squareSize, rowMargin, score) {
 		var self = this;
 
@@ -73,6 +80,9 @@ MikanBox = (function () {
 		}
 		if (squareSize <= 0) {
 			throw 'squareSize must be > 0 but ' + squareSize;
+		}
+		if (!Score.isClassOf(score)) {
+			throw 'score must be specified';
 		}
 
 		// floors the parameters
@@ -149,6 +159,15 @@ MikanBox = (function () {
 		Object.defineProperty(self, 'height', { value: rowCount * squareSize });
 
 		/**
+		 * The score associated with this mikan box.
+		 *
+		 * @property score
+		 * @type {Score}
+		 * @final
+		 */
+		Object.defineProperty(self, 'score', { value: score });
+
+		/**
 		 * Returns the row which includes a specified y-coordinate value.
 		 *
 		 * @method rowAt
@@ -215,10 +234,14 @@ MikanBox = (function () {
 		 *     The column of the square in which the mikan is to be placed.
 		 * @param row {number}
 		 *     The row of the square in which the mikan is to be placed.
+		 * @param aligns {boolean}
+		 *     Whether `mikan` will be aligned to fit the square.
 		 */
 		self.place = function (mikan, column, row) {
 			checkSquare(column, row);
 			// makes sure that the square is vacant
+			// column = self.columnAt(mikan.x);
+			// row    = self.rowAt(mikan.y);
 			var idx = indexOf(column ,row);
 			if (mikanGrid[idx] != null) {
 				throw "square [" + column + ", " + row + "] isn't vacant";
@@ -584,10 +607,10 @@ MikanBox = (function () {
 		 */
 		function makeFall(mikan, dstRow) {
 			Actor.call(mikan, ActorPriorities.FALL, function (scheduler) {
-				var bottom = mikan.y + 10 + squareSize - 1;
+				var bottom = mikan.y + FALLING_SPEED + squareSize - 1;
 				var bottomRow = self.rowAt(bottom);
 				if (bottomRow >= dstRow) {
-					mikan.y += 10;
+					mikan.y += FALLING_SPEED;
 					scheduler.schedule(mikan);
 				} else {
 					self.place(mikan, self.columnAt(mikan.x), dstRow);

@@ -1,82 +1,110 @@
 describe('MikanBox', function () {
+	var score;
+
+	beforeEach(function () {
+		score = new Score();
+	});
+
+
 	it('Should be a Renderable', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(Renderable.isClassOf(mikanBox)).toBe(true);
 	});
 
 	it('Should have columnCount and rowCount', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.columnCount).toBe(8);
 		expect(mikanBox.rowCount).toBe(12);
-		mikanBox = new MikanBox(1, 12, 32);
+		mikanBox = new MikanBox(1, 12, 32, 8, score);
 		expect(mikanBox.columnCount).toBe(1);
 		expect(mikanBox.rowCount).toBe(12);
-		mikanBox = new MikanBox(8, 1, 32);
+		mikanBox = new MikanBox(8, 1, 32, 8, score);
 		expect(mikanBox.columnCount).toBe(8);
 		expect(mikanBox.rowCount).toBe(1);
 	});
 
 	it('Should have squareSize', function () {
-		expect(new MikanBox(8, 12, 32).squareSize).toBe(32);
-		expect(new MikanBox(8, 12, 1).squareSize).toBe(1);
+		expect(new MikanBox(8, 12, 32, 8, score).squareSize).toBe(32);
+		expect(new MikanBox(8, 12, 1, 8, score).squareSize).toBe(1);
 	});
 
 	it('Should have a dimension (width, height)', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.width).toBe(8 * 32);
 		expect(mikanBox.height).toBe(12 * 32);
-		mikanBox = new MikanBox(8, 10, 1);
+		mikanBox = new MikanBox(8, 10, 1, 8, score);
 		expect(mikanBox.width).toBe(8);
 		expect(mikanBox.height).toBe(10);
 	});
 
+	it('Should have score', function () {
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
+		expect(mikanBox.score).toBe(score);
+	});
+
 	it('Should not have columnCount unspecified', function () {
-		expect(function () { new MikanBox(null, 12, 32) }).toThrow();
-		expect(function () { new MikanBox(undefined, 12, 32) }).toThrow();
+		expect(function () { new MikanBox(null, 12, 32, 8, score) }).toThrow();
+		expect(function () {
+			new MikanBox(undefined, 12, 32, 8, score);
+		}).toThrow();
 	});
 
 	it('Should not have non-number columnCount', function () {
-		expect(function () { new MikanBox('8', 12, 32) }).toThrow();
-		expect(function () { new MikanBox(true, 12, 32) }).toThrow();
+		expect(function () { new MikanBox('8', 12, 32, 8, score) }).toThrow();
+		expect(function () { new MikanBox(true, 12, 32, 8, score) }).toThrow();
 	});
 
 	it('Should not have columnCount <= 0', function () {
-		expect(function () { new MikanBox(0, 12, 32) }).toThrow();
-		expect(function () { new MikanBox(-1, 12, 32) }).toThrow();
+		expect(function () { new MikanBox(0, 12, 32, 8, score) }).toThrow();
+		expect(function () { new MikanBox(-1, 12, 32, 8, score) }).toThrow();
 	});
 
 	it('Should not have rowCount unspecified', function () {
-		expect(function () { new MikanBox(8, null, 32) }).toThrow();
-		expect(function () { new MikanBox(8, undefined, 32) }).toThrow();
+		expect(function () { new MikanBox(8, null, 32, 8, score) }).toThrow();
+		expect(function () {
+			new MikanBox(8, undefined, 32, 8, score);
+		}).toThrow();
 	});
 
 	it('Should not have non-number rowCount', function () {
-		expect(function () { new MikanBox(8, '12', 32) }).toThrow();
-		expect(function () { new MikanBox(8, true, 32) }).toThrow();
+		expect(function () { new MikanBox(8, '12', 32, 8, score) }).toThrow();
+		expect(function () { new MikanBox(8, true, 32, 8, score) }).toThrow();
 	});
 
 	it('Should not have rowCount <= 0', function () {
-		expect(function () { new MikanBox(8, 0, 32) }).toThrow();
-		expect(function () { new MikanBox(8, -1, 32) }).toThrow();
+		expect(function () { new MikanBox(8, 0, 32, 8, score) }).toThrow();
+		expect(function () { new MikanBox(8, -1, 32, 8, score) }).toThrow();
 	});
 
 	it('Should not have squareSize unspecified', function () {
-		expect(function () { new MikanBox(8, 12, null) }).toThrow();
-		expect(function () { new MikanBox(8, 12) }).toThrow();
+		expect(function () { new MikanBox(8, 12, null, 8, score) }).toThrow();
+		expect(function () {
+			new MikanBox(8, 12, undefined, 8, score);
+		}).toThrow();
 	});
 
 	it('Should not have non-number squareSize', function () {
-		expect(function () { new MikanBox(8, 12, '32') }).toThrow();
-		expect(function () { new MikanBox(8, 12, true) }).toThrow();
+		expect(function () { new MikanBox(8, 12, '32', 8, score) }).toThrow();
+		expect(function () { new MikanBox(8, 12, true, 8, score) }).toThrow();
 	});
 
 	it('Should not have squareSize <= 0', function () {
-		expect(function () { new MikanBox(8, 12, 0) }).toThrow();
-		expect(function () { new MikanBox(8, 12, -1) }).toThrow();
+		expect(function () { new MikanBox(8, 12, 0, 8, score) }).toThrow();
+		expect(function () { new MikanBox(8, 12, -1, 8, score) }).toThrow();
+	});
+
+	it('Should not have score unspecified', function () {
+		expect(function () { new MikanBox(8, 12, 32, 8, null) }).toThrow();
+		expect(function () { new MikanBox(8, 12, 32, 8) }).toThrow();
+	});
+
+	it('Should not have non-Score score', function () {
+		expect(function () { new MikanBox(8, 12, 32, 8, true) }).toThrow();
+		expect(function () { new MikanBox(8, 12, 32, 8, {})}).toThrow();
 	});
 
 	it('Should initially contain no mikans', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		for (var c = 0; c < mikanBox.columnCount; ++c) {
 			for (var r = 0; r < mikanBox.rowCount; ++r) {
 				expect(mikanBox.mikanAt(c, r)).toBeNull();
@@ -85,7 +113,7 @@ describe('MikanBox', function () {
 	});
 
 	it(':rowAt should interpret a y into a column', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.rowAt(0)).toBe(11);
 		expect(mikanBox.rowAt(32 * 12 - 1)).toBe(0);
 		expect(mikanBox.rowAt(-1)).toBe(12);
@@ -97,7 +125,7 @@ describe('MikanBox', function () {
 	});
 
 	it(':columnAt should interpret an x into a column', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.columnAt(0)).toBe(0);
 		expect(mikanBox.columnAt(32 * 8 - 1)).toBe(7);
 		expect(mikanBox.columnAt(-1)).toBe(-1);
@@ -109,7 +137,7 @@ describe('MikanBox', function () {
 	});
 
 	it(':mikanAt should throw an exception if a specified square is not in it', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(function () { mikanBox.mikanAt(-1, 0) }).toThrow();
 		expect(function () { mikanBox.mikanAt(8, 0) }).toThrow();
 		expect(function () { mikanBox.mikanAt(0, -1) }).toThrow();
@@ -117,7 +145,7 @@ describe('MikanBox', function () {
 	});
 
 	it(':place should throw an exception if a specified square is not in it', function () {
-		var mikanBox = new MikanBox(8, 12, 32);
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		var mikan = new Mikan(0);
 		expect(function () { mikanBox.place(mikan, -1, 0) }).toThrow();
 		expect(function () { mikanBox.place(mikan, 8, 0) }).toThrow();
@@ -131,7 +159,7 @@ describe('MikanBox placing Mikans:', function () {
 	var mikan1, mikan2, mikan3, mikan4;
 
 	beforeEach(function () {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		mikan1 = new Mikan(0);
 		mikan2 = new Mikan(1);
 		mikan3 = new Mikan(2);
@@ -173,7 +201,7 @@ describe('MikanBox dropping Mikans:', function () {
 	beforeEach(function () {
 		scheduler = new ActorScheduler();
 		spyOn(scheduler, 'schedule').and.callThrough();
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		mikan1 = new Mikan(0);
 		mikan2 = new Mikan(1);
 		mikan3 = new Mikan(2);
@@ -292,7 +320,7 @@ describe('MikanBox chaining Mikans:', function () {
 	var mikans;
 
 	beforeEach(function () {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		mikans = [];
 		for (var i = 0; i < 8; ++i) {
 			mikans.push(new Mikan(Mikan.MAX_DAMAGE));
@@ -523,7 +551,7 @@ describe('MikanBox scheduling Sprays', function () {
 	];
 
 	beforeEach(function () {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		scheduler = new ActorScheduler();
 		spyOn(scheduler, 'schedule').and.callThrough();
 		// adds ambiguous equality of Sprays
@@ -574,7 +602,7 @@ describe('MikanBox collecting spoiling targets', function() {
 	var mikanBox;
 
 	beforeEach(function() {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 	});
 
 	it('Should return locations surrounding a single mikan', function () {
@@ -699,7 +727,7 @@ describe('MikanBox erasing Mikans', function () {
 	var controlTrigger;
 
 	beforeEach(function () {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		scheduler = new ActorScheduler();
 		// dummy trigger actors
 		controlTrigger = new Actor(ActorPriorities.CONTROL, function () {
@@ -922,13 +950,11 @@ describe('MikanBox erasing Mikans', function () {
 });
 
 describe('MikanBox as a Renderable:', function () {
-	var mikanBox = new MikanBox(8, 12, 32);
-	var mikan1 = mockMikan();
-	var mikan2 = mockMikan();
-	var mikan3 = mockMikan();
+	var mikanBox;
+	var mikan1, mikan2, mikan3;
 
 	beforeEach(function () {
-		mikanBox = new MikanBox(8, 12, 32);
+		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
 		mikan1 = mockMikan();
 		mikan2 = mockMikan();
 		mikan3 = mockMikan();

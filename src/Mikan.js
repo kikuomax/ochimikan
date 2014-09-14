@@ -1,28 +1,24 @@
 /**
  * A mikan.
  *
- * The initial location of this mikan is (0, 0).
+ * The initial location of the mikan is (0, 0).
  *
- * Throws an exception
- * - if `damage` is not a number
- * - or if `damage` < 0 or `dmanage` > `Mikan.MAX_DAMAGE`.
+ * `typeId` is `Item.TYPE_MIKAN`.
+ *
+ * Throws an exception if `damage` is not a number.
  *
  * @class Mikan
  * @constructor
- * @uses Located
+ * @extends Item
  * @uses Renderable
  * @param damage {number}
- *     The degree of damage to set. A float value is to be floored.
+ *     The degree of damage to set.
  */
 Mikan = (function () {
 	function Mikan(damage) {
 		var self = this;
 
-		// verifies the damage
-		checkDamage(damage);
-
-		// locates at (0, 0)
-		Located.call(self, 0, 0);
+		Item.call(self, Item.TYPE_MIKAN, 0, 0, damage);
 
 		/**
 		 * Renders this mikan.
@@ -37,45 +33,14 @@ Mikan = (function () {
 			Resources.SPRITES['mikan'][self.damage].render(context,
 														   self.x, self.y);
 		});
-
-		/**
-		 * The degree of damage on this mikan.
-		 *
-		 * The setter throws an exception if `damage` < 0 or
-		 * `damage` > `Mikan.MAX_DAMAGE`.
-		 *
-		 * @property damage
-		 * @type number
-		 */
-		var _damage = damage;
-		Object.defineProperty(self, 'damage', {
-			get: function () {
-				return _damage;
-			},
-			set: function (damage) {
-				checkDamage(damage);
-				_damage = damage;
-			}
-		});
-
-		// makes sure that the damage is in [0, MAX_DAMAGE]
-		function checkDamage(damage) {
-			if (typeof damage !== 'number') {
-				throw 'damage must be a number';
-			}
-			if (damage < 0) {
-				throw 'damage must be >= 0 but ' + damage;
-			}
-			if (damage > Mikan.MAX_DAMAGE) {
-				throw 'damage must be <= MAX_DAMAGE but ' + damage;
-			}
-		}
 	}
-	Located.augment(Mikan.prototype);
+	Item.augment(Mikan.prototype);
 	Renderable.augment(Mikan.prototype);
 
 	/**
 	 * The maximum damage of a mikan.
+	 *
+	 *     Mikan.MAX_DAMAGE = 3
 	 *
 	 * @property MAX_DAMAGE
 	 * @static
@@ -85,20 +50,15 @@ Mikan = (function () {
 	Object.defineProperty(Mikan, 'MAX_DAMAGE', { value: 3 });
 
 	/**
-	 * Spoils this mikan.
+	 * Returns the maximum damage of `Mikan`.
 	 *
-	 * The degree of damage of this mikan will be incremented unless it is
-	 * `Mikan.MAX_DAMAGE`.
+	 *     Mikan.prototype.maxDamage = Mikan.MAX_DAMAGE
 	 *
-	 * @method spoil
-	 * @chainable
+	 * @property maxDamage
+	 * @type number
+	 * @final
 	 */
-	Mikan.prototype.spoil = function () {
-		if (this.damage < Mikan.MAX_DAMAGE) {
-			++this.damage;
-		}
-		return this;
-	};
+	Mikan.prototype.maxDamage = Mikan.MAX_DAMAGE;
 
 	return Mikan;
 })();

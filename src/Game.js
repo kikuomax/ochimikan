@@ -7,16 +7,19 @@
  *
  *  1. A `Scene` is presented.
  *  2. The `Scene` presents a `MikanBox`.
- *  3. Two grabbed mikans appear at the top of the `MikanBox`.
- *     They are randomly damaged.
- *  4. The grabbed mikans fall toward the bottom of the `MikanBox` (ground).
- *  5. The grabbed mikans stop falling when either of them reaches the ground
- *     or a fixed mikan.
- *  6. The grabbed mikans become free.
- *  7. The free mikans fall toward the ground.
- *  8. Each of the free mikans stops falling and becomes fixed when it reaches
- *     the ground or a fixed mikan. This steps continues until all of the free
- *     mikans are fixed.
+ *  3. Two grabbed items appear at the top of the `MikanBox`. They can be any
+ *     combination of the followings,
+ *      - A randomly damaged mikan
+ *      - A preservative
+ *  4. The grabbed items fall toward the bottom of the `MikanBox` (ground).
+ *     A user can control the grabbed items during they are falling.
+ *  5. The grabbed items stop falling when either of them reaches the ground
+ *     or a fixed item.
+ *  6. The grabbed items become free.
+ *  7. The free items fall toward the ground.
+ *  8. Each of the free items stops falling and becomes fixed when it reaches
+ *     the ground or a fixed item. This steps continues until all of the free
+ *     items are fixed.
  *  9. Maximally damaged mikans are chained.
  *  10. Back to the step 3.
  *
@@ -25,9 +28,12 @@
  *  - 9 Some of the chains reaches or exceeds the limit length (active chains).
  *     1. Mikans composing the active chains explode and disappear.
  *     2. The player earns points.
- *     3. Mikans surrounding the active chains are spoiled.
- *     4. Mikans not placed on fixed mikans becom free.
- *     5. Back to the step 7.
+ *     3. Mikans surrounding the active chains are spoiled. But if there are
+ *        preservatives next to mikans, such mikans are not spoiled and
+ *        preservatives next to them are spoiled instead.
+ *     4. Maximally damaged preservatives disappear.
+ *     5. Items not placed on the ground or fixed items become free.
+ *     6. Back to the step 7.
  *
  * @class Game
  * @static

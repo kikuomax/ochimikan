@@ -39,9 +39,13 @@
         Game.start(canvas, new SpecResourceManager(), scoreObj);
         window.setInterval(function() {
             var directionId = Math.floor(4 * Math.random());
+            if (Math.random() < 0.01) {
+                directionId = 4;
+            }
             var direction = [
                 'moveLeft', 'moveRight',
-                'rotateClockwise', 'rotateCounterClockwise'
+                'rotateClockwise', 'rotateCounterClockwise',
+                'releaseControl'
             ][directionId];
             directionListeners.forEach(function(listener) {
                 listener[direction](canvas);

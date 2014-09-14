@@ -5,7 +5,6 @@ describe('MikanBox', function () {
 		score = new Score();
 	});
 
-
 	it('Should be a Renderable', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(Renderable.isClassOf(mikanBox)).toBe(true);
@@ -23,9 +22,9 @@ describe('MikanBox', function () {
 		expect(mikanBox.rowCount).toBe(1);
 	});
 
-	it('Should have squareSize', function () {
-		expect(new MikanBox(8, 12, 32, 8, score).squareSize).toBe(32);
-		expect(new MikanBox(8, 12, 1, 8, score).squareSize).toBe(1);
+	it('Should have cellSize', function () {
+		expect(new MikanBox(8, 12, 32, 8, score).cellSize).toBe(32);
+		expect(new MikanBox(8, 12, 1, 8, score).cellSize).toBe(1);
 	});
 
 	it('Should have a dimension (width, height)', function () {
@@ -76,19 +75,19 @@ describe('MikanBox', function () {
 		expect(function () { new MikanBox(8, -1, 32, 8, score) }).toThrow();
 	});
 
-	it('Should not have squareSize unspecified', function () {
+	it('Should not have cellSize unspecified', function () {
 		expect(function () { new MikanBox(8, 12, null, 8, score) }).toThrow();
 		expect(function () {
 			new MikanBox(8, 12, undefined, 8, score);
 		}).toThrow();
 	});
 
-	it('Should not have non-number squareSize', function () {
+	it('Should not have non-number cellSize', function () {
 		expect(function () { new MikanBox(8, 12, '32', 8, score) }).toThrow();
 		expect(function () { new MikanBox(8, 12, true, 8, score) }).toThrow();
 	});
 
-	it('Should not have squareSize <= 0', function () {
+	it('Should not have cellSize <= 0', function () {
 		expect(function () { new MikanBox(8, 12, 0, 8, score) }).toThrow();
 		expect(function () { new MikanBox(8, 12, -1, 8, score) }).toThrow();
 	});
@@ -103,16 +102,16 @@ describe('MikanBox', function () {
 		expect(function () { new MikanBox(8, 12, 32, 8, {})}).toThrow();
 	});
 
-	it('Should initially contain no mikans', function () {
+	it('Should initially contain no items', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		for (var c = 0; c < mikanBox.columnCount; ++c) {
 			for (var r = 0; r < mikanBox.rowCount; ++r) {
-				expect(mikanBox.mikanAt(c, r)).toBeNull();
+				expect(mikanBox.itemIn(c, r)).toBeNull();
 			}
 		}
 	});
 
-	it(':rowAt should interpret a y into a column', function () {
+	it(':rowAt should interpret an y into a row', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.rowAt(0)).toBe(11);
 		expect(mikanBox.rowAt(32 * 12 - 1)).toBe(0);
@@ -136,15 +135,19 @@ describe('MikanBox', function () {
 		expect(mikanBox.columnAt(32 * 7)).toBe(7);
 	});
 
-	it(':mikanAt should throw an exception if a specified square is not in it', function () {
+	it(':itemIn should throw an exception if a specified column is out of bounds', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
-		expect(function () { mikanBox.mikanAt(-1, 0) }).toThrow();
-		expect(function () { mikanBox.mikanAt(8, 0) }).toThrow();
-		expect(function () { mikanBox.mikanAt(0, -1) }).toThrow();
-		expect(function () { mikanBox.mikanAt(0, 12) }).toThrow();
+		expect(function () { mikanBox.itemIn(-1, 0) }).toThrow();
+		expect(function () { mikanBox.itemIn(8, 0) }).toThrow();
 	});
 
-	it(':place should throw an exception if a specified square is not in it', function () {
+	it(':itemIn should throw an exception if a specified row is out of bounds', function () {
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
+		expect(function () { mikanBox.itemIn(0, -1) }).toThrow();
+		expect(function () { mikanBox.itemIn(0, 12) }).toThrow();
+	});
+
+	it(':place should throw an exception if a specified cell is not in it', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		var mikan = new Mikan(0);
 		expect(function () { mikanBox.place(mikan, -1, 0) }).toThrow();
@@ -154,7 +157,7 @@ describe('MikanBox', function () {
 	});
 });
 
-describe('MikanBox placing Mikans:', function () {
+describe('MikanBox placing items:', function () {
 	var mikanBox;
 	var mikan1, mikan2, mikan3, mikan4;
 
@@ -166,30 +169,47 @@ describe('MikanBox placing Mikans:', function () {
 		mikan4 = new Mikan(3);
 	});
 
-	it('Should place a mikan in it and arrange the location of it', function () {
+	it('Should place an item in it and arrange the location of it', function () {
 		mikanBox.place(mikan1, 0, 0);
 		mikanBox.place(mikan2, 7, 0);
 		mikanBox.place(mikan3, 0, 11);
 		mikanBox.place(mikan4, 7, 11);
-		expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
-		expect(mikanBox.mikanAt(7, 0)).toBe(mikan2);
-		expect(mikanBox.mikanAt(0, 11)).toBe(mikan3);
-		expect(mikanBox.mikanAt(7, 11)).toBe(mikan4);
+		expect(mikanBox.itemIn(0, 0)).toBe(mikan1);
+		expect(mikanBox.itemIn(7, 0)).toBe(mikan2);
+		expect(mikanBox.itemIn(0, 11)).toBe(mikan3);
+		expect(mikanBox.itemIn(7, 11)).toBe(mikan4);
 		expect(mikan1.x).toEqual(0);
-		expect(mikan1.y).toEqual(11*32);
-		expect(mikan2.x).toEqual(7*32);
-		expect(mikan2.y).toEqual(11*32);
+		expect(mikan1.y).toEqual(11 * 32);
+		expect(mikan2.x).toEqual(7 * 32);
+		expect(mikan2.y).toEqual(11 * 32);
 		expect(mikan3.x).toEqual(0);
 		expect(mikan3.y).toEqual(0);
-		expect(mikan4.x).toEqual(7*32);
+		expect(mikan4.x).toEqual(7 * 32);
 		expect(mikan4.y).toEqual(0);
 	});
 
-	it('Should not place a mikan if a specified square is not vacant', function () {
+	it('Should not place an item if a specified column is out of bounds', function () {
+		expect(function () { mikanBox.place(mikan1, 8, 0) }).toThrow();
+		expect(function () { mikanBox.place(mikan1, -1, 0) }).toThrow();
+	});
+
+	it('Should not place an item if a specified row is out of bounds', function () {
+		expect(function () { mikanBox.place(mikan1, 0, 12) }).toThrow();
+		expect(function () { mikanBox.place(mikan1, 0, -1) }).toThrow();
+	});
+
+	it('Should not place an item if a specified cell is not vacant', function () {
 		mikanBox.place(mikan1, 0, 0);
 		expect(function () { mikanBox.place(mikan2, 0, 0) }).toThrow();
 		mikanBox.place(mikan3, 7, 11);
 		expect(function () { mikanBox.place(mikan4, 7, 11) }).toThrow();
+	});
+
+	it('Should not place a non-Item object', function () {
+		expect(function () { mikanBox.place({}, 0, 0) }).toThrow();
+		expect(function () {
+			mikanBox.place(new Located(0, 0), 0, 0);
+		}).toThrow();
 	});
 });
 
@@ -221,7 +241,7 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(scheduler.schedule).toHaveBeenCalledWith(mikan1);
 		expect(Actor.isClassOf(mikan1)).toBe(true);
 		expect(mikan1.priority).toBe(ActorPriorities.FALL);
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
 	});
 
 	it('Should not drop a mikan placed on the ground', function () {
@@ -236,7 +256,7 @@ describe('MikanBox dropping Mikans:', function () {
 		scheduler.run();
 		expect(scheduler.schedule).not.toHaveBeenCalled();
 		expect(Actor.isClassOf(mikan1)).toBe(false);
-		expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
+		expect(mikanBox.itemIn(0, 0)).toBe(mikan1);
 	});
 
 	it('Should drop mikans in different columns not placed on the ground', function () {
@@ -258,9 +278,9 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(mikan1.priority).toBe(ActorPriorities.FALL);
 		expect(mikan2.priority).toBe(ActorPriorities.FALL);
 		expect(mikan3.priority).toBe(ActorPriorities.FALL);
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(7, 11)).toBeNull();
-		expect(mikanBox.mikanAt(3, 5)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(7, 11)).toBeNull();
+		expect(mikanBox.itemIn(3, 5)).toBeNull();
 	});
 
 	it('Should drop mikans not placed on the ground but should not drop a mikan on the ground in the same column', function () {
@@ -286,9 +306,9 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(Actor.isClassOf(mikan3)).toBe(true);
 		expect(mikan2.priority).toBe(ActorPriorities.FALL);
 		expect(mikan3.priority).toBe(ActorPriorities.FALL);
-		expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(0, 3)).toBeNull();
+		expect(mikanBox.itemIn(0, 0)).toBe(mikan1);
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(0, 3)).toBeNull();
 	});
 
 	it('Should not drop mikans on the other mikan placed on the ground', function () {
@@ -309,9 +329,9 @@ describe('MikanBox dropping Mikans:', function () {
 		expect(Actor.isClassOf(mikan1)).toBe(false);
 		expect(Actor.isClassOf(mikan2)).toBe(false);
 		expect(Actor.isClassOf(mikan3)).toBe(false);
-		expect(mikanBox.mikanAt(0, 0)).toBe(mikan1);
-		expect(mikanBox.mikanAt(0, 1)).toBe(mikan2);
-		expect(mikanBox.mikanAt(0, 2)).toBe(mikan3);
+		expect(mikanBox.itemIn(0, 0)).toBe(mikan1);
+		expect(mikanBox.itemIn(0, 1)).toBe(mikan2);
+		expect(mikanBox.itemIn(0, 2)).toBe(mikan3);
 	});
 });
 
@@ -782,10 +802,10 @@ describe('MikanBox erasing Mikans', function () {
 		// . .
 		// . .
 		// ---
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0)).toBeNull();
-		expect(mikanBox.mikanAt(1, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(1, 0)).toBeNull();
+		expect(mikanBox.itemIn(1, 1)).toBeNull();
 	});
 
 	it('Should erase and spoil Mikans', function () {
@@ -808,13 +828,13 @@ describe('MikanBox erasing Mikans', function () {
 		// . 3
 		// . 4
 		// ---
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(0, 3)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
-		expect(mikanBox.mikanAt(1, 2).damage).toBe(Mikan.MAX_DAMAGE - 2);
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(0, 3)).toBeNull();
+		expect(mikanBox.itemIn(1, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
+		expect(mikanBox.itemIn(1, 2).damage).toBe(Mikan.MAX_DAMAGE - 2);
 	});
 
 	it('Should erase, spoil and drop Mikans', function () {
@@ -834,24 +854,24 @@ describe('MikanBox erasing Mikans', function () {
 		// 4 3 2 .
 		// . . . .
 		// -------
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0)).toBeNull();
-		expect(mikanBox.mikanAt(2, 0)).toBeNull();
-		expect(mikanBox.mikanAt(3, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
-		expect(mikanBox.mikanAt(2, 1).damage).toBe(Mikan.MAX_DAMAGE - 2);
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(1, 0)).toBeNull();
+		expect(mikanBox.itemIn(2, 0)).toBeNull();
+		expect(mikanBox.itemIn(3, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
+		expect(mikanBox.itemIn(2, 1).damage).toBe(Mikan.MAX_DAMAGE - 2);
 		waitUntilControlIsBack();
 		// . . . .
 		// 4 3 2 .
 		// -------
-		expect(mikanBox.mikanAt(0, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(1, 0).damage).toBe(Mikan.MAX_DAMAGE - 1);
-		expect(mikanBox.mikanAt(2, 0).damage).toBe(Mikan.MAX_DAMAGE - 2);
-		expect(mikanBox.mikanAt(3, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(1, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(1, 0).damage).toBe(Mikan.MAX_DAMAGE - 1);
+		expect(mikanBox.itemIn(2, 0).damage).toBe(Mikan.MAX_DAMAGE - 2);
+		expect(mikanBox.itemIn(3, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(1, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 1)).toBeNull();
 	});
 
 	it('Should erase, spoil, drop, erase, spoil and drop Mikans', function () {
@@ -875,58 +895,58 @@ describe('MikanBox erasing Mikans', function () {
 		// . 4 4 .
 		// . . 4 4
 		// -------
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0)).toBeNull();
-		expect(mikanBox.mikanAt(1, 1).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(2, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(2, 1).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(2, 2).damage).toBe(0);
-		expect(mikanBox.mikanAt(3, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(1, 0)).toBeNull();
+		expect(mikanBox.itemIn(1, 1).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(2, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(2, 1).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(2, 2).damage).toBe(0);
+		expect(mikanBox.itemIn(3, 0).damage).toBe(Mikan.MAX_DAMAGE);
 		waitUntilMovesHaveDone();
 		// . . 1 .
 		// . . 4 .
 		// . 4 4 4
 		// -------
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(1, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(2, 1).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(2, 2).damage).toBe(0);
-		expect(mikanBox.mikanAt(3, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(1, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(1, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(2, 1).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(2, 2).damage).toBe(0);
+		expect(mikanBox.itemIn(3, 0).damage).toBe(Mikan.MAX_DAMAGE);
 		waitUntilEraseHasDone();
 		waitUntilSpoilHasDone();
 		// . . 2 .
 		// . . . .
 		// . . . .
 		// -------
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0)).toBeNull();
-		expect(mikanBox.mikanAt(1, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 0)).toBeNull();
-		expect(mikanBox.mikanAt(2, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 2).damage).toBe(1);
-		expect(mikanBox.mikanAt(3, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(1, 0)).toBeNull();
+		expect(mikanBox.itemIn(1, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 0)).toBeNull();
+		expect(mikanBox.itemIn(2, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 2).damage).toBe(1);
+		expect(mikanBox.itemIn(3, 0)).toBeNull();
 		waitUntilControlIsBack();
 		// . . . .
 		// . . . .
 		// . . 2 .
 		// -------
-		expect(mikanBox.mikanAt(0, 0)).toBeNull();
-		expect(mikanBox.mikanAt(0, 1)).toBeNull();
-		expect(mikanBox.mikanAt(0, 2)).toBeNull();
-		expect(mikanBox.mikanAt(1, 0)).toBeNull();
-		expect(mikanBox.mikanAt(1, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 0).damage).toBe(1);
-		expect(mikanBox.mikanAt(2, 1)).toBeNull();
-		expect(mikanBox.mikanAt(2, 2)).toBeNull();
-		expect(mikanBox.mikanAt(3, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 0)).toBeNull();
+		expect(mikanBox.itemIn(0, 1)).toBeNull();
+		expect(mikanBox.itemIn(0, 2)).toBeNull();
+		expect(mikanBox.itemIn(1, 0)).toBeNull();
+		expect(mikanBox.itemIn(1, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 0).damage).toBe(1);
+		expect(mikanBox.itemIn(2, 1)).toBeNull();
+		expect(mikanBox.itemIn(2, 2)).toBeNull();
+		expect(mikanBox.itemIn(3, 0)).toBeNull();
 	});
 
 	it('Should not erase Mikans', function () {
@@ -942,10 +962,10 @@ describe('MikanBox erasing Mikans', function () {
 		// 3 1
 		// 4 2
 		// ---
-		expect(mikanBox.mikanAt(0, 0).damage).toBe(Mikan.MAX_DAMAGE);
-		expect(mikanBox.mikanAt(0, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
-		expect(mikanBox.mikanAt(1, 0).damage).toBe(Mikan.MAX_DAMAGE - 2);
-		expect(mikanBox.mikanAt(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 3);
+		expect(mikanBox.itemIn(0, 0).damage).toBe(Mikan.MAX_DAMAGE);
+		expect(mikanBox.itemIn(0, 1).damage).toBe(Mikan.MAX_DAMAGE - 1);
+		expect(mikanBox.itemIn(1, 0).damage).toBe(Mikan.MAX_DAMAGE - 2);
+		expect(mikanBox.itemIn(1, 1).damage).toBe(Mikan.MAX_DAMAGE - 3);
 	});
 });
 

@@ -1,17 +1,19 @@
-describe('Resources', function (){
+describe('Resources', function () {
 	var savedSPRITES;
-	var sprite1, sprite2, sprite3;
+	var sprite1, sprite2, sprite3, sprite4;
 	var rm;
 
 	beforeEach(function () {
 		// replaces SPRITES with a dummy one
 		savedSPRITES = Resources.SPRITES;
-		sprite1 = { load: jasmine.createSpy("sprite1") };
-		sprite2 = { load: jasmine.createSpy("sprite2") };
-		sprite3 = { load: jasmine.createSpy("sprite3") };
+		sprite1 = { load: jasmine.createSpy('sprite1') };
+		sprite2 = { load: jasmine.createSpy('sprite2') };
+		sprite3 = { load: jasmine.createSpy('sprite3') };
+		sprite4 = { load: jasmine.createSpy('sprite4') };
 		Resources.SPRITES = {
-			mikan: [sprite1],
-			spray: [sprite2, sprite3]
+			mikan:        [sprite1],
+			spray:        [sprite2, sprite3],
+			preservative: [sprite4]
 		};
 		rm = new ResourceManager();
 	});
@@ -26,6 +28,7 @@ describe('Resources', function (){
 		expect(sprite1.load).toHaveBeenCalledWith(rm);
 		expect(sprite2.load).toHaveBeenCalledWith(rm);
 		expect(sprite3.load).toHaveBeenCalledWith(rm);
+		expect(sprite4.load).toHaveBeenCalledWith(rm);
 	});
 
 	it(':loadSprites should throw an exception if no ResourceManager is specified', function () {

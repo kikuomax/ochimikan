@@ -21,16 +21,23 @@ Resources = (function () {
 	 */
 	Resources.SPRITES = {
 		mikan: [
-			new Sprite("imgs/mikan.png",  0, 0, 32, 32),
-			new Sprite("imgs/mikan.png", 32, 0, 32, 32),
-			new Sprite("imgs/mikan.png", 64, 0, 32, 32),
-			new Sprite("imgs/mikan.png", 96, 0, 32, 32)
+			new Sprite('imgs/mikan.png',  0, 0, 32, 32),
+			new Sprite('imgs/mikan.png', 32, 0, 32, 32),
+			new Sprite('imgs/mikan.png', 64, 0, 32, 32),
+			new Sprite('imgs/mikan.png', 96, 0, 32, 32)
 		],
 		spray: [
-			new Sprite("imgs/spray.png",  0, 0, 32, 32),
-			new Sprite("imgs/spray.png", 32, 0, 32, 32),
-			new Sprite("imgs/spray.png", 64, 0, 32, 32),
-			new Sprite("imgs/spray.png", 96, 0, 32, 32)
+			new Sprite('imgs/spray.png',  0, 0, 32, 32),
+			new Sprite('imgs/spray.png', 32, 0, 32, 32),
+			new Sprite('imgs/spray.png', 64, 0, 32, 32),
+			new Sprite('imgs/spray.png', 96, 0, 32, 32)
+		],
+		preservative: [
+			new Sprite('imgs/preservative.png',   0, 0, 32, 32),
+			new Sprite('imgs/preservative.png',  32, 0, 32, 32),
+			new Sprite('imgs/preservative.png',  64, 0, 32, 32),
+			new Sprite('imgs/preservative.png',  96, 0, 32, 32),
+			new Sprite('imgs/preservative.png', 128, 0, 32, 32)
 		]
 	};
 

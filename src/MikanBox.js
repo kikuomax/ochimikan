@@ -1,7 +1,7 @@
 /**
  * A mikan box.
  *
- * No mikans are placed initially.
+ * No items are placed initially.
  *
  * NOTE: (column, row)=(0, 0) comes to the bottom-left in the screen
  *       coordinate and (column, row)=(columnCount-1, rowCount-1) comes to
@@ -10,22 +10,22 @@
  * Throws an exception,
  *  - if `columnCount` is not a number
  *  - or if `rowCount` is not a number
- *  - or if `squareSize` is not a number
+ *  - or if `cellSize` is not a number
  *  - or if `rowMargin` is not a number
  *  - or if `score` is not a `Score`
  *  - or if `columnCount` <= 0
  *  - or if `rowCount` <= 0
- *  - or if `squareSize` <= 0
+ *  - or if `cellSize` <= 0
  *  - or if `rowMargin` < 0
  *
  * ## Scenarios
  *
- * ### Placing, Dropping and Erasing mikans
+ * ### Placing, Dropping and Erasing items
  *
  *  1. A `MikanBox` is given.
- *  2. A user places a `Mikan` somewhere in the `MikanBox`.
- *  3. The user asks the `MikanBox` to `scheduleToDropMikans` in it.
- *  4. The user asks the `MikanBox` to `scheduleToErase` mikans in it.
+ *  2. A user places a `Mikan` or `Preservative` somewhere in the `MikanBox`.
+ *  3. The user asks the `MikanBox` to `scheduleToDrop` items in it.
+ *  4. The user asks the `MikanBox` to `scheduleToErase` items in it.
  *
  * @class MikanBox
  * @constructor
@@ -34,10 +34,10 @@
  *     The number of columns in the mikan box.
  * @param rowCount {number}
  *     The number of rows in the mikan box.
- * @param squareSize {number}
- *     The size (in pixels) of each square in the mikan box.
+ * @param cellSize {number}
+ *     The size (in pixels) of each cell in the mikan box.
  * @param rowMargin {number}
- *     The number of extra rows which store mikans stacked above the mikan box.
+ *     The number of extra rows which store items stacked above the mikan box.
  * @param score {Score}
  *     The score to be associated with the mikan box.
  */
@@ -51,15 +51,15 @@ MikanBox = (function () {
 
 	// a unit velocities of spreading sprays.
 	var VELOCITIES = SURROUNDINGS.map(function (v) {
-		norm = Math.sqrt(v[0]*v[0] + v[1]*v[1]);
-		return [ v[0]/norm, v[1]/norm ]
+		norm = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+		return [ v[0] / norm, v[1] / norm ]
 	});
 
 	// the speed of falling mikan
 	var FALLING_SPEED = 15;
 
 	// constructor
-	function MikanBox(columnCount, rowCount, squareSize, rowMargin, score) {
+	function MikanBox(columnCount, rowCount, cellSize, rowMargin, score) {
 		var self = this;
 
 		// verifies arguments
@@ -69,8 +69,8 @@ MikanBox = (function () {
 		if (typeof rowCount !== 'number') {
 			throw 'rowCount must be a number';
 		}
-		if (typeof squareSize !== 'number') {
-			throw 'squareSize must be a number';
+		if (typeof cellSize !== 'number') {
+			throw 'cellSize must be a number';
 		}
 		if (columnCount <= 0) {
 			throw 'columnCount must be > 0 but ' + columnCount;
@@ -78,8 +78,8 @@ MikanBox = (function () {
 		if (rowCount <= 0) {
 			throw 'rowCount must be > 0 but ' + rowCount;
 		}
-		if (squareSize <= 0) {
-			throw 'squareSize must be > 0 but ' + squareSize;
+		if (cellSize <= 0) {
+			throw 'cellSize must be > 0 but ' + cellSize;
 		}
 		if (!Score.isClassOf(score)) {
 			throw 'score must be specified';
@@ -88,33 +88,33 @@ MikanBox = (function () {
 		// floors the parameters
 		columnCount = Math.floor(columnCount);
 		rowCount    = Math.floor(rowCount);
-		squareSize  = Math.floor(squareSize);
+		cellSize    = Math.floor(cellSize);
+
+		// creates the cells where items are placed
+		var cells = new Array(columnCount * rowCount);
+		for (var i = 0; i < cells.length; ++i) {
+			cells[i] = null;
+		}
 
 		/**
-		 * Renders this mikan box.
+		 * Renders this `MikanBox`.
 		 *
-		 * Renders each mikan in this mikan box.
+		 * Renders each item in this mikan box.
 		 *
 		 * @method render
 		 * @param context {canvas context}
 		 *     The context in which this mikan box is rendered.
 		 */
 		Renderable.call(self, function (context) {
-			mikanGrid.forEach(function (mikan) {
-				if (mikan != null) {
-					mikan.render(context);
+			cells.forEach(function (item) {
+				if (item != null) {
+					item.render(context);
 				}
 			});
 		});
 
-		// creates the grid where mikans are placed
-		var mikanGrid = new Array(columnCount * rowCount);
-		for (var i = 0; i < mikanGrid.length; ++i) {
-			mikanGrid[i] = null;
-		}
-
 		/**
-		 * The number of columns in this mikan box.
+		 * The number of columns in this `MikanBox`.
 		 *
 		 * @property columnCount
 		 * @type {number}
@@ -123,7 +123,7 @@ MikanBox = (function () {
 		Object.defineProperty(self, 'columnCount', { value: columnCount });
 
 		/**
-		 * The number of rows in this mikan box.
+		 * The number of rows in this `MikanBox`.
 		 *
 		 * @property rowCount
 		 * @type {number}
@@ -132,54 +132,40 @@ MikanBox = (function () {
 		Object.defineProperty(self, 'rowCount', { value: rowCount });
 
 		/**
-		 * The size (in pixels) of each square in this mikan box.
+		 * The size (in pixels) of each cell in this `MikanBox`.
 		 *
-		 * @property squareSize
+		 * @property cellSize
 		 * @type {number}
 		 * @final
 		 */
-		Object.defineProperty(self, 'squareSize', { value: squareSize });
+		Object.defineProperty(self, 'cellSize', { value: cellSize });
 
 		/**
-		 * The width (in pixels) of this mikan box.
+		 * The width (in pixels) of this `MikanBox`.
 		 *
 		 * @property width
 		 * @type {number}
 		 * @final
 		 */
-		Object.defineProperty(self, 'width', { value: columnCount * squareSize });
+		Object.defineProperty(self, 'width', { value: columnCount * cellSize });
 
 		/**
-		 * The height (in pixels) of this mikan box.
+		 * The height (in pixels) of this `MikanBox`.
 		 *
 		 * @property height
 		 * @type {number}
 		 * @final
 		 */
-		Object.defineProperty(self, 'height', { value: rowCount * squareSize });
+		Object.defineProperty(self, 'height', { value: rowCount * cellSize });
 
 		/**
-		 * The score associated with this mikan box.
+		 * The score associated with this `MikanBox`.
 		 *
 		 * @property score
 		 * @type {Score}
 		 * @final
 		 */
 		Object.defineProperty(self, 'score', { value: score });
-
-		/**
-		 * Returns the row which includes a specified y-coordinate value.
-		 *
-		 * @method rowAt
-		 * @param y {number}
-		 *     The y-coordinate value included in the requested row.
-		 * @retrun {number}
-		 *     The row which includes `y`.
-		 *     This number can exceeds the size of this `MikanBox`.
-		 */
-		self.rowAt = function (y) {
-			return Math.floor((self.height - y - 1) / squareSize);
-		};
 
 		/**
 		 * Returns the column which includes a specified x-coordinate value.
@@ -189,82 +175,98 @@ MikanBox = (function () {
 		 *     The x-coordinate value included in the requested column.
 		 * @return {number}
 		 *     The column which includes `x`.
-		 *     This number can exceeds the size of this `MikanBox`.
+		 *     This number can be less than 0, or equal to or greater than
+		 *     the number of columns in this `MikanBox`.
 		 */
 		self.columnAt = function (x) {
-			return Math.floor(x / squareSize);
+			return Math.floor(x / cellSize);
 		};
 
 		/**
-		 * Returns the mikan in the specified square in this mikan box.
+		 * Returns the row which includes a specified y-coordinate value.
+		 *
+		 * @method rowAt
+		 * @param y {number}
+		 *     The y-coordinate value included in the requested row.
+		 * @retrun {number}
+		 *     The row which includes `y`.
+		 *     This number can be less than 0, or equal to or greater than
+		 *     the number of rows in this `MikanBox`.
+		 */
+		self.rowAt = function (y) {
+			return Math.floor((self.height - y - 1) / cellSize);
+		};
+
+		/**
+		 * Returns the item in the specified cell in this `MikanBox`.
 		 *
 		 * Throws an exception
 		 *  - if `column` < 0 or `column` >= `columnCount`
 		 *  - or if `row` < 0 or `row` >= `rowCount`
 		 *
-		 * @method mikanAt
+		 * @method itemIn
 		 * @param column {number}
-		 *     The column of the square from which a mikan is to be obtained.
+		 *     The column of the cell from which an item is to be obtained.
 		 * @param row {number}
-		 *     The row of the square from which a mikan is to be obtained.
+		 *     The row of the cell from which an item is to be obtained.
 		 * @return {Mikan}
-		 *     The mikan at (`column`, `row`). `null` if no mikan is in
-		 *     the square.
+		 *     The item at (`column`, `row`). `null` if no item is in
+		 *     the cell.
 		 */
-		self.mikanAt = function (column, row) {
-			checkSquare(column, row);
-			return mikanGrid[indexOf(column, row)];
+		self.itemIn = function (column, row) {
+			checkCell(column, row);
+			return cells[indexOf(column, row)];
 		};
 
 		/**
-		 * Places the specified mikan in the specified square in this mikan box.
+		 * Places the specified item in the specified cell of this `MikanBox`.
 		 *
-		 * The location of `mikan` is arranged so that its top-left corner comes
-		 * to the top-left corner of the specified square in a screen.
+		 * The location of `item` is arranged so that its top-left corner comes
+		 * to the top-left corner of the specified cell in a screen.
 		 *
 		 * Thorows an exception
-		 *  - if `column < 0` or `column >= columnCount`
+		 *  - if `item` is not a `Item`
+		 *  - or if `column < 0` or `column >= columnCount`
 		 *  - or if `row < 0` or `row >= rowCount`
-		 *  - or if other mikan is already in the squared (`column`, `row`)
+		 *  - or if other item is already in the cell (`column`, `row`)
 		 *
 		 * @method place
-		 * @param mikan {Mikan}
-		 *     The mikan to be placed.
+		 * @param item {Item}
+		 *     The item to be placed.
 		 * @param column {number}
-		 *     The column of the square in which the mikan is to be placed.
+		 *     The column of the cell in which `item` is to be placed.
 		 * @param row {number}
-		 *     The row of the square in which the mikan is to be placed.
-		 * @param aligns {boolean}
-		 *     Whether `mikan` will be aligned to fit the square.
+		 *     The row of the cell in which `item` is to be placed.
 		 */
-		self.place = function (mikan, column, row) {
-			checkSquare(column, row);
-			// makes sure that the square is vacant
-			// column = self.columnAt(mikan.x);
-			// row    = self.rowAt(mikan.y);
-			var idx = indexOf(column ,row);
-			if (mikanGrid[idx] != null) {
-				throw "square [" + column + ", " + row + "] isn't vacant";
+		self.place = function (item, column, row) {
+			if (item.typeId == null) {
+				throw 'item must be a Item';
 			}
-			mikanGrid[idx] = mikan;
-			mikan.locate(xAt(column), yAt(row));
+			checkCell(column, row);
+			// makes sure that the cell is vacant
+			var idx = indexOf(column ,row);
+			if (cells[idx] != null) {
+				throw 'cell [' + column + ', ' + row + '] is not vacant';
+			}
+			item.locate(xAt(column), yAt(row));
+			cells[idx] = item;
 		};
 
 		/**
-		 * Schedules to drop mikans in this mikan box.
+		 * Schedules to drop items in this mikan box.
 		 *
 		 * Schedules an `Actor` which does the followings,
 		 *
-		 *  1. For each mikan in this mikan box, which isn't placed on
+		 *  1. For each item in this mikan box, which isn't placed on
 		 *     the ground,
-		 *     1. Releases the mikan from this mikan box.
-		 *     2. Makes the mikan an actor which moves toward the ground
-		 *        (ActorPriorities.FALL).
-		 *     3. Schedules the mikan in `scheduler`.
+		 *      1. Releases the item from this mikan box.
+		 *      2. Makes the item an actor which moves toward the ground
+		 *         (ActorPriorities.FALL).
+		 *      3. Schedules the item in `scheduler`.
 		 *
 		 * @method scheduleToDrop
 		 * @param scheduler {ActorScheduler}
-		 *     The `ActorScheduler` in which the dropper is to be scheduled.
+		 *     The `ActorScheduler` in which the actor is to be scheduled.
 		 */
 		self.scheduleToDrop = function (scheduler) {
 			var dropper = new Actor(ActorPriorities.DROP, function (scheduler) {
@@ -272,13 +274,13 @@ MikanBox = (function () {
 					var height = 0;
 					for (var r = 0; r < rowCount; ++r) {
 						var idx = indexOf(c, r);
-						var mikan = mikanGrid[idx];
-						if (mikan != null) {
-							// moves the mikan toward the ground
+						var item = cells[idx];
+						if (item != null) {
+							// moves the item toward the ground
 							// if it's not on the ground
 							if (r > height) {
-								scheduler.schedule(makeFall(mikan, height));
-								mikanGrid[idx] = null;
+								scheduler.schedule(makeFall(item, height));
+								cells[idx] = null;
 							}
 							++height;
 						}
@@ -294,14 +296,14 @@ MikanBox = (function () {
 		 * Schedules an `Actor` which does the followings,
 		 *
 		 *  1. Collects chained mikans.
-		 *  1. For each mikan chain
+		 *  2. For each mikan chain
 		 *     1. Erases mikans composing the chain.
-		 *     1. Creates sprays spreading (in 8 directions) from the chained
+		 *     2. Creates sprays spreading (in 8 directions) from the chained
 		 *        mikans and schedules them in `scheduler`.
-		 *  1. Schedules an actor which spoils mikans surrounding the chained
+		 *  3. Schedules an actor which spoils mikans surrounding the chained
 		 *     mikans (ActorPriorities.SPOIL).
-		 *  1. Schedules an actor which drops mikans (ActorPriorities.DROP).
-		 *  1. Schedules itself again.
+		 *  4. Schedules an actor which drops items (ActorPriorities.DROP).
+		 *  5. Schedules itself again.
 		 *
 		 * If no mikans are chained, the `Actor` will stop.
 		 *
@@ -318,7 +320,7 @@ MikanBox = (function () {
 					var numErased = 0;
 					chains.forEach(function (chain) {
 						chain.forEach(function (loc) {
-							mikanGrid[indexOf(loc[0], loc[1])] = null;
+							cells[indexOf(loc[0], loc[1])] = null;
 							++numErased;
 						});
 					});
@@ -328,7 +330,7 @@ MikanBox = (function () {
 					self.scheduleSprays(chains, scheduler);
 					// schedules to spoil mikans
 					self.scheduleToSpoil(chains, scheduler);
-					// schedules to drop mikans
+					// schedules to drop items
 					self.scheduleToDrop(scheduler);
 					// schedules itself again
 					scheduler.schedule(this);
@@ -352,18 +354,18 @@ MikanBox = (function () {
 		 *     locations (column, row) of chained mikans.
 		 */
 		self.chainMikans = function () {
-			var chainGrid = new Array(columnCount * rowCount);
+			var chainCells = new Array(columnCount * rowCount);
 			var chains = [];
 			for (var c = 0; c < columnCount; ++c) {
 				for (var r = 0; r < rowCount; ++r) {
 					// starts chaining from a maximally damaged mikan
 					// but avoids chaining already chained mikans
 					var idx = indexOf(c, r);
-					if (isMaxDamaged(mikanGrid[idx])) {
-						if (chainGrid[idx] == null) {
+					if (isMaxDamaged(cells[idx])) {
+						if (chainCells[idx] == null) {
 							// creates a new chain
 							var chain = [[c, r]];
-							chainGrid[idx] = chain;
+							chainCells[idx] = chain;
 							propagate(c, r);
 							if (chain.length >= MikanBox.CHAIN_LENGTH) {
 								chains.push(chain);
@@ -375,12 +377,12 @@ MikanBox = (function () {
 								tryToChain(c2, r2 + 1);
 							}
 							function tryToChain (c2, r2) {
-								if (isValidSquare(c2, r2)) {
+								if (isValidCell(c2, r2)) {
 									var idx2 = indexOf(c2, r2);
-									if (isMaxDamaged(mikanGrid[idx2])) {
-										if (chainGrid[idx2] == null) {
+									if (isMaxDamaged(cells[idx2])) {
+										if (chainCells[idx2] == null) {
 											chain.push([c2, r2]);
-											chainGrid[idx2] = chain;
+											chainCells[idx2] = chain;
 											propagate(c2, r2);
 										}
 									}
@@ -432,8 +434,7 @@ MikanBox = (function () {
 		 *     The array of chains whose surrounding mikans are to be spoiled.
 		 *     Each element is an array of [column, row] locations.
 		 * @param scheduler {ActorScheduler}
-		 *     The `ActorScheduler` in which the spoiler `Actor` is to be
-		 *     scheduled.
+		 *     The `ActorScheduler` in which the actor is to be scheduled.
 		 */
 		self.scheduleToSpoil = function (chains, scheduler) {
 			var targets = self.collectSpoilingTargets(chains);
@@ -441,8 +442,8 @@ MikanBox = (function () {
 				new Actor(ActorPriorities.SPOIL, function (scheduler) {
 					targets.forEach(function (loc) {
 						var idx = indexOf(loc[0], loc[1]);
-						if (mikanGrid[idx]) {
-							mikanGrid[idx].spoil();
+						if (cells[idx]) {
+							cells[idx].spoil();
 						}
 					});
 				});
@@ -462,11 +463,11 @@ MikanBox = (function () {
 		 */
 		self.collectSpoilingTargets = function (chains) {
 			var targets = [];
-			var spoilMap = new Array(columnCount * rowCount);
+			var spoilCells = new Array(columnCount * rowCount);
 			// avoids spoiling chains
 			chains.forEach(function (chain) {
 				chain.forEach(function (loc) {
-					spoilMap[indexOf(loc[0], loc[1])] = true;
+					spoilCells[indexOf(loc[0], loc[1])] = true;
 				});
 			});
 			// collects surrounding locations
@@ -479,9 +480,9 @@ MikanBox = (function () {
 							&& 0 <= row && row < rowCount)
 						{
 							var idx = indexOf(column, row);
-							if (!spoilMap[idx]) {
+							if (!spoilCells[idx]) {
 								targets.push([column, row]);
-								spoilMap[idx] = true;
+								spoilCells[idx] = true;
 							}
 						}
 					});
@@ -491,16 +492,16 @@ MikanBox = (function () {
 		};
 
 		/**
-		 * Returns the index of the specified square.
+		 * Returns the index of the specified cell.
 		 *
 		 * @method indexOf
 		 * @private
 		 * @param column {number}
-		 *     The column of the square.
+		 *     The column of the cell.
 		 * @param row {number}
-		 *     The row of the square.
+		 *     The row of the cell.
 		 * @return {number}
-		 *     The index of the square (`column`, `row`).
+		 *     The index of the cell (`column`, `row`).
 		 */
 		function indexOf(column, row) {
 			return row + (column * rowCount);
@@ -509,20 +510,20 @@ MikanBox = (function () {
 		/**
 		 * Returns whether the specified column and row are valid.
 		 *
-		 * A valid square is
+		 * A valid cell is
 		 *  - 0 <= `column` < `columnCount`
 		 *  - 0 <= `row` < `rowCount`
 		 *
-		 * @method isValidSquare
+		 * @method isValidCell
 		 * @private
 		 * @param column {number}
 		 *     The column to be tested.
 		 * @param row {number}
 		 *     The row to be tested.
 		 * @return {boolean}
-		 *     Whether (`column`, `row`) is a valid square.
+		 *     Whether (`column`, `row`) is a valid cell.
 		 */
-		function isValidSquare(column, row) {
+		function isValidCell(column, row) {
 			return column >= 0 && column < columnCount
 				&& row >= 0 && row < rowCount;
 		}
@@ -534,14 +535,14 @@ MikanBox = (function () {
 		 * - if `column` < 0 or `column` >= `columnCount`
 		 * - or if `row` < 0 or `row` >= `rowCount`
 		 *
-		 * @method checkSquare
+		 * @method checkCell
 		 * @private
 		 * @param column {number}
 		 *     The column to be tested.
 		 * @param row {number}
 		 *     The row to be tested.
 		 */
-		function checkSquare(column, row) {
+		function checkCell(column, row) {
 			if (column < 0 || column >= columnCount) {
 				throw "column must be in [0, "
 					+ (columnCount - 1) + "] but " + column;
@@ -562,7 +563,7 @@ MikanBox = (function () {
 		 *     The left location of the column.
 		 */
 		function xAt(column) {
-			return column * squareSize;
+			return column * cellSize;
 		}
 
 		/**
@@ -576,7 +577,7 @@ MikanBox = (function () {
 		 *     The top location of the row.
 		 */
 		function yAt(row) {
-			return (rowCount - row - 1) * squareSize;
+			return (rowCount - row - 1) * cellSize;
 		}
 
 		/**
@@ -588,35 +589,35 @@ MikanBox = (function () {
 		 *     The mikan to be tested.
 		 * @return {boolean}
 		 *     Whether `mikan` has `damage=Mikan.MAX_DAMAGE`.
-		 *     `false` if `mikan` is `null` or `undefined`.
+		 *     `false` if `mikan` is not specified.
 		 */
 		function isMaxDamaged(mikan) {
 			return mikan != null && mikan.damage == Mikan.MAX_DAMAGE;
 		}
 
 		/**
-		 * Makes a specified mikan fall to a specified row.
+		 * Makes a specified item fall to a specified row.
 		 *
 		 * @method makeFall
-		 * @param mikan {Mikan}
-		 *     The mikan to fall.
+		 * @param item {Item}
+		 *     The item to fall.
 		 * @param dstRow {number}
-		 *     The destination row of the falling mikan.
-		 * @return {Mikan, Actor}
-		 *     `mikan` as an Actor.
+		 *     The destination row of the falling item.
+		 * @return {Item, Actor}
+		 *     `item` as an Actor.
 		 */
-		function makeFall(mikan, dstRow) {
-			Actor.call(mikan, ActorPriorities.FALL, function (scheduler) {
-				var bottom = mikan.y + FALLING_SPEED + squareSize - 1;
+		function makeFall(item, dstRow) {
+			Actor.call(item, ActorPriorities.FALL, function (scheduler) {
+				var bottom = item.y + FALLING_SPEED + cellSize - 1;
 				var bottomRow = self.rowAt(bottom);
 				if (bottomRow >= dstRow) {
-					mikan.y += FALLING_SPEED;
-					scheduler.schedule(mikan);
+					item.y += FALLING_SPEED;
+					scheduler.schedule(item);
 				} else {
-					self.place(mikan, self.columnAt(mikan.x), dstRow);
+					self.place(item, self.columnAt(item.x), dstRow);
 				}
 			});
-			return mikan;
+			return item;
 		}
 	}
 

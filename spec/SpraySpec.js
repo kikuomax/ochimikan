@@ -53,7 +53,7 @@ describe('Spray', function () {
 		expect(spray.ttl).toBe(15);
 	});
 
-	defineLocatedSpec(function () {
+	defineLocatedLocationExpectations(function () {
 		return new Spray(0, 0, 2, 2, 15);
 	});
 

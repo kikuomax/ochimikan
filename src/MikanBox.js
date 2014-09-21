@@ -264,6 +264,9 @@ MikanBox = (function () {
 		 *         (ActorPriorities.FALL).
 		 *      3. Schedules the item in `scheduler`.
 		 *
+		 * A falling item reschedules itself until it reaches the ground or
+		 * a fixed item.
+		 *
 		 * @method scheduleToDrop
 		 * @param scheduler {ActorScheduler}
 		 *     The `ActorScheduler` in which the actor is to be scheduled.
@@ -293,19 +296,23 @@ MikanBox = (function () {
 		/**
 		 * Schedules to erase chained mikans in this box.
 		 *
-		 * Schedules an `Actor` which does the followings,
-		 *
+		 * Schedules an `Actor` which has `ActorPriorities.ERASE` and does
+		 * the followings,
 		 *  1. Collects chained mikans.
 		 *  2. For each mikan chain
-		 *     1. Erases mikans composing the chain.
-		 *     2. Creates sprays spreading (in 8 directions) from the chained
-		 *        mikans and schedules them in `scheduler`.
-		 *  3. Schedules an actor which spoils mikans surrounding the chained
-		 *     mikans (ActorPriorities.SPOIL).
-		 *  4. Schedules an actor which drops items (ActorPriorities.DROP).
+		 *      1. Erases mikans composing the chain.
+		 *      2. Creates sprays spreading from the chained mikans and
+		 *         schedules them in `scheduler`.
+		 *  3. Schedules an actor which spoils items surrounding the chained
+		 *     mikans (ActorPriorities.SPOIL). The actor also spoils
+		 *     preservatives which prevent mikans to be spoiled, and erases
+		 *     maximally damaged preservatives.
+		 *  4. Schedules an actor which drops items toward the ground
+		 *     (ActorPriorities.DROP).
 		 *  5. Schedules itself again.
 		 *
-		 * If no mikans are chained, the `Actor` will stop.
+		 * If no mikans are chained, the `Actor` will stop; i.e., does not
+		 * reschedule itself.
 		 *
 		 * @method scheduleToErase
 		 * @param scheduler {ActorScheduler}
@@ -328,7 +335,7 @@ MikanBox = (function () {
 					score.addCombo();
 					// sprays
 					self.scheduleSprays(chains, scheduler);
-					// schedules to spoil mikans
+					// schedules to spoil items
 					self.scheduleToSpoil(chains, scheduler);
 					// schedules to drop items
 					self.scheduleToDrop(scheduler);
@@ -361,7 +368,7 @@ MikanBox = (function () {
 					// starts chaining from a maximally damaged mikan
 					// but avoids chaining already chained mikans
 					var idx = indexOf(c, r);
-					if (isMaxDamaged(cells[idx])) {
+					if (isMaxDamagedMikan(cells[idx])) {
 						if (chainCells[idx] == null) {
 							// creates a new chain
 							var chain = [[c, r]];
@@ -379,7 +386,7 @@ MikanBox = (function () {
 							function tryToChain (c2, r2) {
 								if (isValidCell(c2, r2)) {
 									var idx2 = indexOf(c2, r2);
-									if (isMaxDamaged(cells[idx2])) {
+									if (isMaxDamagedMikan(cells[idx2])) {
 										if (chainCells[idx2] == null) {
 											chain.push([c2, r2]);
 											chainCells[idx2] = chain;
@@ -423,10 +430,15 @@ MikanBox = (function () {
 		};
 
 		/**
-		 * Schedules to spoil mikans surrounding specified chains.
+		 * Schedules to spoil items surrounding specified mikan chains.
 		 *
-		 * Schedules an `Actor` which has `ActorPriorities.SPOIL` and spoils
-		 * mikans surrounding `chains`.
+		 * Determines which mikans and preservatives are to be spoiled,
+		 * and then schedules the following `Actor`s,
+		 *  1. An `Actor` which has `ActorPriorities.ABSORB` and creates
+		 *     `Spray`s being absorbed into items to be spoiled.
+		 *  2. An `Actor` which has `ActorPriorities.SPOIL` and spoils mikans
+		 *     and preservatives. It also erases maximally damaged
+		 *     preservatives.
 		 *
 		 * @method scheduleToSpoil
 		 * @private
@@ -437,15 +449,64 @@ MikanBox = (function () {
 		 *     The `ActorScheduler` in which the actor is to be scheduled.
 		 */
 		self.scheduleToSpoil = function (chains, scheduler) {
-			var targets = self.collectSpoilingTargets(chains);
+			var cellMarkers = new Array(columnCount * rowCount);
+			self.markSpoilingTargets(chains, cellMarkers);
+			self.markAbsorbers(cellMarkers);
+			// absorbs sprays
+			var absorber =
+				new Actor(ActorPriorities.ABSORB, function (scheduler) {
+					for (var c = 0; c < columnCount; ++c) {
+						for (var r = 0; r < rowCount; ++r) {
+							var idx = indexOf(c, r);
+							if (cellMarkers[idx] == 2 || cellMarkers[idx] == 3) {
+								var x = xAt(c);
+								var y = yAt(r);
+								VELOCITIES.forEach(function (v) {
+									var x2 = x + 20 * v[0];
+									var y2 = y + 20 * v[1];
+									var spray = new Spray(x2, y2, -2 * v[0], -2 * v[1], 10);
+									scheduler.schedule(spray);
+								});
+							}
+						}
+					}
+				});
+			scheduler.schedule(absorber);
+			// spoils items
 			var spoiler =
 				new Actor(ActorPriorities.SPOIL, function (scheduler) {
-					targets.forEach(function (loc) {
-						var idx = indexOf(loc[0], loc[1]);
-						if (cells[idx]) {
-							cells[idx].spoil();
+					for (var c = 0; c < columnCount; ++c) {
+						for (var r = 0; r < rowCount; ++r) {
+							var idx = indexOf(c, r);
+							if (cellMarkers[idx] == 2) {
+								cells[idx].spoil();
+							} else if (cellMarkers[idx] == 3) {
+								cells[idx].spoil();
+								if (Item.isMaxDamaged(cells[idx])) {
+									// destroys the preservative after few frames
+									(function (item, ttl) {
+										Actor.call(item, ActorPriorities.SPOIL, function () {
+											--ttl;
+											if (ttl > 0) {
+												scheduler.schedule(this);
+											} else {
+												for (var i = 0; i < 3; ++i) {
+													var x2 = this.x + Math.random(5) - 2;
+													var y2 = this.y + Math.random(5) - 2;
+													var spray = new Spray(x2, y2, 0, -1.5, 5);
+													scheduler.schedule(spray);
+												}
+
+											}
+
+										});
+										scheduler.schedule(item);
+									})(cells[idx], 3);
+									cells[idx] = null;
+								}
+							}
 						}
-					});
+					}
 				});
 			scheduler.schedule(spoiler);
 		};
@@ -475,7 +536,7 @@ MikanBox = (function () {
 				chain.forEach(function (loc) {
 					SURROUNDINGS.forEach(function (d) {
 						var column = loc[0] + d[0];
-						var row = loc[1] + d[1];
+						var row    = loc[1] + d[1];
 						if (0 <= column && column < columnCount
 							&& 0 <= row && row < rowCount)
 						{
@@ -489,6 +550,64 @@ MikanBox = (function () {
 				});
 			});
 			return targets;
+		};
+		self.markSpoilingTargets = function (chains, cellMarkers) {
+			chains.forEach(function (chain) {
+				chain.forEach(function (loc) {
+					cellMarkers[indexOf(loc[0], loc[1])] = 1;
+				});
+			});
+			chains.forEach(function (chain) {
+				chain.forEach(function (loc) {
+					SURROUNDINGS.forEach(function (d) {
+						var column = loc[0] + d[0];
+						var row    = loc[1] + d[1];
+						if (0 <= column && column < columnCount
+							&& 0 <= row && row < rowCount)
+						{
+							var idx = indexOf(column, row);
+							var item = cells[idx];
+							if (cellMarkers[idx] !== 1 && item) {
+								switch (item.typeId) {
+								case Item.TYPE_MIKAN:
+									cellMarkers[idx] = 2;
+									break;
+								case Item.TYPE_PRESERVATIVE:
+									cellMarkers[idx] = 3;
+									break;
+								default:
+									console.error('unknown type: ' + item.typeId);
+								}
+							}
+						}
+					});
+				});
+			});
+		};
+		self.markAbsorbers = function (cellMarkers) {
+			for (var c = 0; c < columnCount; ++c) {
+				for (var r = 0; r < rowCount; ++r) {
+					var idx = indexOf(c, r);
+					if (cellMarkers[idx] == 2) {
+						SURROUNDINGS.forEach(function (d) {
+							var c2 = c + d[0];
+							var r2 = r + d[1];
+							if (0 <= c2 && c2 < columnCount
+								&& 0 <= r2 && r2 < rowCount)
+							{
+								var idx2 = indexOf(c2, r2);
+								var item = cells[idx2];
+								if (item
+									&& item.typeId == Item.TYPE_PRESERVATIVE)
+								{
+									cellMarkers[idx2] = 3;
+									cellMarkers[idx]  = 0;
+								}
+							}
+						});
+					}
+				}
+			}
 		};
 
 		/**
@@ -581,18 +700,20 @@ MikanBox = (function () {
 		}
 
 		/**
-		 * Returns whether the specified mikan is maximally damaged.
+		 * Returns whether the specified item is a maximally damaged mikan.
 		 *
-		 * @method isMaxDamaged
+		 * @method isMaxDamagedMikan
 		 * @private
-		 * @param mikan {Mikan}
-		 *     The mikan to be tested.
+		 * @param item {Item}
+		 *     The item to be tested.
 		 * @return {boolean}
-		 *     Whether `mikan` has `damage=Mikan.MAX_DAMAGE`.
-		 *     `false` if `mikan` is not specified.
+		 *     Whether `item` is a `Mikan` and maximally damaged.
+		 *     `false` if `item` is not specified.
 		 */
-		function isMaxDamaged(mikan) {
-			return mikan != null && mikan.damage == Mikan.MAX_DAMAGE;
+		function isMaxDamagedMikan(item) {
+			return item
+				&& item.typeId == Item.TYPE_MIKAN
+				&& Item.isMaxDamaged(item);
 		}
 
 		/**

@@ -83,9 +83,13 @@ Scene = (function () {
 			// (0)
 			// (1)
 			for (var i = 0; i < 2; ++i) {
-				var damage = Math.floor(4 * Math.random());
+				if (Math.random() < 0.1) {
+					grabbedItems[i] = new Preservative();
+				} else {
+					var damage = Math.floor(4 * Math.random());
+					grabbedItems[i] = new Mikan(damage);
+				}
 				var y = -(mikanBox.cellSize * (2 - i));
-				grabbedItems[i] = new Mikan(damage);
 				grabbedItems[i].locate(x, y);
 			}
 			rotation = 0;

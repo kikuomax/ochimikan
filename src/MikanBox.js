@@ -55,6 +55,12 @@ MikanBox = (function () {
 		return [ v[0] / norm, v[1] / norm ]
 	});
 
+	// a marker for a mikan in a chain
+	var MARKER_CHAIN = 1;
+
+	// a marker for an item to be spoiled
+	var MARKER_SPOIL = 2;
+
 	// the speed of falling mikan
 	var FALLING_SPEED = 15;
 
@@ -449,6 +455,7 @@ MikanBox = (function () {
 		 *     The `ActorScheduler` in which the actor is to be scheduled.
 		 */
 		self.scheduleToSpoil = function (chains, scheduler) {
+			// marks cells
 			var cellMarkers = new Array(columnCount * rowCount);
 			self.markSpoilingTargets(chains, cellMarkers);
 			self.markAbsorbers(cellMarkers);
@@ -458,7 +465,7 @@ MikanBox = (function () {
 					for (var c = 0; c < columnCount; ++c) {
 						for (var r = 0; r < rowCount; ++r) {
 							var idx = indexOf(c, r);
-							if (cellMarkers[idx] == 2 || cellMarkers[idx] == 3) {
+							if (cellMarkers[idx] == MARKER_SPOIL) {
 								var x = xAt(c);
 								var y = yAt(r);
 								VELOCITIES.forEach(function (v) {
@@ -478,11 +485,12 @@ MikanBox = (function () {
 					for (var c = 0; c < columnCount; ++c) {
 						for (var r = 0; r < rowCount; ++r) {
 							var idx = indexOf(c, r);
-							if (cellMarkers[idx] == 2) {
-								cells[idx].spoil();
-							} else if (cellMarkers[idx] == 3) {
-								cells[idx].spoil();
-								if (Item.isMaxDamaged(cells[idx])) {
+							if (cellMarkers[idx] == MARKER_SPOIL) {
+								var item = cells[idx];
+								item.spoil();
+								if (item.typeId == Item.TYPE_PRESERVATIVE
+									&& Item.isMaxDamaged(item))
+								{
 									// destroys the preservative after few frames
 									(function (item, ttl) {
 										Actor.call(item, ActorPriorities.SPOIL, function () {
@@ -503,6 +511,7 @@ MikanBox = (function () {
 										scheduler.schedule(item);
 									})(cells[idx], 3);
 									cells[idx] = null;
+
 								}
 							}
 						}
@@ -512,49 +521,28 @@ MikanBox = (function () {
 		};
 
 		/**
-		 * Collects spoiling targets.
+		 * Marks items to be spoiled.
 		 *
-		 * @method collectSpoilingTargets
+		 * `cellMarkers` will be modified like the followings,
+		 *  - Mikans in `chains` are as `MARKER_CHAIN`.
+		 *  - Items to be spoiled as `MARKER_SPOIL`.
+		 *
+		 * Other cells are retained.
+		 *
+		 * NOTE: this function does not mark preservatives which prevent mikans
+		 *       from being spoiled.
+		 *
+		 * @method markSpoilingTargets
 		 * @private
 		 * @param chains {array}
-		 *     The array of chains whose surrounding mikans are to be spoiled.
-		 *     Each element is an array of [column, row] locations.
-		 * @return {array}
-		 *     An array of [column, row] locations to be spoiled.
+		 *     An array of mikan chains.
+		 * @param cellMarkers {array}
+		 *     An array similar to `cells`, in which markers are to be stored.
 		 */
-		self.collectSpoilingTargets = function (chains) {
-			var targets = [];
-			var spoilCells = new Array(columnCount * rowCount);
-			// avoids spoiling chains
-			chains.forEach(function (chain) {
-				chain.forEach(function (loc) {
-					spoilCells[indexOf(loc[0], loc[1])] = true;
-				});
-			});
-			// collects surrounding locations
-			chains.forEach(function (chain) {
-				chain.forEach(function (loc) {
-					SURROUNDINGS.forEach(function (d) {
-						var column = loc[0] + d[0];
-						var row    = loc[1] + d[1];
-						if (0 <= column && column < columnCount
-							&& 0 <= row && row < rowCount)
-						{
-							var idx = indexOf(column, row);
-							if (!spoilCells[idx]) {
-								targets.push([column, row]);
-								spoilCells[idx] = true;
-							}
-						}
-					});
-				});
-			});
-			return targets;
-		};
 		self.markSpoilingTargets = function (chains, cellMarkers) {
 			chains.forEach(function (chain) {
 				chain.forEach(function (loc) {
-					cellMarkers[indexOf(loc[0], loc[1])] = 1;
+					cellMarkers[indexOf(loc[0], loc[1])] = MARKER_CHAIN;
 				});
 			});
 			chains.forEach(function (chain) {
@@ -567,28 +555,33 @@ MikanBox = (function () {
 						{
 							var idx = indexOf(column, row);
 							var item = cells[idx];
-							if (cellMarkers[idx] !== 1 && item) {
-								switch (item.typeId) {
-								case Item.TYPE_MIKAN:
-									cellMarkers[idx] = 2;
-									break;
-								case Item.TYPE_PRESERVATIVE:
-									cellMarkers[idx] = 3;
-									break;
-								default:
-									console.error('unknown type: ' + item.typeId);
-								}
+							if (cellMarkers[idx] !== MARKER_CHAIN && item) {
+								cellMarkers[idx] = MARKER_SPOIL;
 							}
 						}
 					});
 				});
 			});
 		};
+
+		/**
+		 * Marks preservatives which prevent mikans from being spoiled.
+		 *
+		 * Also clears markers, marks as 0, for mikans which are prevented from
+		 * being spoiled.
+		 *
+		 * @method markAbsorbers
+		 * @private
+		 * @param cellMarkers {array}
+		 *     An array similar to `cells`, which records markers.
+		 */
 		self.markAbsorbers = function (cellMarkers) {
 			for (var c = 0; c < columnCount; ++c) {
 				for (var r = 0; r < rowCount; ++r) {
 					var idx = indexOf(c, r);
-					if (cellMarkers[idx] == 2) {
+					if (cellMarkers[idx] == MARKER_SPOIL
+					    && cells[idx].typeId == Item.TYPE_MIKAN)
+					{
 						SURROUNDINGS.forEach(function (d) {
 							var c2 = c + d[0];
 							var r2 = r + d[1];
@@ -600,7 +593,7 @@ MikanBox = (function () {
 								if (item
 									&& item.typeId == Item.TYPE_PRESERVATIVE)
 								{
-									cellMarkers[idx2] = 3;
+									cellMarkers[idx2] = MARKER_SPOIL;
 									cellMarkers[idx]  = 0;
 								}
 							}

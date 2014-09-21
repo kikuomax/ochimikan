@@ -425,11 +425,11 @@ MikanBox = (function () {
 			chains.forEach(function (c) {
 				c.forEach(function (loc) {
 					VELOCITIES.forEach(function (v) {
+						var move = Spray.moveLinear(v[0] * 1.5, v[1] * 1.5);
 						scheduler.schedule(new Spray(xAt(loc[0]),
 													 yAt(loc[1]),
-													 v[0] * 1.5,
-													 v[1] * 1.5,
-													 15));
+													 15,
+													 move));
 					});
 				});
 			});
@@ -469,9 +469,9 @@ MikanBox = (function () {
 								var x = xAt(c);
 								var y = yAt(r);
 								VELOCITIES.forEach(function (v) {
-									var x2 = x + 20 * v[0];
-									var y2 = y + 20 * v[1];
-									var spray = new Spray(x2, y2, -2 * v[0], -2 * v[1], 10);
+									var x2 = x + 15 * v[0];
+									var y2 = y + 15 * v[1];
+									var spray = new Spray(x2, y2, 10, Spray.moveLinear(-1.5 * v[0], -1.5 * v[1]));
 									scheduler.schedule(spray);
 								});
 							}
@@ -501,7 +501,7 @@ MikanBox = (function () {
 												for (var i = 0; i < 3; ++i) {
 													var x2 = this.x + Math.random(5) - 2;
 													var y2 = this.y + Math.random(5) - 2;
-													var spray = new Spray(x2, y2, 0, -1.5, 5);
+													var spray = new Spray(x2, y2, 5, Spray.moveLinear(0, -1.5));
 													scheduler.schedule(spray);
 												}
 

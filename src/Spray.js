@@ -3,6 +3,12 @@
  *
  * An actor whose a priority is `ActorPriorities.SPRAY`.
  *
+ * Throws an exception,
+ *  - if `x` is not a number
+ *  - or if `y` is not a number
+ *  - or if `ttl` is not a number
+ *  - if `move` is not a function
+ *
  * @class Spray
  * @constructor
  * @uses Located
@@ -12,36 +18,42 @@
  *     The x-coordinate value of the initial location.
  * @param y {number}
  *     The y-coordinate value of the initial location.
- * @param dX {number}
- *     The speed along the x-coordinate axis.
- * @param dY {number}
- *     The speed along the y-coordinate axis.
  * @param ttl {number}
  *     The time to live.
+ * @param move {function}
+ *     The function to move the `Spray` everytime `run` is called.
+ *     This function will be invoked in the context of the `Spray`.
  */
 Spray = (function () {
-	function Spray(x, y, dX, dY, ttl) {
+	function Spray(x, y, ttl, move) {
 		var self = this;
 
 		Located.call(self, x, y);
+
+		if (typeof ttl != 'number') {
+			throw 'ttl must be a number';
+		}
+		if (typeof move != 'function') {
+			throw 'move must be a function';
+		}
 
 		/**
 		 * Performs the action of this spray.
 		 *
 		 * ## Behavior
 		 *
-		 * 1. Decrements `ttl`.
-		 * 1. Moves the specified amount (`dX`, `dY`)
-		 * 1. Increments `frameIndex`.
-		 * 1. Asks `scheduler` to `schedule` this again.
+		 *  1. Decrements `ttl`.
+		 *  2. Invokes `move`.
+		 *  3. Increments `frameIndex`.
+		 *  4. Asks `scheduler` to `schedule` this again.
 		 *
 		 * ### Derivative
 		 *
-		 * - 1 `ttl` expires (<= 0)
-		 *   1. END
-		 * - 3 `frameIndex` reaches `Spray.FRAME_COUNT`.
-		 *   1. Resets `frameIndex` to 0.
-		 *   1. Proceeds to the step 3.
+		 *  - 1 `ttl` expires (<= 0)
+		 *     1. END
+		 *  - 3 `frameIndex` reaches `Spray.FRAME_COUNT`.
+		 *     1. Resets `frameIndex` to 0.
+		 *     2. Proceeds to the step 3.
 		 *
 		 * @param scheduler {ActorScheduler}
 		 *     The `ActorScheduler` which is running this actor.
@@ -50,8 +62,7 @@ Spray = (function () {
 			// moves and reschedules if ttl has not expired
 			if (ttl > 0) {
 				--ttl;
-				self.x += dX;
-				self.y += dY;
+				move.call(this);
 				++frameIndex;
 				if (frameIndex == Spray.FRAME_COUNT) {
 					frameIndex = 0;
@@ -76,24 +87,6 @@ Spray = (function () {
 		});
 
 		/**
-		 * The speed along the x-coordinate axis.
-		 *
-		 * @property dX
-		 * @type {number}
-		 * @final
-		 */
-		Object.defineProperty(self, 'dX', { value: dX });
-
-		/**
-		 * The speed along the y-coordinate axis.
-		 *
-		 * @property dY
-		 * @type {number}
-		 * @final
-		 */
-		Object.defineProperty(self, 'dY', { value: dY });
-
-		/**
 		 * The time to live.
 		 *
 		 * @property ttl
@@ -102,6 +95,14 @@ Spray = (function () {
 		Object.defineProperty(self, 'ttl', {
 			get: function () { return ttl; }
 		});
+
+		/**
+		 * The function which moves everytime `run` is called.
+		 *
+		 * @property move
+		 * @type {function}
+		 */
+		Object.defineProperty(self, 'move', { value: move });
 
 		/**
 		 * The frame index.
@@ -128,6 +129,24 @@ Spray = (function () {
 	 * @final
 	 */
 	Object.defineProperty(Spray, 'FRAME_COUNT', { value: 4 });
+
+	/**
+	 * Returns a simple move function which adds specified speed.
+	 *
+	 * @method moveLinear
+	 * @static
+	 * @param dX {number}
+	 *     The speed along the x-axis.
+	 * @param dY {number}
+	 *     The speed along the y-axis.
+	 * @return {function}
+	 *     A move function which adds `dX` and `dY` to the location of a spray.
+	 */
+	Spray.moveLinear = function (dX, dY) {
+		return function () {
+			this.translate(dX, dY);
+		};
+	};
 
 	return Spray;
 })();

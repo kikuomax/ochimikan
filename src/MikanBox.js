@@ -468,12 +468,21 @@ MikanBox = (function () {
 							if (cellMarkers[idx] == MARKER_SPOIL) {
 								var x = xAt(c);
 								var y = yAt(r);
-								VELOCITIES.forEach(function (v) {
-									var x2 = x + 15 * v[0];
-									var y2 = y + 15 * v[1];
-									var spray = new Spray(x2, y2, 10, Spray.moveLinear(-1.5 * v[0], -1.5 * v[1]));
+								for (var i = 0; i < 4; ++i) {
+									var angle = i * Math.PI / 2;
+									var move = (function (x, y, angle) {
+										return function () {
+											angle += Math.PI / 30;
+											var r = 1.5 * this.ttl
+											this.x = x + r * Math.cos(angle);
+											this.y = y + r * Math.sin(angle);
+										};
+									})(x, y, angle);
+									var x2 = x + 15 * Math.cos(angle);
+									var y2 = y + 15 * Math.sin(angle);
+									var spray = new Spray(x2, y2, 10, move);
 									scheduler.schedule(spray);
-								});
+								}
 							}
 						}
 					}

@@ -27,6 +27,11 @@ describe('MikanBox', function () {
 		expect(new MikanBox(8, 12, 1, 8, score).cellSize).toBe(1);
 	});
 
+	it('Should have rowMargin', function () {
+		expect(new MikanBox(8, 12, 32, 8, score).rowMargin).toBe(8);
+		expect(new MikanBox(8, 12, 32, 0, score).rowMargin).toBe(0);
+	});
+
 	it('Should have a dimension (width, height)', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(mikanBox.width).toBe(8 * 32);
@@ -92,6 +97,22 @@ describe('MikanBox', function () {
 		expect(function () { new MikanBox(8, 12, -1, 8, score) }).toThrow();
 	});
 
+	it('Should not have rowMargin unspecified', function () {
+		expect(function () { new MikanBox(8, 12, 32, null, score) }).toThrow();
+		expect(function () {
+			new MikanBox(8, 12, 32, undefined, score);
+		}).toThrow();
+	});
+
+	it('Should not have non-number rowMargin', function () {
+		expect(function () { new MikanBox(8, 12, 32, '8', score) }).toThrow();
+		expect(function () { new MikanBox(8, 12, 32, true, score) }).toThrow();
+	});
+
+	it('Should not have rowMargin < 0', function () {
+		expect(function () { new MikanBox(8, 12, 32, -1, score) }).toThrow();
+	});
+
 	it('Should not have score unspecified', function () {
 		expect(function () { new MikanBox(8, 12, 32, 8, null) }).toThrow();
 		expect(function () { new MikanBox(8, 12, 32, 8) }).toThrow();
@@ -104,23 +125,11 @@ describe('MikanBox', function () {
 
 	it('Should initially contain no items', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
-		for (var c = 0; c < mikanBox.columnCount; ++c) {
-			for (var r = 0; r < mikanBox.rowCount; ++r) {
-				expect(mikanBox.itemIn(c, r)).toBeNull();
+		for (var c = 0; c < 8; ++c) {
+			for (var r = 0; r < 12 + 8; ++r) {
+				expect(mikanBox.itemIn(c, r)).toBeFalsy();
 			}
 		}
-	});
-
-	it(':rowAt should interpret an y into a row', function () {
-		var mikanBox = new MikanBox(8, 12, 32, 8, score);
-		expect(mikanBox.rowAt(0)).toBe(11);
-		expect(mikanBox.rowAt(32 * 12 - 1)).toBe(0);
-		expect(mikanBox.rowAt(-1)).toBe(12);
-		expect(mikanBox.rowAt(32 * 12)).toBe(-1);
-		expect(mikanBox.rowAt(32)).toBe(10);
-		expect(mikanBox.rowAt(31)).toBe(11);
-		expect(mikanBox.rowAt(32 * 11 - 1)).toBe(1);
-		expect(mikanBox.rowAt(32 * 11)).toBe(0);
 	});
 
 	it(':columnAt should interpret an x into a column', function () {
@@ -135,6 +144,18 @@ describe('MikanBox', function () {
 		expect(mikanBox.columnAt(32 * 7)).toBe(7);
 	});
 
+	it(':rowAt should interpret an y into a row', function () {
+		var mikanBox = new MikanBox(8, 12, 32, 8, score);
+		expect(mikanBox.rowAt(0)).toBe(11);
+		expect(mikanBox.rowAt(32 * 12 - 1)).toBe(0);
+		expect(mikanBox.rowAt(-1)).toBe(12);
+		expect(mikanBox.rowAt(32 * 12)).toBe(-1);
+		expect(mikanBox.rowAt(32)).toBe(10);
+		expect(mikanBox.rowAt(31)).toBe(11);
+		expect(mikanBox.rowAt(32 * 11 - 1)).toBe(1);
+		expect(mikanBox.rowAt(32 * 11)).toBe(0);
+	});
+
 	it(':itemIn should throw an exception if a specified column is out of bounds', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(function () { mikanBox.itemIn(-1, 0) }).toThrow();
@@ -144,7 +165,7 @@ describe('MikanBox', function () {
 	it(':itemIn should throw an exception if a specified row is out of bounds', function () {
 		var mikanBox = new MikanBox(8, 12, 32, 8, score);
 		expect(function () { mikanBox.itemIn(0, -1) }).toThrow();
-		expect(function () { mikanBox.itemIn(0, 12) }).toThrow();
+		expect(function () { mikanBox.itemIn(0, 12 + 8) }).toThrow();
 	});
 });
 
@@ -207,7 +228,9 @@ describe('MikanBox placing items', function () {
 	});
 
 	it('Should not place an item if a specified row is out of bounds', function () {
-		expect(function () { mikanBox.place(item1, 0, 12, true) }).toThrow();
+		expect(function () {
+			mikanBox.place(item1, 0, 12 + 8, true);
+		}).toThrow();
 		expect(function () { mikanBox.place(item1, 0, -1, true) }).toThrow();
 	});
 

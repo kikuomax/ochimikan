@@ -31,7 +31,7 @@ Scene = (function () {
 		var mikanBox = new MikanBox(Scene.COLUMN_COUNT,
 									Scene.ROW_COUNT,
 									Scene.CELL_SIZE,
-									0,
+									Scene.ROW_MARGIN,
 									score);
 
 		/**
@@ -368,8 +368,9 @@ Scene = (function () {
 	 * @property COLUMN_COUNT
 	 * @type {number}
 	 * @static
+	 * @final
 	 */
-	Scene.COLUMN_COUNT = 8;
+	Object.defineProperty(Scene, 'COLUMN_COUNT', { value: 8 });
 
 	/**
 	 * The number of rows in a mikan box.
@@ -379,8 +380,21 @@ Scene = (function () {
 	 * @property ROW_COUNT
 	 * @type {number}
 	 * @static
+	 * @final
 	 */
-	Scene.ROW_COUNT = 12;
+	Object.defineProperty(Scene, 'ROW_COUNT', { value: 12 });
+
+	/**
+	 * The number of extra rows.
+	 *
+	 *     Scene.ROW_MARGIN = 8
+	 *
+	 * @property ROW_MARGIN
+	 * @type {number}
+	 * @static
+	 * @final
+	 */
+	Object.defineProperty(Scene, 'ROW_MARGIN', { value: 8 });
 
 	/**
 	 * The size of each cell in a mikan box.
@@ -390,8 +404,9 @@ Scene = (function () {
 	 * @property CELL_SIZE
 	 * @type {number}
 	 * @static
+	 * @final
 	 */
-	Scene.CELL_SIZE = 32;
+	Object.defineProperty(Scene, 'CELL_SIZE', { value: 32 });
 
 	return Scene;
 })();

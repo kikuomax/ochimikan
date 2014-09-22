@@ -78,6 +78,9 @@ MikanBox = (function () {
 		if (typeof cellSize !== 'number') {
 			throw 'cellSize must be a number';
 		}
+		if (typeof rowMargin !== 'number') {
+			throw 'rowMargin must be a number';
+		}
 		if (columnCount <= 0) {
 			throw 'columnCount must be > 0 but ' + columnCount;
 		}
@@ -86,6 +89,9 @@ MikanBox = (function () {
 		}
 		if (cellSize <= 0) {
 			throw 'cellSize must be > 0 but ' + cellSize;
+		}
+		if (rowMargin < 0) {
+			throw 'rowMargin must be >= 0 but ' + rowMargin;
 		}
 		if (!Score.isClassOf(score)) {
 			throw 'score must be specified';
@@ -97,7 +103,8 @@ MikanBox = (function () {
 		cellSize    = Math.floor(cellSize);
 
 		// creates the cells where items are placed
-		var cells = new Array(columnCount * rowCount);
+		var maxRowCount = rowCount + rowMargin;
+		var cells = new Array(columnCount * maxRowCount);
 		for (var i = 0; i < cells.length; ++i) {
 			cells[i] = null;
 		}
@@ -105,18 +112,21 @@ MikanBox = (function () {
 		/**
 		 * Renders this `MikanBox`.
 		 *
-		 * Renders each item in this mikan box.
+		 * Renders visible items in this mikan box.
 		 *
 		 * @method render
 		 * @param context {canvas context}
 		 *     The context in which this mikan box is rendered.
 		 */
 		Renderable.call(self, function (context) {
-			cells.forEach(function (item) {
-				if (item != null) {
-					item.render(context);
+			for (var c = 0; c < columnCount; ++c) {
+				for (var r = 0; r < rowCount; ++r) {
+					var item = cells[indexOf(c, r)];
+					if (item) {
+						item.render(context);
+					}
 				}
-			});
+			}
 		});
 
 		/**
@@ -145,6 +155,15 @@ MikanBox = (function () {
 		 * @final
 		 */
 		Object.defineProperty(self, 'cellSize', { value: cellSize });
+
+		/**
+		 * The number of extra rows which stack items above this `MikanBox`.
+		 *
+		 * @property rowMargin
+		 * @type {number}
+		 * @final
+		 */
+		Object.defineProperty(self, 'rowMargin', { value: rowMargin });
 
 		/**
 		 * The width (in pixels) of this `MikanBox`.
@@ -208,7 +227,7 @@ MikanBox = (function () {
 		 *
 		 * Throws an exception
 		 *  - if `column` < 0 or `column` >= `columnCount`
-		 *  - or if `row` < 0 or `row` >= `rowCount`
+		 *  - or if `row` < 0 or `row` >= `rowCount + rowMargin`
 		 *
 		 * @method itemIn
 		 * @param column {number}
@@ -234,7 +253,7 @@ MikanBox = (function () {
 		 * Throws an exception
 		 *  - if `item` is not an `Item`
 		 *  - or if `column < 0` or `column >= columnCount`
-		 *  - or if `row < 0` or `row >= rowCount`
+		 *  - or if `row < 0` or `row >= rowCount + rowMargin`
 		 *  - or if other item is already in the cell (`column`, `row`)
 		 *
 		 * @method place
@@ -286,7 +305,7 @@ MikanBox = (function () {
 			var dropper = new Actor(ActorPriorities.DROP, function (scheduler) {
 				for (var c = 0; c < columnCount; ++c) {
 					var height = 0;
-					for (var r = 0; r < rowCount; ++r) {
+					for (var r = 0; r < maxRowCount; ++r) {
 						var idx = indexOf(c, r);
 						var item = cells[idx];
 						if (item != null) {
@@ -372,10 +391,10 @@ MikanBox = (function () {
 		 *     locations (column, row) of chained mikans.
 		 */
 		self.chainMikans = function () {
-			var chainCells = new Array(columnCount * rowCount);
+			var chainCells = new Array(columnCount * maxRowCount);
 			var chains = [];
 			for (var c = 0; c < columnCount; ++c) {
-				for (var r = 0; r < rowCount; ++r) {
+				for (var r = 0; r < maxRowCount; ++r) {
 					// starts chaining from a maximally damaged mikan
 					// but avoids chaining already chained mikans
 					var idx = indexOf(c, r);
@@ -461,14 +480,14 @@ MikanBox = (function () {
 		 */
 		self.scheduleToSpoil = function (chains, scheduler) {
 			// marks cells
-			var cellMarkers = new Array(columnCount * rowCount);
+			var cellMarkers = new Array(columnCount * maxRowCount);
 			self.markSpoilingTargets(chains, cellMarkers);
 			self.markAbsorbers(cellMarkers);
 			// absorbs sprays
 			var absorber =
 				new Actor(ActorPriorities.ABSORB, function (scheduler) {
 					for (var c = 0; c < columnCount; ++c) {
-						for (var r = 0; r < rowCount; ++r) {
+						for (var r = 0; r < maxRowCount; ++r) {
 							var idx = indexOf(c, r);
 							if (cellMarkers[idx] == MARKER_SPOIL) {
 								var x = xAt(c);
@@ -497,7 +516,7 @@ MikanBox = (function () {
 			var spoiler =
 				new Actor(ActorPriorities.SPOIL, function (scheduler) {
 					for (var c = 0; c < columnCount; ++c) {
-						for (var r = 0; r < rowCount; ++r) {
+						for (var r = 0; r < maxRowCount; ++r) {
 							var idx = indexOf(c, r);
 							if (cellMarkers[idx] == MARKER_SPOIL) {
 								var item = cells[idx];
@@ -525,7 +544,6 @@ MikanBox = (function () {
 										scheduler.schedule(item);
 									})(cells[idx], 3);
 									cells[idx] = null;
-
 								}
 							}
 						}
@@ -564,9 +582,7 @@ MikanBox = (function () {
 					SURROUNDINGS.forEach(function (d) {
 						var column = loc[0] + d[0];
 						var row    = loc[1] + d[1];
-						if (0 <= column && column < columnCount
-							&& 0 <= row && row < rowCount)
-						{
+						if (isValidCell(column, row)) {
 							var idx = indexOf(column, row);
 							var item = cells[idx];
 							if (cellMarkers[idx] !== MARKER_CHAIN && item) {
@@ -591,7 +607,7 @@ MikanBox = (function () {
 		 */
 		self.markAbsorbers = function (cellMarkers) {
 			for (var c = 0; c < columnCount; ++c) {
-				for (var r = 0; r < rowCount; ++r) {
+				for (var r = 0; r < maxRowCount; ++r) {
 					var idx = indexOf(c, r);
 					if (cellMarkers[idx] == MARKER_SPOIL
 					    && cells[idx].typeId == Item.TYPE_MIKAN)
@@ -599,9 +615,7 @@ MikanBox = (function () {
 						SURROUNDINGS.forEach(function (d) {
 							var c2 = c + d[0];
 							var r2 = r + d[1];
-							if (0 <= c2 && c2 < columnCount
-								&& 0 <= r2 && r2 < rowCount)
-							{
+							if (isValidCell(c2, r2)) {
 								var idx2 = indexOf(c2, r2);
 								var item = cells[idx2];
 								if (item
@@ -630,7 +644,7 @@ MikanBox = (function () {
 		 *     The index of the cell (`column`, `row`).
 		 */
 		function indexOf(column, row) {
-			return row + (column * rowCount);
+			return row + (column * maxRowCount);
 		}
 
 		/**
@@ -638,7 +652,7 @@ MikanBox = (function () {
 		 *
 		 * A valid cell is
 		 *  - 0 <= `column` < `columnCount`
-		 *  - 0 <= `row` < `rowCount`
+		 *  - 0 <= `row` < `maxRowCount`
 		 *
 		 * @method isValidCell
 		 * @private
@@ -651,7 +665,7 @@ MikanBox = (function () {
 		 */
 		function isValidCell(column, row) {
 			return column >= 0 && column < columnCount
-				&& row >= 0 && row < rowCount;
+				&& row >= 0 && row < maxRowCount;
 		}
 
 		/**
@@ -659,7 +673,7 @@ MikanBox = (function () {
 		 *
 		 * Throws an exception
 		 * - if `column` < 0 or `column` >= `columnCount`
-		 * - or if `row` < 0 or `row` >= `rowCount`
+		 * - or if `row` < 0 or `row` >= `maxRowCount`
 		 *
 		 * @method checkCell
 		 * @private
@@ -673,8 +687,9 @@ MikanBox = (function () {
 				throw "column must be in [0, "
 					+ (columnCount - 1) + "] but " + column;
 			}
-			if (row < 0 || row >= rowCount) {
-				throw "row must be in [0, " + (rowCount - 1) + "] but " + row;
+			if (row < 0 || row >= maxRowCount) {
+				throw "row must be in [0, "
+					+ (maxRowCount - 1) + "] but " + row;
 			}
 		}
 

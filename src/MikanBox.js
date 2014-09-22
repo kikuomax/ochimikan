@@ -5,18 +5,19 @@
  *
  * NOTE: (column, row)=(0, 0) comes to the bottom-left in the screen
  *       coordinate and (column, row)=(columnCount-1, rowCount-1) comes to
- *       the top-right in the screen coordinate.
+ *       the top-right in the screen coordinate. Rows from `rowCount` to
+ *       `rowCount + rowMargin - 1` are not visible in the screen.
  *
  * Throws an exception,
  *  - if `columnCount` is not a number
  *  - or if `rowCount` is not a number
- *  - or if `cellSize` is not a number
  *  - or if `rowMargin` is not a number
+ *  - or if `cellSize` is not a number
  *  - or if `score` is not a `Score`
  *  - or if `columnCount` <= 0
  *  - or if `rowCount` <= 0
- *  - or if `cellSize` <= 0
  *  - or if `rowMargin` < 0
+ *  - or if `cellSize` <= 0
  *
  * ## Scenarios
  *
@@ -34,10 +35,10 @@
  *     The number of columns in the mikan box.
  * @param rowCount {number}
  *     The number of rows in the mikan box.
- * @param cellSize {number}
- *     The size (in pixels) of each cell in the mikan box.
  * @param rowMargin {number}
  *     The number of extra rows which store items stacked above the mikan box.
+ * @param cellSize {number}
+ *     The size (in pixels) of each cell in the mikan box.
  * @param score {Score}
  *     The score to be associated with the mikan box.
  */
@@ -65,7 +66,7 @@ MikanBox = (function () {
 	var FALLING_SPEED = 15;
 
 	// constructor
-	function MikanBox(columnCount, rowCount, cellSize, rowMargin, score) {
+	function MikanBox(columnCount, rowCount, rowMargin, cellSize, score) {
 		var self = this;
 
 		// verifies arguments
@@ -75,11 +76,11 @@ MikanBox = (function () {
 		if (typeof rowCount !== 'number') {
 			throw 'rowCount must be a number';
 		}
-		if (typeof cellSize !== 'number') {
-			throw 'cellSize must be a number';
-		}
 		if (typeof rowMargin !== 'number') {
 			throw 'rowMargin must be a number';
+		}
+		if (typeof cellSize !== 'number') {
+			throw 'cellSize must be a number';
 		}
 		if (columnCount <= 0) {
 			throw 'columnCount must be > 0 but ' + columnCount;
@@ -87,11 +88,11 @@ MikanBox = (function () {
 		if (rowCount <= 0) {
 			throw 'rowCount must be > 0 but ' + rowCount;
 		}
-		if (cellSize <= 0) {
-			throw 'cellSize must be > 0 but ' + cellSize;
-		}
 		if (rowMargin < 0) {
 			throw 'rowMargin must be >= 0 but ' + rowMargin;
+		}
+		if (cellSize <= 0) {
+			throw 'cellSize must be > 0 but ' + cellSize;
 		}
 		if (!Score.isClassOf(score)) {
 			throw 'score must be specified';
@@ -148,15 +149,6 @@ MikanBox = (function () {
 		Object.defineProperty(self, 'rowCount', { value: rowCount });
 
 		/**
-		 * The size (in pixels) of each cell in this `MikanBox`.
-		 *
-		 * @property cellSize
-		 * @type {number}
-		 * @final
-		 */
-		Object.defineProperty(self, 'cellSize', { value: cellSize });
-
-		/**
 		 * The number of extra rows which stack items above this `MikanBox`.
 		 *
 		 * @property rowMargin
@@ -164,6 +156,15 @@ MikanBox = (function () {
 		 * @final
 		 */
 		Object.defineProperty(self, 'rowMargin', { value: rowMargin });
+
+		/**
+		 * The size (in pixels) of each cell in this `MikanBox`.
+		 *
+		 * @property cellSize
+		 * @type {number}
+		 * @final
+		 */
+		Object.defineProperty(self, 'cellSize', { value: cellSize });
 
 		/**
 		 * The width (in pixels) of this `MikanBox`.

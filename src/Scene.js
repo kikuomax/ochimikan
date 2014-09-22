@@ -30,8 +30,8 @@ Scene = (function () {
 
 		var mikanBox = new MikanBox(Scene.COLUMN_COUNT,
 									Scene.ROW_COUNT,
-									Scene.CELL_SIZE,
 									Scene.ROW_MARGIN,
+									Scene.CELL_SIZE,
 									score);
 
 		/**

@@ -225,13 +225,14 @@ MikanBox = (function () {
 		};
 
 		/**
-		 * Places the specified item in the specified cell of this `MikanBox`.
+		 * Places a specified item in a specified cell of this `MikanBox`.
 		 *
-		 * The location of `item` is arranged so that its top-left corner comes
-		 * to the top-left corner of the specified cell in a screen.
+		 * If `align` if true, the location of `item` is arranged so that
+		 * its top-left corner comes to the top-left corner of the specified
+		 * cell in a screen.
 		 *
-		 * Thorows an exception
-		 *  - if `item` is not a `Item`
+		 * Throws an exception
+		 *  - if `item` is not an `Item`
 		 *  - or if `column < 0` or `column >= columnCount`
 		 *  - or if `row < 0` or `row >= rowCount`
 		 *  - or if other item is already in the cell (`column`, `row`)
@@ -243,8 +244,10 @@ MikanBox = (function () {
 		 *     The column of the cell in which `item` is to be placed.
 		 * @param row {number}
 		 *     The row of the cell in which `item` is to be placed.
+		 * @param align {boolean}
+		 *     Whether the location of `item` is to be aligned to the cell.
 		 */
-		self.place = function (item, column, row) {
+		self.place = function (item, column, row, align) {
 			if (item.typeId == null) {
 				throw 'item must be a Item';
 			}
@@ -254,7 +257,9 @@ MikanBox = (function () {
 			if (cells[idx] != null) {
 				throw 'cell [' + column + ', ' + row + '] is not vacant';
 			}
-			item.locate(xAt(column), yAt(row));
+			if (align) {
+				item.locate(xAt(column), yAt(row));
+			}
 			cells[idx] = item;
 		};
 
@@ -737,7 +742,7 @@ MikanBox = (function () {
 					item.y += FALLING_SPEED;
 					scheduler.schedule(item);
 				} else {
-					self.place(item, self.columnAt(item.x), dstRow);
+					self.place(item, self.columnAt(item.x), dstRow, true);
 				}
 			});
 			return item;

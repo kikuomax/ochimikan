@@ -135,7 +135,7 @@ Scene = (function () {
 				if (moved) {
 					self.schedule(this);
 				} else {
-					doReleaseControl();
+					doReleaseControl(true);
 				}
 			}
 		});
@@ -214,7 +214,7 @@ Scene = (function () {
 		 * @method releaseControl
 		 */
 		self.releaseControl = function () {
-			scheduleInput(doReleaseControl);
+			scheduleInput(doReleaseControl);  // align=false
 		};
 
 		// Schedules a specified function as an input Actor.
@@ -331,15 +331,22 @@ Scene = (function () {
 			}
 		}
 
-		// Releases control of grabbed items.
-		function doReleaseControl() {
+		/**
+		 * Releases control of grabbed items.
+		 *
+		 * @method doReleaseControl
+		 * @private
+		 * @param align {boolean}
+		 *     Whether items are aligned to cells.
+		 */
+		function doReleaseControl(align) {
 			if (grabbedItems) {
 				// places the items
 				grabbedItems.forEach(function (item) {
 					var column = mikanBox.columnAt(item.x);
 					var row    = mikanBox.rowAt(item.y);
 					try {
-						mikanBox.place(item, column, row);
+						mikanBox.place(item, column, row, align);
 					} catch (err) {
 						console.error(err);
 					}

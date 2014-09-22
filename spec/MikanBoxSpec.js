@@ -146,75 +146,87 @@ describe('MikanBox', function () {
 		expect(function () { mikanBox.itemIn(0, -1) }).toThrow();
 		expect(function () { mikanBox.itemIn(0, 12) }).toThrow();
 	});
-
-	it(':place should throw an exception if a specified cell is not in it', function () {
-		var mikanBox = new MikanBox(8, 12, 32, 8, score);
-		var mikan = new Mikan(0);
-		expect(function () { mikanBox.place(mikan, -1, 0) }).toThrow();
-		expect(function () { mikanBox.place(mikan, 8, 0) }).toThrow();
-		expect(function () { mikanBox.place(mikan, 0, -1) }).toThrow();
-		expect(function () { mikanBox.place(mikan, 0, 12) }).toThrow();
-	});
 });
 
-describe('MikanBox placing items:', function () {
+describe('MikanBox placing items', function () {
 	var mikanBox;
-	var mikan1, mikan2;
-	var preservative1, preservative2;
+	var item1, item2, item3, item4;
 
 	beforeEach(function () {
 		mikanBox = new MikanBox(8, 12, 32, 8, new Score());
-		mikan1 = new Mikan(0);
-		mikan2 = new Mikan(1);
-		preservative1 = new Preservative();
-		preservative2 = new Preservative();
+		item1 = new Mikan(0);
+		item2 = new Mikan(1);
+		item3 = new Preservative();
+		item4 = new Preservative();
 	});
 
-	it('Should place an item in it and arrange the location of it', function () {
-		mikanBox.place(mikan1, 0, 0);
-		mikanBox.place(mikan2, 7, 0);
-		mikanBox.place(preservative1, 0, 11);
-		mikanBox.place(preservative2, 7, 11);
-		expect(mikanBox.itemIn(0, 0)).toBe(mikan1);
-		expect(mikanBox.itemIn(7, 0)).toBe(mikan2);
-		expect(mikanBox.itemIn(0, 11)).toBe(preservative1);
-		expect(mikanBox.itemIn(7, 11)).toBe(preservative2);
-		expect(mikan1.x).toEqual(0);
-		expect(mikan1.y).toEqual(11 * 32);
-		expect(mikan2.x).toEqual(7 * 32);
-		expect(mikan2.y).toEqual(11 * 32);
-		expect(preservative1.x).toEqual(0);
-		expect(preservative1.y).toEqual(0);
-		expect(preservative2.x).toEqual(7 * 32);
-		expect(preservative2.y).toEqual(0);
+	it('Should place an item in a specified cell and not arrange the location of it if align is false', function () {
+		item2.locate(100,  20);
+		item3.locate(200, -10);
+		item4.locate(50,   50);
+		mikanBox.place(item1, 0,  0, false);
+		mikanBox.place(item2, 7,  0, false);
+		mikanBox.place(item3, 0, 11, false);
+		mikanBox.place(item4, 7, 11, false);
+		expect(mikanBox.itemIn(0,  0)).toBe(item1);
+		expect(mikanBox.itemIn(7,  0)).toBe(item2);
+		expect(mikanBox.itemIn(0, 11)).toBe(item3);
+		expect(mikanBox.itemIn(7, 11)).toBe(item4);
+		expect(item1.x).toEqual(0);
+		expect(item1.y).toEqual(0);
+		expect(item2.x).toEqual(100);
+		expect(item2.y).toEqual(20);
+		expect(item3.x).toEqual(200);
+		expect(item3.y).toEqual(-10);
+		expect(item4.x).toEqual(50);
+		expect(item4.y).toEqual(50);
+	});
+
+	it('Should place an item in a specified cell and arrange the location of it if align is true', function () {
+		mikanBox.place(item1, 0,  0, true);
+		mikanBox.place(item2, 7,  0, true);
+		mikanBox.place(item3, 0, 11, true);
+		mikanBox.place(item4, 7, 11, true);
+		expect(mikanBox.itemIn(0,  0)).toBe(item1);
+		expect(mikanBox.itemIn(7,  0)).toBe(item2);
+		expect(mikanBox.itemIn(0, 11)).toBe(item3);
+		expect(mikanBox.itemIn(7, 11)).toBe(item4);
+		expect(item1.x).toEqual(0);
+		expect(item1.y).toEqual(11 * 32);
+		expect(item2.x).toEqual(7 * 32);
+		expect(item2.y).toEqual(11 * 32);
+		expect(item3.x).toEqual(0);
+		expect(item3.y).toEqual(0);
+		expect(item4.x).toEqual(7 * 32);
+		expect(item4.y).toEqual(0);
 	});
 
 	it('Should not place an item if a specified column is out of bounds', function () {
-		expect(function () { mikanBox.place(mikan1, 8, 0) }).toThrow();
-		expect(function () { mikanBox.place(mikan1, -1, 0) }).toThrow();
+		expect(function () { mikanBox.place(item1,  8, 0, true) }).toThrow();
+		expect(function () { mikanBox.place(item1, -1, 0, true) }).toThrow();
 	});
 
 	it('Should not place an item if a specified row is out of bounds', function () {
-		expect(function () { mikanBox.place(mikan1, 0, 12) }).toThrow();
-		expect(function () { mikanBox.place(mikan1, 0, -1) }).toThrow();
+		expect(function () { mikanBox.place(item1, 0, 12, true) }).toThrow();
+		expect(function () { mikanBox.place(item1, 0, -1, true) }).toThrow();
 	});
 
 	it('Should not place an item if a specified cell is not vacant', function () {
-		mikanBox.place(mikan1, 0, 0);
-		expect(function () { mikanBox.place(mikan2, 0, 0) }).toThrow();
-		mikanBox.place(preservative1, 7, 11);
-		expect(function () { mikanBox.place(preservative2, 7, 11) }).toThrow();
+		mikanBox.place(item1, 0, 0, true);
+		expect(function () { mikanBox.place(item2, 0, 0, true) }).toThrow();
+		mikanBox.place(item3, 7, 11, true);
+		expect(function () { mikanBox.place(item4, 7, 11, true) }).toThrow();
 	});
 
 	it('Should not place a non-Item object', function () {
-		expect(function () { mikanBox.place({}, 0, 0) }).toThrow();
+		expect(function () { mikanBox.place({}, 0, 0, true) }).toThrow();
 		expect(function () {
-			mikanBox.place(new Located(0, 0), 0, 0);
+			mikanBox.place(new Located(0, 0), 0, 0, true);
 		}).toThrow();
 	});
 });
 
-describe('MikanBox dropping Items:', function () {
+describe('MikanBox dropping Items', function () {
 	var mikanBox;
 	var scheduler;
 	var item1, item2, item3;
@@ -231,7 +243,7 @@ describe('MikanBox dropping Items:', function () {
 		// | o
 		// | .
 		// +--
-		mikanBox.place(item1, 0, 1);
+		mikanBox.place(item1, 0, 1, true);
 		// drops
 		mikanBox.scheduleToDrop(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -256,9 +268,9 @@ describe('MikanBox dropping Items:', function () {
 		// | o . . . . . . . |
 		// | . . . . . . . . |
 		// +-----------------+
-		mikanBox.place(item1, 0, 1);
-		mikanBox.place(item2, 7, 11);
-		mikanBox.place(item3, 3, 5);
+		mikanBox.place(item1, 0,  1, true);
+		mikanBox.place(item2, 7, 11, true);
+		mikanBox.place(item3, 3,  5, true);
 		// drops
 		mikanBox.scheduleToDrop(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -289,9 +301,9 @@ describe('MikanBox dropping Items:', function () {
 		// | .
 		// | o
 		// +--
-		mikanBox.place(item1, 0, 0);
-		mikanBox.place(item2, 0, 2);
-		mikanBox.place(item3, 0, 3);
+		mikanBox.place(item1, 0, 0, true);
+		mikanBox.place(item2, 0, 2, true);
+		mikanBox.place(item3, 0, 3, true);
 		// drops
 		mikanBox.scheduleToDrop(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -321,10 +333,10 @@ describe('MikanBox chaining Mikans:', function () {
 
 	it('Should make a horiztontal chain comprising 4 mikans', function () {
 		// o o o o
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 1, 0);
-		mikanBox.place(mikans[2], 2, 0);
-		mikanBox.place(mikans[3], 3, 0);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 1, 0, true);
+		mikanBox.place(mikans[2], 2, 0, true);
+		mikanBox.place(mikans[3], 3, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(4);
@@ -337,10 +349,10 @@ describe('MikanBox chaining Mikans:', function () {
 	it('Should make a chain comprising 4 mikans at the top-right corner', function () {
 		// o o
 		// o o
-		mikanBox.place(mikans[0], 6, 10);
-		mikanBox.place(mikans[1], 7, 10);
-		mikanBox.place(mikans[2], 6, 11);
-		mikanBox.place(mikans[3], 7, 11);
+		mikanBox.place(mikans[0], 6, 10, true);
+		mikanBox.place(mikans[1], 7, 10, true);
+		mikanBox.place(mikans[2], 6, 11, true);
+		mikanBox.place(mikans[3], 7, 11, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(4);
@@ -355,10 +367,10 @@ describe('MikanBox chaining Mikans:', function () {
 		// o
 		// o
 		// o
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 0, 1);
-		mikanBox.place(mikans[2], 0, 2);
-		mikanBox.place(mikans[3], 0, 3);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 0, 1, true);
+		mikanBox.place(mikans[2], 0, 2, true);
+		mikanBox.place(mikans[3], 0, 3, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(4);
@@ -372,11 +384,11 @@ describe('MikanBox chaining Mikans:', function () {
 		// . . o
 		// o o o
 		// o . .
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 0, 1);
-		mikanBox.place(mikans[2], 1, 1);
-		mikanBox.place(mikans[3], 2, 1);
-		mikanBox.place(mikans[4], 2, 2);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 0, 1, true);
+		mikanBox.place(mikans[2], 1, 1, true);
+		mikanBox.place(mikans[3], 2, 1, true);
+		mikanBox.place(mikans[4], 2, 2, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(5);
@@ -391,11 +403,11 @@ describe('MikanBox chaining Mikans:', function () {
 		// o . .
 		// o o o
 		// . . o
-		mikanBox.place(mikans[0], 2, 0);
-		mikanBox.place(mikans[1], 0, 1);
-		mikanBox.place(mikans[2], 1, 1);
-		mikanBox.place(mikans[3], 2, 1);
-		mikanBox.place(mikans[4], 0, 2);
+		mikanBox.place(mikans[0], 2, 0, true);
+		mikanBox.place(mikans[1], 0, 1, true);
+		mikanBox.place(mikans[2], 1, 1, true);
+		mikanBox.place(mikans[3], 2, 1, true);
+		mikanBox.place(mikans[4], 0, 2, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(5);
@@ -410,11 +422,11 @@ describe('MikanBox chaining Mikans:', function () {
 		// . o .
 		// o o o
 		// . o .
-		mikanBox.place(mikans[0], 3, 4);
-		mikanBox.place(mikans[1], 2, 5);
-		mikanBox.place(mikans[2], 3, 5);
-		mikanBox.place(mikans[3], 4, 5);
-		mikanBox.place(mikans[4], 3, 6);
+		mikanBox.place(mikans[0], 3, 4, true);
+		mikanBox.place(mikans[1], 2, 5, true);
+		mikanBox.place(mikans[2], 3, 5, true);
+		mikanBox.place(mikans[3], 4, 5, true);
+		mikanBox.place(mikans[4], 3, 6, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(5);
@@ -429,12 +441,12 @@ describe('MikanBox chaining Mikans:', function () {
 		// o o o
 		// o . o
 		// . . o
-		mikanBox.place(mikans[0], 2, 0);
-		mikanBox.place(mikans[3], 0, 1);
-		mikanBox.place(mikans[1], 2, 1);
-		mikanBox.place(mikans[2], 0, 2);
-		mikanBox.place(mikans[4], 1, 2);
-		mikanBox.place(mikans[5], 2, 2);
+		mikanBox.place(mikans[0], 2, 0, true);
+		mikanBox.place(mikans[3], 0, 1, true);
+		mikanBox.place(mikans[1], 2, 1, true);
+		mikanBox.place(mikans[2], 0, 2, true);
+		mikanBox.place(mikans[4], 1, 2, true);
+		mikanBox.place(mikans[5], 2, 2, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(6);
@@ -448,37 +460,37 @@ describe('MikanBox chaining Mikans:', function () {
 
 	it('Should not make a chain comprising 2 mikans', function () {
 		// o o
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 1, 0);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 1, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains).toEqual([]);
 	});
 
 	it('Should not make a chain comprising 3 mikans', function () {
 		// o o o
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 1, 0);
-		mikanBox.place(mikans[2], 2, 0);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 1, 0, true);
+		mikanBox.place(mikans[2], 2, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains).toEqual([]);
 	});
 
 	it('Should not chain mikans which are not damaged', function () {
 		// x x x x
-		mikanBox.place(new Mikan(0), 0, 0);
-		mikanBox.place(new Mikan(0), 1, 0);
-		mikanBox.place(new Mikan(0), 2, 0);
-		mikanBox.place(new Mikan(0), 3, 0);
+		mikanBox.place(new Mikan(0), 0, 0, true);
+		mikanBox.place(new Mikan(0), 1, 0, true);
+		mikanBox.place(new Mikan(0), 2, 0, true);
+		mikanBox.place(new Mikan(0), 3, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains).toEqual([]);
 	});
 
 	it('Should not chain mikans which are not maximally damaged', function () {
 		// x x x x
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 3, 0);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 3, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains).toEqual([]);
 	});
@@ -487,15 +499,15 @@ describe('MikanBox chaining Mikans:', function () {
 		// o x x
 		// o x o
 		// o o x
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0);
-		mikanBox.place(mikans[2], 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 1);
-		mikanBox.place(mikans[3], 2, 1);
-		mikanBox.place(mikans[4], 0, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 2);
+		mikanBox.place(mikans[0],                       0, 0, true);
+		mikanBox.place(mikans[1],                       1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0, true);
+		mikanBox.place(mikans[2],                       0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 1, true);
+		mikanBox.place(mikans[3],                       2, 1, true);
+		mikanBox.place(mikans[4],                       0, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 2, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(1);
 		expect(chains[0].length).toBe(4);
@@ -510,14 +522,14 @@ describe('MikanBox chaining Mikans:', function () {
 		// o . . . . .
 		// o . . . . .
 		// o . o o o o
-		mikanBox.place(mikans[0], 0, 0);
-		mikanBox.place(mikans[1], 0, 1);
-		mikanBox.place(mikans[2], 0, 2);
-		mikanBox.place(mikans[3], 0, 3);
-		mikanBox.place(mikans[4], 2, 0);
-		mikanBox.place(mikans[5], 3, 0);
-		mikanBox.place(mikans[6], 4, 0);
-		mikanBox.place(mikans[7], 5, 0);
+		mikanBox.place(mikans[0], 0, 0, true);
+		mikanBox.place(mikans[1], 0, 1, true);
+		mikanBox.place(mikans[2], 0, 2, true);
+		mikanBox.place(mikans[3], 0, 3, true);
+		mikanBox.place(mikans[4], 2, 0, true);
+		mikanBox.place(mikans[5], 3, 0, true);
+		mikanBox.place(mikans[6], 4, 0, true);
+		mikanBox.place(mikans[7], 5, 0, true);
 		var chains = mikanBox.chainMikans();
 		expect(chains.length).toBe(2);
 		expect(chains[0].length).toBe(4);
@@ -563,10 +575,10 @@ describe('MikanBox erasing Mikans', function () {
 		// | 3 3
 		// | 3 3
 		// +----
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 1);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 1, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -585,13 +597,13 @@ describe('MikanBox erasing Mikans', function () {
 		// | 3 1
 		// | 3 2
 		// +----
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 3);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 1, 2);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 3, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 1, 2, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -615,13 +627,13 @@ describe('MikanBox erasing Mikans', function () {
 		// p1 m3 |
 		// p0 m3 |
 		// ------+
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 3);
-		mikanBox.place(createDamagedPreservative(4), 6, 0);
-		mikanBox.place(createDamagedPreservative(3), 6, 1);
-		mikanBox.place(createDamagedPreservative(2), 6, 2);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  7, 3, true);
+		mikanBox.place(createDamagedPreservative(4), 6, 0, true);
+		mikanBox.place(createDamagedPreservative(3), 6, 1, true);
+		mikanBox.place(createDamagedPreservative(2), 6, 2, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -643,13 +655,13 @@ describe('MikanBox erasing Mikans', function () {
 		// | 2 1 0 .
 		// | 3 3 3 3
 		// +--------
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     2, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     3, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 2, 1);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     2, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     3, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 2, 1, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.ERASE);
@@ -683,15 +695,15 @@ describe('MikanBox erasing Mikans', function () {
 		// | 3 2 2 .
 		// | 3 3 2 3
 		// +--------
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 1);
-		mikanBox.place(new Mikan(0), 2, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 3, 0);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 1, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 2, 1, true);
+		mikanBox.place(new Mikan(0),                    2, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     3, 0, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.ERASE);
@@ -763,13 +775,13 @@ describe('MikanBox erasing Mikans', function () {
 		// | m3 p3
 		// | m3 p3
 		// +------
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 0, 3);
-		mikanBox.place(createDamagedPreservative(1), 1, 0);
-		mikanBox.place(createDamagedPreservative(1), 1, 1);
-		mikanBox.place(createDamagedPreservative(1), 1, 2);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  0, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),  0, 3, true);
+		mikanBox.place(createDamagedPreservative(1), 1, 0, true);
+		mikanBox.place(createDamagedPreservative(1), 1, 1, true);
+		mikanBox.place(createDamagedPreservative(1), 1, 2, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -793,17 +805,17 @@ describe('MikanBox erasing Mikans', function () {
 		// | p0 m3 m0  .  .
 		// | m0 m3 m0 p0 p0
 		// +------------
-		mikanBox.place(new Mikan(0), 0, 0);
-		mikanBox.place(new Preservative(), 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 2);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 3);
-		mikanBox.place(new Mikan(0), 2, 0);
-		mikanBox.place(new Mikan(0), 2, 1);
-		mikanBox.place(new Mikan(0), 2, 2);
-		mikanBox.place(new Preservative(), 3, 0);
-		mikanBox.place(new Preservative(), 4, 0);
+		mikanBox.place(new Mikan(0),                0, 0, true);
+		mikanBox.place(new Preservative(),          0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 2, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE), 1, 3, true);
+		mikanBox.place(new Mikan(0),                2, 0, true);
+		mikanBox.place(new Mikan(0),                2, 1, true);
+		mikanBox.place(new Mikan(0),                2, 2, true);
+		mikanBox.place(new Preservative(),          3, 0, true);
+		mikanBox.place(new Preservative(),          4, 0, true);
 		// erases
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
@@ -829,10 +841,10 @@ describe('MikanBox erasing Mikans', function () {
 		// | 3 1
 		// | 4 2
 		// +----
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 1);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 0);
-		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 1, 1);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE),     0, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 1), 0, 1, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 2), 1, 0, true);
+		mikanBox.place(new Mikan(Mikan.MAX_DAMAGE - 3), 1, 1, true);
 		mikanBox.scheduleToErase(scheduler);
 		runUntilActorHasRun(scheduler, ActorPriorities.CONTROL);
 		// | 3 1
@@ -854,9 +866,9 @@ describe('MikanBox as a Renderable:', function () {
 		mikan1 = mockMikan();
 		mikan2 = mockMikan();
 		mikan3 = mockMikan();
-		mikanBox.place(mikan1, 0, 0);
-		mikanBox.place(mikan2, 7, 11);
-		mikanBox.place(mikan3, 3, 7);
+		mikanBox.place(mikan1, 0,  0, true);
+		mikanBox.place(mikan2, 7, 11, true);
+		mikanBox.place(mikan3, 3,  7, true);
 	});
 
 	it('Should render placed mikans', function () {

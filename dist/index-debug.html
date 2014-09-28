@@ -130,7 +130,6 @@
         };
 
         var statistics = new Statistics();
-        var scoreObj = new Score(statistics);
 
         var canvas = document.getElementById('mikanCanvas');
         var game = Game.start(TestCanvas.augment(canvas), new ResourceManager(), statistics);
@@ -138,10 +137,22 @@
         function ViewModel() {
             var self = this;
 
-            self.score = ko.observable(scoreObj.score);
+            self.score = ko.observable(statistics.score);
+            self.level = ko.observable(statistics.level + 1);
 
-            scoreObj.addObserver(function () {
-                self.score(scoreObj.score);
+            statistics.addObserver(function (id) {
+                switch (id) {
+                case 'scoreUpdated':
+                    self.score(statistics.score);
+                    break;
+                case 'levelUpdated':
+                    self.level(statistics.level + 1);
+                    break;
+                case 'statisticsReset':
+                    self.score(statistics.score);
+                    self.level(statistics.level + 1);
+                    break;
+                }
             });
 
             self.restart = function () {
@@ -156,10 +167,20 @@
 </head>
 <body> 
   <div>
-    Score: <span data-bind="text: score"></span>
+    <span style="float: left">Score: </span>
+    <span style="float: left; width: 5em; text-align: right"
+          data-bind="text: score"></span>
+    <span style="float: left; margin-left: 1em">Level: </span>
+    <span style="float: left; width: 2em; text-align: right"
+          data-bind="text: level"></span>
   </div>
-  <canvas id="mikanCanvas" style="background-image: url('imgs/background.png')">
-  </canvas>
-  <button data-bind="click: restart">Restart</button>
+  <div style="clear: both">
+    <canvas id="mikanCanvas"
+            style="background-image: url('imgs/background.png')">
+    </canvas>
+  </div>
+  <div>
+    <button data-bind="click: restart">Restart</button>
+  </div>
 </body>
 </html>

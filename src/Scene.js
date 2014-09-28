@@ -61,6 +61,36 @@ Scene = (function () {
 		Object.defineProperty(self, 'canvas', { value: canvas });
 		canvas.addDirectionListener(self);
 
+		// Updates the score and the level when mikans are erased.
+		var speed = 3;
+		var toNextLevel = 20;
+		statistics.addObserver(function (id) {
+			switch (id) {
+			case 'mikanErased':
+				var count = arguments[2];
+				// updates the score
+				statistics.score +=
+					count * getComboFactor(statistics.comboLength);
+				// updates the level
+				var level = statistics.level;
+				while (count >= toNextLevel) {
+					count -= toNextLevel;
+					++level;
+					toNextLevel = 20;
+				}
+				toNextLevel -= count;
+				statistics.level = level;
+				break;
+			case 'levelUpdated':
+				speed = Math.min(3 + statistics.level / 2, 15);
+				break;
+			case 'statisticsReset':
+				speed = 3;
+				toNextLevel = 20;
+				break;
+			}
+		});
+
 		/**
 		 * The actor which spawns grabbed items.
 		 *
@@ -109,7 +139,6 @@ Scene = (function () {
 		 * @type {Actor, Renderable}
 		 * @private
 		 */
-		var speed = 3;
 		var gravity = new Actor(ActorPriorities.CONTROL, function (scheduler) {
 			if (grabbedItems) {
 				grabbedItems.forEach(function (item) {
@@ -152,10 +181,10 @@ Scene = (function () {
 		 */
 		self.reset = function () {
 			mikanBox = new MikanBox(Scene.COLUMN_COUNT,
-										Scene.ROW_COUNT,
-										Scene.ROW_MARGIN,
-										Scene.CELL_SIZE,
-										statistics);
+									Scene.ROW_COUNT,
+									Scene.ROW_MARGIN,
+									Scene.CELL_SIZE,
+									statistics);
 			grabbedItems = null;
 			self.actorQueue = [ spawner ];
 		};
@@ -372,6 +401,27 @@ Scene = (function () {
 				mikanBox.scheduleToErase(self);
 			}
 		}
+
+		/**
+		 * Returns the factor for each of erased mikans at a specified combo
+		 * length.
+		 *
+		 * The factor is calculated by the following expression,
+		 *
+		 *     Math.round(10 * Math.pow(1.6, comboLength))
+		 *
+		 * @method getComboFactor
+		 * @static
+		 * @private
+		 * @param comboLength {number}
+		 *     The length of the combo.
+		 * @return {number}
+		 *     The factor for each of erased mikans at the specified combo
+		 *     length.
+		 */
+		function getComboFactor(comboLength) {
+			return Math.round(10 * Math.pow(1.6, comboLength));
+		};
 	}
 	ActorScheduler.augment(Scene.prototype);
 

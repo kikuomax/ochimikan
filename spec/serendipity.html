@@ -33,7 +33,6 @@
         };
 
         var statistics = new Statistics();
-        var scoreObj = new Score(statistics);
 
         var canvas = document.getElementById('mikanCanvas');
         TestCanvas.augment(canvas);
@@ -56,10 +55,12 @@
         function ViewModel() {
             var self = this;
 
-            self.score = ko.observable(scoreObj.score);
-            scoreObj.addObserver(function () {
-                console.log('score updated: ' + scoreObj.score);
-                self.score(scoreObj.score);
+            self.score = ko.observable(statistics.score);
+
+            statistics.addObserver(function (id) {
+                if (id == 'scoreUpdated' || id == 'statisticsReset') {
+                    self.score(statistics.score);
+                }
             });
         }
 
@@ -70,10 +71,14 @@
 </head>
 <body>
   <div>
-    Score: <span data-bind="text: score"></span>
+    <span style="float: left">Score: </span>
+    <span style="float: left; width: 5em; text-align: right"
+          data-bind="text: score"></span>
   </div>
-  <canvas id="mikanCanvas"
-          style="background-image: url('../dist/imgs/background.png')">
-  </canvas>
+  <div style="clear: both">
+    <canvas id="mikanCanvas"
+            style="background-image: url('../dist/imgs/background.png')">
+    </canvas>
+  </div>
 </body>
 </html>

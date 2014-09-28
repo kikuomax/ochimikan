@@ -2,6 +2,8 @@
  * Records statistics of the game.
  *
  * The following statistics are recorded,
+ *  - Current game level
+ *  - Current score
  *  - Total number of erased mikans
  *  - Length of the current combo
  *
@@ -15,8 +17,11 @@
  *  3. Optional arguments:      Optional arguments depending on the event ID.
  *
  * An event ID can be one of the followings,
- *  - 'statisticsReset':
- *    Indicates that the statistics has been reset. No optional arguments.
+ *  - 'levelUpdated':
+ *    Indicates that the current game level has been changed.
+ *    No optional arguments.
+ *  - 'scoreUpdated':
+ *    Indicates that the current score has been changed. No optional arguments.
  *  - 'mikansErased':
  *    Indicates that the total number of erased mikans has increased.
  *    Takes the following additional argument,
@@ -24,6 +29,8 @@
  *  - 'comboUpdated':
  *    Indicates that the length of the current combo has been changed.
  *    No optional arguments.
+ *  - 'statisticsReset':
+ *    Indicates that the statistics has been reset. No optional arguments.
  *
  * @class Statistics
  * @constructor
@@ -36,6 +43,74 @@ Statistics = (function () {
 		Observable.call(self);
 
 		/**
+		 * The current game level.
+		 *
+		 * Initially 0.
+		 *
+		 * Changing this property notifies 'levelUpdated' to observers, but
+		 * setting this property to the same value notifies nothing.
+		 *
+		 * Throws an exception,
+		 *  - if this property is set unspecified
+		 *  - or if this property is set to a non-number value
+		 *  - or if this property is set to a negative number
+		 *
+		 * @property level
+		 * @type number
+		 */
+		var level = 0;
+		Object.defineProperty(self, 'level', {
+			get: function () { return level },
+			set: function (newLevel) {
+				if (typeof newLevel !== 'number') {
+					throw 'level must be a number';
+				}
+				if (newLevel < 0) {
+					throw 'level must be >= 0';
+				}
+				// updates if necessary
+				if (level != newLevel) {
+					level = newLevel;
+					self.notifyObservers('levelUpdated', self);
+				}
+			}
+		});
+
+		/**
+		 * The current score.
+		 *
+		 * Initially 0.
+		 *
+		 * Changing this property notifies 'scoreUpdated' to observers, but
+		 * setting this property to the same value notifies nothing.
+		 *
+		 * Throws an exception,
+		 *  - if this property is set unspecified
+		 *  - or if this property is set to a non-number value
+		 *  - or if this property is set to a negative number
+		 *
+		 * @property score
+		 * @type number
+		 */
+		var score = 0;
+		Object.defineProperty(self, 'score', {
+			get: function () { return score },
+			set: function (newScore) {
+				if (typeof newScore !== 'number') {
+					throw 'score must be a number';
+				}
+				if (newScore < 0) {
+					throw 'score must be >= 0';
+				}
+				// updates if necessary
+				if (score != newScore) {
+					score = newScore;
+					self.notifyObservers('scoreUpdated', self);
+				}
+			}
+		});
+
+		/**
 		 * The total number of erased mikans.
 		 *
 		 * Initially 0.
@@ -45,9 +120,9 @@ Statistics = (function () {
 		 * @property erasedMikanCount
 		 * @type number
 		 */
-		var _erasedMikanCount = 0;
+		var erasedMikanCount = 0;
 		Object.defineProperty(self, 'erasedMikanCount', {
-			get: function () { return _erasedMikanCount }
+			get: function () { return erasedMikanCount }
 		});
 
 		/**
@@ -60,9 +135,9 @@ Statistics = (function () {
 		 * @property comboLength
 		 * @type number
 		 */
-		var _comboLength = 0;
+		var comboLength = 0;
 		Object.defineProperty(self, 'comboLength', {
-			get: function () { return _comboLength }
+			get: function () { return comboLength }
 		});
 
 		/**
@@ -81,7 +156,7 @@ Statistics = (function () {
 				throw 'count must be a number';
 			}
 			if (count != 0) {
-				_erasedMikanCount += count;
+				erasedMikanCount += count;
 				self.notifyObservers('mikanErased', self, count);
 			}
 		};
@@ -94,7 +169,7 @@ Statistics = (function () {
 		 * @method addCombo
 		 */
 		self.addCombo = function () {
-			++_comboLength;
+			++comboLength;
 			self.notifyObservers('comboUpdated', self);
 		};
 
@@ -108,22 +183,28 @@ Statistics = (function () {
 		 * @method resetCombo
 		 */
 		self.resetCombo = function () {
-			_comboLength = 0;
+			comboLength = 0;
 			self.notifyObservers('comboUpdated', self);
 		};
 
 		/**
 		 * Resets this `Statistics`.
 		 *
-		 * Resets `erasedMikanCount` and `comboLength` to 0.
+		 * Resets the following properties to 0,
+		 *  - `level`
+		 *  - `score`
+		 *  - `erasedMikanCount`
+		 *  - `comboLength`
 		 *
 		 * Notifies `statisticsReset` to observers.
 		 *
 		 * @method reset
 		 */
 		self.reset = function () {
-			_erasedMikanCount = 0;
-			_comboLength = 0;
+			level            = 0;
+			score            = 0;
+			erasedMikanCount = 0;
+			comboLength      = 0;
 			self.notifyObservers('statisticsReset', self);
 		};
 	}
@@ -135,6 +216,8 @@ Statistics = (function () {
 	 * A `Statistics` must satisfy all of the following conditions,
 	 *  - Is a `Observable`
 	 *  - Has all of the following properties,
+	 *     - level:            number
+	 *     - score:            number
 	 *     - erasedMikanCount: number
 	 *     - comboLength:      number
 	 *     - addErasedMikans:  function
@@ -151,6 +234,8 @@ Statistics = (function () {
 	 */
 	Statistics.isClassOf = function (obj) {
 		return Observable.isClassOf(obj)
+			&& typeof obj.level            === 'number'
+			&& typeof obj.score            === 'number'
 			&& typeof obj.erasedMikanCount === 'number'
 			&& typeof obj.comboLength      === 'number'
 			&& typeof obj.addErasedMikans  === 'function'

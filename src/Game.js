@@ -1,7 +1,8 @@
 /**
  * The instance of the game.
  *
- * ## Scenarios
+ * Scenarios
+ * ---------
  *
  * ### The cycle of the game
  *
@@ -26,14 +27,16 @@
  * #### Derivative
  *
  *  - 9 Some of the chains reaches or exceeds the limit length (active chains).
- *     1. Mikans composing the active chains explode and disappear.
- *     2. The player earns points.
- *     3. Mikans surrounding the active chains are spoiled. But if there are
- *        preservatives next to mikans, such mikans are not spoiled and
- *        preservatives next to them are spoiled instead.
- *     4. Maximally damaged preservatives disappear.
- *     5. Items not placed on the ground or fixed items become free.
- *     6. Back to the step 7.
+ *       1. Mikans composing the active chains explode and disappear.
+ *       2. The player earns points.
+ *       3. If the number of erased mikans reaches the criteria of the current
+ *          game level, the game level increases.
+ *       4. Mikans surrounding the active chains are spoiled. But if there are
+ *          preservatives next to mikans, such mikans are not spoiled and
+ *          preservatives next to them are spoiled instead.
+ *       5. Maximally damaged preservatives disappear.
+ *       6. Items not placed on the ground or fixed items become free.
+ *       7. Back to the step 7 of the main scenario.
  *
  * @class Game
  * @static

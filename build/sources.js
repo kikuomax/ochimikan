@@ -17,7 +17,6 @@ linkMikanSources([
 	'src/Preservative.js',
 	'src/MikanBox.js',
 	'src/Statistics.js',
-	'src/Score.js',
 	'src/Scene.js',
 	'src/Game.js'
 ]);

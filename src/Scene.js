@@ -19,11 +19,11 @@
  * @uses DirectionListener
  * @param canvas {GameCanvas}
  *     The `GameCanvas` to be associated with the `Scene`.
- * @param score {Score}
- *     The `Score`.
+ * @param statistics {Statistics}
+ *     The `Statistics` of the game.
  */
 Scene = (function () {
-	function Scene(canvas, score) {
+	function Scene(canvas, statistics) {
 		var self = this;
 
 		ActorScheduler.call(self);
@@ -32,7 +32,7 @@ Scene = (function () {
 									Scene.ROW_COUNT,
 									Scene.ROW_MARGIN,
 									Scene.CELL_SIZE,
-									score);
+									statistics);
 
 		/**
 		 * The width of this scene.
@@ -155,7 +155,7 @@ Scene = (function () {
 										Scene.ROW_COUNT,
 										Scene.ROW_MARGIN,
 										Scene.CELL_SIZE,
-										score);
+										statistics);
 			grabbedItems = null;
 			self.actorQueue = [ spawner ];
 		};

@@ -13,7 +13,7 @@
  *  - or if `rowCount` is not a number
  *  - or if `rowMargin` is not a number
  *  - or if `cellSize` is not a number
- *  - or if `score` is not a `Score`
+ *  - or if `statistics` is not a `Statistics`
  *  - or if `columnCount` <= 0
  *  - or if `rowCount` <= 0
  *  - or if `rowMargin` < 0
@@ -39,8 +39,8 @@
  *     The number of extra rows which store items stacked above the mikan box.
  * @param cellSize {number}
  *     The size (in pixels) of each cell in the mikan box.
- * @param score {Score}
- *     The score to be associated with the mikan box.
+ * @param statistics {Statistics}
+ *     The `Statistics` of the game.
  */
 MikanBox = (function () {
 	// a table to access surrounding location.
@@ -66,7 +66,7 @@ MikanBox = (function () {
 	var FALLING_SPEED = 15;
 
 	// constructor
-	function MikanBox(columnCount, rowCount, rowMargin, cellSize, score) {
+	function MikanBox(columnCount, rowCount, rowMargin, cellSize, statistics) {
 		var self = this;
 
 		// verifies arguments
@@ -94,8 +94,8 @@ MikanBox = (function () {
 		if (cellSize <= 0) {
 			throw 'cellSize must be > 0 but ' + cellSize;
 		}
-		if (!Score.isClassOf(score)) {
-			throw 'score must be specified';
+		if (!Statistics.isClassOf(statistics)) {
+			throw 'statistics must be a Statistics';
 		}
 
 		// floors the parameters
@@ -185,13 +185,13 @@ MikanBox = (function () {
 		Object.defineProperty(self, 'height', { value: rowCount * cellSize });
 
 		/**
-		 * The score associated with this `MikanBox`.
+		 * The `Statistics` associated with this `MikanBox`.
 		 *
-		 * @property score
-		 * @type {Score}
+		 * @property statistics
+		 * @type {Statistics}
 		 * @final
 		 */
-		Object.defineProperty(self, 'score', { value: score });
+		Object.defineProperty(self, 'statistics', { value: statistics });
 
 		/**
 		 * Returns the column which includes a specified x-coordinate value.
@@ -362,8 +362,8 @@ MikanBox = (function () {
 							++numErased;
 						});
 					});
-					score.addErasedMikans(numErased);
-					score.addCombo();
+					statistics.addErasedMikans(numErased);
+					statistics.addCombo();
 					// sprays
 					self.scheduleSprays(chains, scheduler);
 					// schedules to spoil items
@@ -373,7 +373,7 @@ MikanBox = (function () {
 					// schedules itself again
 					scheduler.schedule(this);
 				} else {
-					score.resetCombo();
+					statistics.resetCombo();
 				}
 			});
 			scheduler.schedule(eraser);

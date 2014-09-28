@@ -32,11 +32,12 @@
             return canvas;
         };
 
-        var scoreObj = new Score();
+        var statistics = new Statistics();
+        var scoreObj = new Score(statistics);
 
         var canvas = document.getElementById('mikanCanvas');
         TestCanvas.augment(canvas);
-        Game.start(canvas, new SpecResourceManager(), scoreObj);
+        Game.start(canvas, new SpecResourceManager(), statistics);
         window.setInterval(function() {
             var directionId = Math.floor(4 * Math.random());
             if (Math.random() < 0.01) {

@@ -129,10 +129,11 @@
             return canvas;
         };
 
-        var scoreObj = new Score();
+        var statistics = new Statistics();
+        var scoreObj = new Score(statistics);
 
         var canvas = document.getElementById('mikanCanvas');
-        var game = Game.start(TestCanvas.augment(canvas), new ResourceManager(), scoreObj);
+        var game = Game.start(TestCanvas.augment(canvas), new ResourceManager(), statistics);
 
         function ViewModel() {
             var self = this;
@@ -144,8 +145,8 @@
             });
 
             self.restart = function () {
+                statistics.reset();
                 game.restart();
-                scoreObj.reset();
             };
         }
         ko.applyBindings(new ViewModel());

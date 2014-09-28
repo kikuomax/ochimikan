@@ -58,18 +58,25 @@ Game = (function () {
 	 *     The `Score`.
 	 */
 	Game.start = function (canvas, resourceManager, score) {
+		var game = new Game();
 		// loads the resources
 		Resources.loadSprites(resourceManager);
 		// creates a Scene associated with the canvas
-		var scene = new Scene(canvas, score);
-		canvas.width = scene.width;
-		canvas.height = scene.height;
+		game.scene = new Scene(canvas, score);
+		canvas.width = game.scene.width;
+		canvas.height = game.scene.height;
 		// runs the game
 		window.setInterval(function () {
 			// runs and renders a frame
-			scene.run();
-			scene.render();
+			game.scene.run();
+			game.scene.render();
 		}, Game.FRAME_INTERVAL);
+		return game;
+	};
+
+	/** Restarts the game. */
+	Game.prototype.restart = function () {
+		this.scene.reset();
 	};
 
 	/**

@@ -132,7 +132,7 @@
         var scoreObj = new Score();
 
         var canvas = document.getElementById('mikanCanvas');
-        Game.start(TestCanvas.augment(canvas), new ResourceManager(), scoreObj);
+        var game = Game.start(TestCanvas.augment(canvas), new ResourceManager(), scoreObj);
 
         function ViewModel() {
             var self = this;
@@ -142,6 +142,11 @@
             scoreObj.addObserver(function () {
                 self.score(scoreObj.score);
             });
+
+            self.restart = function () {
+                game.restart();
+                scoreObj.reset();
+            };
         }
         ko.applyBindings(new ViewModel());
     })
@@ -154,5 +159,6 @@
   </div>
   <canvas id="mikanCanvas" style="background-image: url('imgs/background.png')">
   </canvas>
+  <button data-bind="click: restart">Restart</button>
 </body>
 </html>

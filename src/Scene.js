@@ -146,6 +146,21 @@ Scene = (function () {
 		});
 
 		/**
+		 * Resets this `Scene`.
+		 *
+		 * @method reset
+		 */
+		self.reset = function () {
+			mikanBox = new MikanBox(Scene.COLUMN_COUNT,
+										Scene.ROW_COUNT,
+										Scene.ROW_MARGIN,
+										Scene.CELL_SIZE,
+										score);
+			grabbedItems = null;
+			self.actorQueue = [ spawner ];
+		};
+
+		/**
 		 * Renders this scene.
 		 *
 		 * @method render

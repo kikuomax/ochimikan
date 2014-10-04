@@ -1,5 +1,5 @@
 /**
- * A `GameCanvas` implemented for touch events.
+ * A `GamePad` implemented for touch events.
  *
  * This constructor should be invoked in the context of an `HTMLElement`.
  * You should use `attachTo` function instead of this constructor.
@@ -8,47 +8,20 @@
  *
  * @class TouchGamePad
  * @constructor
- * @extends GameCanvas
- * @param canvas {HTMLElement}
+ * @extends GamePad
+ * @param canvas {canvas HTMLElement}
  *     The canvas element to attach.
  */
 TouchGamePad = (function () {
 	function TouchGamePad() {
 		var self = this;
 
-		GameCanvas.call(self);
+		GamePad.call(self);
 
 		// checks this object
 		if (!('addEventListener' in self)) {
 			throw 'canvas must be an HTMLElement';
 		}
-
-		// direction listeners
-		var directionListeners = [];
-
-		/**
-		 * *TouchGamePad specific behavior.*
-		 *
-		 * `listener` will receive,
-		 *  - `moveLeft`:               when a user swiped leftward
-		 *  - `moveRight`:              when a user swiped rightward
-		 *  - `rotateClockwise`:        when a user swiped downward
-		 *  - `rotateCounterClockwise`: when a user swiped upward
-		 *  - `releaseControl`:         when a user tapped
-		 *
-		 * @method addDirectionListener
-		 */
-		self.addDirectionListener = function (listener) {
-			directionListeners.push(listener);
-		};
-
-		// Removes a specified `DirectionListener` from this canvas.
-		self.removeDirectionListener = function () {
-			var idx = directionListeners.indexOf(listener);
-			if (idx != -1) {
-				directionListeners.splice(idx, 1);
-			}
-		};
 
 		// listens touch events of this canvas
 		self.addEventListener('touchstart',  handleTouchStart, false);
@@ -114,7 +87,7 @@ TouchGamePad = (function () {
 					// and updates the tracking record
 					// if there is a direction
                     if (direction) {
-						sendDirection(direction);
+						self.sendDirection(direction);
                         moved = true;
                         x = touch.pageX;
                         y = touch.pageY;
@@ -136,18 +109,11 @@ TouchGamePad = (function () {
 					if (!moved) {
 						var interval = evt.timeStamp - touchTimeStamp;
 						if (interval <= TouchGamePad.MAX_TAP_INTERVAL) {
-							sendDirection('releaseControl');
+							self.sendDirection('releaseControl');
 						}
 					}
 				}
 			}
-		}
-
-		// sends a specified direction to `DirectionListeners`
-		function sendDirection(direction) {
-			directionListeners.forEach(function (listener) {
-				listener[direction](self);
-			});
 		}
 	}
 
@@ -207,6 +173,20 @@ TouchGamePad = (function () {
 	 * @type number
 	 */
 	TouchGamePad.MAX_TAP_INTERVAL = 200;
+
+	// the following is only for documentation
+	/**
+	 * *TouchGamePad specific behavior.*
+	 *
+	 * `listener` will receive,
+	 *  - `moveLeft`:               when a user swiped leftward
+	 *  - `moveRight`:              when a user swiped rightward
+	 *  - `rotateClockwise`:        when a user swiped downward
+	 *  - `rotateCounterClockwise`: when a user swiped upward
+	 *  - `releaseControl`:         when a user tapped
+	 *
+	 * @method addDirectionListener
+	 */
 
 	return TouchGamePad;
 })();

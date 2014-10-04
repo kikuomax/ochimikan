@@ -17,8 +17,9 @@
  * @contructor
  * @extends ActorScheduler
  * @uses DirectionListener
- * @param canvas {GameCanvas}
- *     The `GameCanvas` to be associated with the `Scene`.
+ * @param canvas {canvas HTMLElement, GamePad}
+ *     The canvas element on which the `Scene` is to be rendered.
+ *     This must be a `GamePad` at the same time.
  * @param statistics {Statistics}
  *     The `Statistics` of the game.
  * @param nextItem {function}
@@ -61,7 +62,6 @@ Scene = (function () {
 		 * @type {GameCanvas}
 		 */
 		Object.defineProperty(self, 'canvas', { value: canvas });
-		canvas.addDirectionListener(self);
 
 		// Updates the score and the level when mikans are erased.
 		var speed = 3;
@@ -258,6 +258,9 @@ Scene = (function () {
 		self.releaseControl = function () {
 			scheduleInput(doReleaseControl);  // align=false
 		};
+
+		// receives directions from `canvas`
+		canvas.addDirectionListener(self);
 
 		// Schedules a specified function as an input Actor.
 		function scheduleInput(input) {

@@ -5,7 +5,7 @@ linkMikanSources([
 	'src/ResourceManager.js',
 	'src/Sprite.js',
 	'src/Resources.js',
-	'src/GameCanvas.js',
+	'src/GamePad.js',
 	'src/Actor.js',
 	'src/ActorScheduler.js',
 	'src/Renderable.js',

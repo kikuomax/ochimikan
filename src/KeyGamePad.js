@@ -1,55 +1,22 @@
 /**
- * A `GameCanvas` implemented for key inputs.
+ * A `GamePad` implemented for key inputs.
  *
- * This constructor must be invoked in the context of an `HTMLElement`.
  * You should use `attachTo` instead of this constructor.
- *
- * Throws an exception if `this` does not have `addEventListener` method.
  *
  * @class KeyGamePad
  * @constructor
- * @extends GameCanvas
+ * @extends GamePad
+ * @param target {EventTarget}
+ *     The `EventTarget` on which key events are interpreted.
  */
 KeyGamePad = (function () {
-	function KeyGamePad() {
+	function KeyGamePad(target) {
 		var self = this;
 
-		GameCanvas.call(self);
-
-		// this must be a canvas
-		if (!('addEventListener' in this)) {
-			throw 'canvas must be an HTMLElement';
-		}
-
-		// direction listeners
-		var directionListeners = [];
-
-		/**
-		 * *KeyGamePad specific behavior.*
-		 *
-		 * `listener` will receive,
-		 *  - `moveLeft`:               when a user pressed a left arrow key
-		 *  - `moveRight`:              when a user pressed a right arrow key
-		 *  - `rotateClockwise`:        when a user pressed a down arrow key
-		 *  - `rotateCounterClockwise`: when a user pressed a up arrow key
-		 *  - `releaseControl`:         when a user pressed a spacebar
-		 *
-		 * @method addDirectionListener
-		 */
-		self.addDirectionListener = function (listener) {
-			directionListeners.push(listener);
-		};
-
-		// Removes a specified `DirectionListener` from this canvas.
-		self.removeDirectionListener = function () {
-			var idx = directionListeners.indexOf(listener);
-			if (idx != -1) {
-				directionListeners.splice(idx, 1);
-			}
-		};
+		GamePad.call(self);
 
 		// processes key down events on this canvas
-		window.addEventListener('keydown', handleKeyDown, false);
+		target.addEventListener('keydown', handleKeyDown, false);
 
 		// handles a key down event
 		function handleKeyDown(evt) {
@@ -104,9 +71,7 @@ KeyGamePad = (function () {
 			// sends the direction to `DirectionListener`s if it exists
 			if (direction) {
 				evt.preventDefault();
-				directionListeners.forEach(function (listener) {
-					listener[direction](self);
-				});
+				self.sendDirection(direction);
 			}
 		}
 	}
@@ -118,24 +83,38 @@ KeyGamePad = (function () {
 	 *  - addDirectionListener
 	 *  - removeDirectionListener
 	 *
-	 * Throws an exception
-	 *  - if `canvas` is not specified,
-	 *  - or if `canvas` does not have `addEventListener` method
+	 * Throws an exception if `obj` is not specified.
 	 *
 	 * @method attachTo
 	 * @static
-	 * @param canvas {HTMLElement}
-	 *     The canvas to attach.
-	 * @return {HTMLElement}
-	 *     `canvas`.
+	 * @param obj {object}
+	 *     The object to attach.
+	 * @param window {EventTarget}
+	 *     The `EventTarget` on which key events are interpreted.
+	 * @return {object}
+	 *     `obj`.
 	 */
-	KeyGamePad.attachTo = function (canvas) {
-		if (canvas == null) {
-			throw 'canvas must be specified';
+	KeyGamePad.attachTo = function (obj, target) {
+		if (obj == null) {
+			throw 'obj must be specified';
 		}
-		KeyGamePad.call(canvas);
-		return canvas;
+		KeyGamePad.call(obj, target);
+		return obj;
 	};
+
+	// the following is only for documentation
+	/**
+	 * *KeyGamePad specific behavior.*
+	 *
+	 * `listener` will receive,
+	 *  - `moveLeft`:               when a user pressed a left arrow key
+	 *  - `moveRight`:              when a user pressed a right arrow key
+	 *  - `rotateClockwise`:        when a user pressed a down arrow key
+	 *  - `rotateCounterClockwise`: when a user pressed a up arrow key
+	 *  - `releaseControl`:         when a user pressed a spacebar
+	 *
+	 * @method addDirectionListener
+	 */
 
 	return KeyGamePad;
 })();

@@ -9,18 +9,16 @@
     $(function () {
         var statistics = new Statistics();
 
+        var canvas = document.getElementById('mikanCanvas');
+
         // uses TouchGamePad if touch events are supported
-        var gamePad;
         if ('ontouchstart' in document.documentElement) {
             console.debug('using TouchGamePad');
-            gamePad = TouchGamePad;
+            TouchGamePad.attachTo(canvas);
         } else {
             console.debug('using KeyGamePad');
-            gamePad = KeyGamePad;
+            KeyGamePad.attachTo(canvas, document);
         }
-
-        var canvas = gamePad.attachTo(document.getElementById('mikanCanvas'));
-        canvas.focus();
 
         var game = Game.start(
             canvas,
@@ -64,6 +62,7 @@
                 game.restart();
             };
         }
+
         ko.applyBindings(new ViewModel());
     });
   </script>

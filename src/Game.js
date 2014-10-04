@@ -48,13 +48,15 @@ Game = (function () {
 	 * Starts the game.
 	 *
 	 * Throws an exception
-	 * - if `canvas` is not a `GameCanvas`
-	 * - or if `resourceManager` is not a `ResourceManager`
+	 *  - if `canvas` is not an `HTMLElement`,
+	 *  - or if `canvas` is not a `GamePad`,
+	 *  - or if `resourceManager` is not a `ResourceManager`
 	 *
 	 * @method start
 	 * @static
-	 * @param canvas {GameCanvas}
-	 *     The `GameCanvas` on which the game runs.
+	 * @param canvas {HTMLElement, GamePad}
+	 *     The canvas element on which the game will be rendered.
+	 *     This must be a `GamePad` at the same time.
 	 * @param resourceManager {ResourceManager}
 	 *     The `ResouceManager` which resolves resources.
 	 * @param statistics {Statisitcs}

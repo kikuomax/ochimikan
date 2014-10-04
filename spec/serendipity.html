@@ -34,37 +34,79 @@
 
         var statistics = new Statistics();
 
-        var canvas = document.getElementById('mikanCanvas');
-        TestCanvas.augment(canvas);
-        Game.start(canvas, new SpecResourceManager(), statistics);
-        window.setInterval(function() {
-            var directionId = Math.floor(4 * Math.random());
-            if (Math.random() < 0.01) {
-                directionId = 4;
-            }
-            var direction = [
-                'moveLeft', 'moveRight',
-                'rotateClockwise', 'rotateCounterClockwise',
-                'releaseControl'
-            ][directionId];
-            directionListeners.forEach(function(listener) {
-                listener[direction](canvas);
-            });
-        }, 10);
-
         function ViewModel() {
             var self = this;
 
             self.score = ko.observable(statistics.score);
+            self.level = ko.observable(statistics.level + 1);
+            self.preservativeProbability = ko.observable(0.05);
+            self.damage0Ratio = ko.observable(1);
+            self.damage1Ratio = ko.observable(1);
+            self.damage2Ratio = ko.observable(1);
+            self.damage3Ratio = ko.observable(1);
+            self.damageRatios = [
+                self.damage0Ratio,
+                self.damage1Ratio,
+                self.damage2Ratio,
+                self.damage3Ratio
+            ];
+            self.releaseProbability = ko.observable(0.01);
 
             statistics.addObserver(function (id) {
-                if (id == 'scoreUpdated' || id == 'statisticsReset') {
+                switch (id) {
+                case 'scoreUpdated':
                     self.score(statistics.score);
+                    break;
+                case 'levelUpdated':
+                    self.level(statistics.level + 1);
+                    break;
+                case 'statisticsReset':
+                    self.score(statistics.score);
+                    self.level(statistics.level + 1);
+                    break;
                 }
             });
-        }
+        };
+        var viewModel = new ViewModel();
 
-        ko.applyBindings(new ViewModel());
+        var canvas = document.getElementById('mikanCanvas');
+        TestCanvas.augment(canvas);
+        Game.start(canvas, new SpecResourceManager(), statistics, function () {
+            if (Math.random() < viewModel.preservativeProbability()) {
+                item = new Preservative();
+            } else {
+                var denominator = 0;
+                for (var i = 0; i < viewModel.damageRatios.length; ++i) {
+                    denominator += Number(viewModel.damageRatios[i]());
+                }
+                var numerator = denominator * Math.random();
+                var damage = 0;
+                while (numerator > viewModel.damageRatios[damage]()) {
+                    numerator -= viewModel.damageRatios[damage]();
+                    ++damage;
+                }
+                item = new Mikan(damage);
+            }
+            return item;
+        });
+        window.setInterval(function () {
+            var directionId = Math.floor(4 * Math.random());
+            if (Math.random() < viewModel.releaseProbability()) {
+                directionId = 4;
+            }
+            var direction = [
+                'moveLeft',
+                'moveRight',
+                'rotateClockwise',
+                'rotateCounterClockwise',
+                'releaseControl'
+            ][directionId];
+            directionListeners.forEach(function (listener) {
+                listener[direction](canvas);
+            });
+        }, 10);
+
+        ko.applyBindings(viewModel);
     });
  </script>
   <title>落ちみかん(セレンディピティ)</title>
@@ -74,11 +116,33 @@
     <span style="float: left">Score: </span>
     <span style="float: left; width: 5em; text-align: right"
           data-bind="text: score"></span>
+    <span style="float: left; margin-left: 1em">Level: </span>
+    <span style="float: left; width: 2em; text-align: right"
+          data-bind="text: level"></span>
   </div>
   <div style="clear: both">
     <canvas id="mikanCanvas"
-            style="background-image: url('../dist/imgs/background.png')">
+            style="float: left;
+                   background-image: url('../dist/imgs/background.png')">
     </canvas>
+    <div style="float: none">
+      Preservative Probability:
+      <input type="number" min="0" max="1" step="0.01"
+             data-bind="value: preservativeProbability"></input><br>
+      Damage 0 Ratio: <input type="number"
+                             data-bind="value: damage0Ratio"></input><br>
+      Damage 1 Ratio: <input type="number"
+                             data-bind="value: damage1Ratio"></input><br>
+      Damage 2 Ratio: <input type="number"
+                             data-bind="value: damage2Ratio"></input><br>
+      Damage 3 Ratio: <input type="number"
+                             data-bind="value: damage3Ratio"></input><br>
+    </div>
+    <div>
+      Release Probability:
+      <input type="number" min="0" max="1" step="0.01"
+             data-bind="value: releaseProbability"></input>
+    </div>
   </div>
 </body>
 </html>

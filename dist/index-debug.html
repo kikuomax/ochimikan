@@ -7,132 +7,23 @@
   <script type="text/javascript" src="mikan.debug.js"></script>
   <script type="text/javascript">
     $(function () {
-        function TestCanvas() {}
-        TestCanvas.augment = function (canvas) {
-            var directionListeners = [];
-            canvas.addDirectionListener = function (listener) {
-                directionListeners.push(listener);
-            };
-            canvas.removeDirectionListener = function (listener) {
-                var idx = directionListeners.indexOf(listener);
-                if (idx != -1) {
-                    directionListener.splice(idx, 1);
-                }
-            };
-
-            if ('ontouchstart' in document.documentElement) {
-                canvas.addEventListener('touchstart',  handleTouchStart, false);
-                canvas.addEventListener('touchmove',   handleTouchMove,  false);
-                canvas.addEventListener('touchend',    handleTouchEnd,   false);
-                canvas.addEventListener('touchleave',  handleTouchEnd,   false);
-                canvas.addEventListener('touchcancel', handleTouchEnd,   false);
-            } else {
-                canvas.addEventListener('mousedown',  handleStart, false);
-                canvas.addEventListener('mousemove',  handleMove,  false);
-                canvas.addEventListener('mouseup',    handleEnd,   false);
-                canvas.addEventListener('mouseleave', handleEnd,   false);
-            }
-
-            var touchId = -1;
-            function handleTouchStart(evt) {
-                if (touchId === -1) {
-                    var touch = evt.changedTouches[0];
-                    touchId = touch.identifier;
-                    evt.x = touch.pageX;
-                    evt.y = touch.pageY;
-                    handleStart(evt);
-                }
-            }
-
-            function handleTouchMove(evt) {
-                var touches = evt.changedTouches;
-                for (var i = 0; i < touches.length; ++i) {
-                    var touch = touches[i];
-                    if (touch.identifier === touchId) {
-                        evt.x = touch.pageX;
-                        evt.y = touch.pageY;
-                        handleMove(evt);
-                    }
-                }
-            }
-
-            function handleTouchEnd(evt) {
-                var touches = evt.changedTouches;
-                for (var i = 0; i < touches.length; ++i) {
-                    var touch = touches[i];
-                    if (touch.identifier === touchId) {
-                        touchId = -1;
-                        evt.x = touch.pageX;
-                        evt.y = touch.pageY;
-                        handleEnd(evt);
-                    }
-                }
-            }
- 
-            var isDown = false;
-            var downTimeStamp = 0;
-            var moved = false;
-            var x, y;
-            function handleStart(evt) {
-                evt.preventDefault();
-                isDown = true; 
-                downTimeStamp = evt.timeStamp;
-                moved = false;
-                x = evt.x;
-                y = evt.y;
-            }
-
-            function handleMove(evt) {
-                if (isDown) {
-                    evt.preventDefault();
-                    var dX = evt.x - x;
-                    var dY = evt.y - y;
-                    var notification;
-                    if (Math.abs(dX) > Math.abs(dY)) {
-                        if (Math.abs(dX) > 15) {
-                            if (dX < 0) {
-                                notification = 'moveLeft';
-                            } else {
-                                notification = 'moveRight';
-                            }
-                        }
-                    } else {
-                        if (Math.abs(dY) > 30) {
-                            if (dY < 0) {
-                                notification = 'rotateCounterClockwise';
-                            } else {
-                                notification = 'rotateClockwise';
-                            }
-                        }
-                    }
-                    if (notification) {
-                        directionListeners.forEach(function (listener) {
-                            listener[notification](canvas);
-                        });
-                        moved = true;
-                        x = evt.x;
-                        y = evt.y;
-                    }
-                }
-            }
-
-            function handleEnd(evt) {
-                evt.preventDefault();
-                isDown = false;
-                if (!moved && evt.timeStamp - downTimeStamp < 200) {
-                    directionListeners.forEach(function (listener) {
-                        listener.releaseControl(canvas);
-                    });
-                }
-            }
-
-            return canvas;
-        };
-
         var statistics = new Statistics();
 
-        var canvas = document.getElementById('mikanCanvas');
-        var game = Game.start(TestCanvas.augment(canvas), new ResourceManager(), statistics);
+        var game = Game.start(
+            TouchGamePad.attachTo(document.getElementById('mikanCanvas')),
+            new ResourceManager(),
+            statistics,
+            function () {
+              var item;
+              if (Math.random() < 0.1) {
+                  item = new Preservative();
+              } else {
+                  var damage = (Mikan.MAX_DAMAGE + 1) * Math.random();
+                  item = new Mikan(Math.floor(damage));
+              }
+              return item;
+            }
+        );
 
         function ViewModel() {
             var self = this;
@@ -161,7 +52,7 @@
             };
         }
         ko.applyBindings(new ViewModel());
-    })
+    });
   </script>
   <title>落ちみかん</title>
 </head>

@@ -59,13 +59,15 @@ Game = (function () {
 	 *     The `ResouceManager` which resolves resources.
 	 * @param statistics {Statisitcs}
 	 *     The `Statistics` of the game.
+	 * @param nextItem {function}
+	 *     The function which determines the next item. Takes no arguments.
 	 */
-	Game.start = function (canvas, resourceManager, statistics) {
+	Game.start = function (canvas, resourceManager, statistics, nextItem) {
 		var game = new Game();
 		// loads the resources
 		Resources.loadSprites(resourceManager);
 		// creates a Scene associated with the canvas
-		game.scene = new Scene(canvas, statistics);
+		game.scene = new Scene(canvas, statistics, nextItem);
 		canvas.width = game.scene.width;
 		canvas.height = game.scene.height;
 		// runs the game

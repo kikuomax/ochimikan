@@ -21,9 +21,11 @@
  *     The `GameCanvas` to be associated with the `Scene`.
  * @param statistics {Statistics}
  *     The `Statistics` of the game.
+ * @param nextItem {function}
+ *     The function which determines the next item. Takes no arguments.
  */
 Scene = (function () {
-	function Scene(canvas, statistics) {
+	function Scene(canvas, statistics, nextItem) {
 		var self = this;
 
 		ActorScheduler.call(self);
@@ -113,14 +115,10 @@ Scene = (function () {
 			// (0)
 			// (1)
 			for (var i = 0; i < 2; ++i) {
-				if (Math.random() < 0.1) {
-					grabbedItems[i] = new Preservative();
-				} else {
-					var damage = Math.floor(4 * Math.random());
-					grabbedItems[i] = new Mikan(damage);
-				}
+				var item = nextItem();
 				var y = -(mikanBox.cellSize * (2 - i));
-				grabbedItems[i].locate(x, y);
+				item.locate(x, y);
+				grabbedItems[i] = item;
 			}
 			rotation = 0;
 			self.schedule(gravity);
@@ -340,38 +338,79 @@ Scene = (function () {
 
 		// Updates the rotation of grabbed items.
 		function updateRotation(newRotation) {
-			var newX, newY;
-			// moves grabbedItems[0] to a new location
+			var newX0, newY0, newX1, newY1;
+			// rotates only grabbedItems[0]
+			newX1 = grabbedItems[1].x;
+			newY1 = grabbedItems[1].y;
 			switch(newRotation) {
 			case 0:
-				newX = grabbedItems[1].x;
-				newY = grabbedItems[1].y - mikanBox.cellSize;
+				newX0 = newX1;
+				newY0 = newY1 - mikanBox.cellSize;
 				break;
 			case 1:
-				newX = grabbedItems[1].x + mikanBox.cellSize;
-				newY = grabbedItems[1].y;
+				newX0 = newX1 + mikanBox.cellSize;
+				newY0 = newY1;
 				break;
 			case 2:
-				newX = grabbedItems[1].x;
-				newY = grabbedItems[1].y + mikanBox.cellSize;
+				newX0 = newX1;
+				newY0 = newY1 + mikanBox.cellSize;
 				break;
 			case 3:
-				newX = grabbedItems[1].x - mikanBox.cellSize;
-				newY = grabbedItems[1].y;
+				newX0 = newX1 - mikanBox.cellSize;
+				newY0 = newY1;
 				break;
 			default:
 				console.error('invalid rotation: ' + newRotation);
 			}
-			// makes sure that the new location is in the mikan box
-			var column = mikanBox.columnAt(newX);
-			var row = mikanBox.rowAt(newY + mikanBox.cellSize - 1);
-			if (column >= 0 && column < mikanBox.columnCount && row >= 0) {
-				// makes sure that no item is placed at the new location
-				if (!mikanBox.itemIn(column, row)) {
-					grabbedItems[0].x = newX;
-					grabbedItems[0].y = newY;
-					rotation = newRotation;
+			// adjusts the location so that
+			// items are in the box and do not collide with other items
+			var left    = mikanBox.columnAt(Math.min(newX0, newX1));
+			var right   = mikanBox.columnAt(Math.max(newX0, newX1));
+			var bottomY = Math.max(newY0, newY1) + mikanBox.cellSize - 1;
+			var row     = mikanBox.rowAt(bottomY);
+			if (newRotation == 2) {
+				if (row < 0) {
+					var dY = mikanBox.height - bottomY;
+					newY0 += dY;
+					newY1 += dY;
+					row = 0;
+				} else if (mikanBox.itemIn(left, row)) {
+					var dY = mikanBox.topYOf(row) - bottomY;
+					newY0 += dY;
+					newY1 += dY;
+					++row;
 				}
+			} else {
+				if (left < 0 || mikanBox.itemIn(left, row)) {
+					newX0 += mikanBox.cellSize;
+					newX1 += mikanBox.cellSize;
+					++left;
+					++right;
+				}
+				if (right >= mikanBox.columnCount
+					|| mikanBox.itemIn(right, row))
+				{
+					newX0 -= mikanBox.cellSize;
+					newX1 -= mikanBox.cellSize;
+					--left;
+					--right;
+				}
+			}
+			// makes sure that the new location
+			// is in the mikan box and do not collide with other items
+			if (row >= 0
+				&& row < mikanBox.rowCount
+				&& left >= 0
+				&& right < mikanBox.columnCount
+				&& !mikanBox.itemIn(left, row)
+				&& !mikanBox.itemIn(right, row))
+			{
+				// makes sure that no item is placed at the new location
+				grabbedItems[0].x = newX0;
+				grabbedItems[0].y = newY0;
+				grabbedItems[1].x = newX1;
+				grabbedItems[1].y = newY1;
+				rotation = newRotation;
 			}
 		}
 
@@ -408,7 +447,7 @@ Scene = (function () {
 		 *
 		 * The factor is calculated by the following expression,
 		 *
-		 *     Math.round(10 * Math.pow(1.6, comboLength))
+		 *     Math.round(10 * Math.pow(2, comboLength))
 		 *
 		 * @method getComboFactor
 		 * @static
@@ -420,7 +459,7 @@ Scene = (function () {
 		 *     length.
 		 */
 		function getComboFactor(comboLength) {
-			return Math.round(10 * Math.pow(1.6, comboLength));
+			return Math.round(10 * Math.pow(2, comboLength));
 		};
 	}
 	ActorScheduler.augment(Scene.prototype);

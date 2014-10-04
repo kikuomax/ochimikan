@@ -278,7 +278,7 @@ MikanBox = (function () {
 				throw 'cell [' + column + ', ' + row + '] is not vacant';
 			}
 			if (align) {
-				item.locate(xAt(column), yAt(row));
+				item.locate(self.leftXOf(column), self.topYOf(row));
 			}
 			cells[idx] = item;
 		};
@@ -451,8 +451,8 @@ MikanBox = (function () {
 				c.forEach(function (loc) {
 					VELOCITIES.forEach(function (v) {
 						var move = Spray.moveLinear(v[0] * 1.5, v[1] * 1.5);
-						scheduler.schedule(new Spray(xAt(loc[0]),
-													 yAt(loc[1]),
+						scheduler.schedule(new Spray(self.leftXOf(loc[0]),
+													 self.topYOf(loc[1]),
 													 15,
 													 move));
 					});
@@ -491,8 +491,8 @@ MikanBox = (function () {
 						for (var r = 0; r < maxRowCount; ++r) {
 							var idx = indexOf(c, r);
 							if (cellMarkers[idx] == MARKER_SPOIL) {
-								var x = xAt(c);
-								var y = yAt(r);
+								var x = self.leftXOf(c);
+								var y = self.topYOf(r);
 								for (var i = 0; i < 4; ++i) {
 									var angle = i * Math.PI / 2;
 									var move = (function (x, y, angle) {
@@ -695,30 +695,29 @@ MikanBox = (function () {
 		}
 
 		/**
-		 * Returns the left location of a specified column.
+		 * Returns the x-coordinate value of the left edge of a specified
+		 * column.
 		 *
-		 * @method xAt
-		 * @private
+		 * @method leftXOf
 		 * @param column {number}
 		 *     The column to be converted.
 		 * @return {number}
-		 *     The left location of the column.
+		 *     The the x-coordinate value of the left edge of `column`.
 		 */
-		function xAt(column) {
+		self.leftXOf = function (column) {
 			return column * cellSize;
-		}
+		};
 
 		/**
-		 * Returns the top location of a specified row.
+		 * Returns the y-coordinate value of the top edge of a specified row.
 		 *
-		 * @method yAt
-		 * @private
+		 * @method topYOf
 		 * @param row {number}
 		 *     The row to be converted.
 		 * @return {number}
-		 *     The top location of the row.
+		 *     The the y-coordinate value of the top edge of `row`.
 		 */
-		function yAt(row) {
+		self.topYOf = function (row) {
 			return (rowCount - row - 1) * cellSize;
 		}
 

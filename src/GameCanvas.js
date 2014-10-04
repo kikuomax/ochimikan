@@ -5,7 +5,8 @@
  * @constructor
  */
 GameCanvas = (function () {
-function GameCanvas() {}
+	function GameCanvas() {}
+
 	/**
 	 * Returns whehter a specified object is a `GameCanvas`.
 	 *
@@ -24,7 +25,7 @@ function GameCanvas() {}
 	 */
 	GameCanvas.isClassOf = function (obj) {
 		return obj instanceof Element
-			&& typeof obj.addDirectionListener === 'function'
+			&& typeof obj.addDirectionListener    === 'function'
 			&& typeof obj.removeDirectionListener === 'function';
 	};
 
@@ -80,9 +81,9 @@ DirectionListener = (function () {
 	 */
 	DirectionListener.isClassOf = function (obj) {
 		return obj != null
-			&& typeof obj.moveLeft === 'function'
-			&& typeof obj.moveRight === 'function'
-			&& typeof obj.rotateClockwise === 'function'
+			&& typeof obj.moveLeft               === 'function'
+			&& typeof obj.moveRight              === 'function'
+			&& typeof obj.rotateClockwise        === 'function'
 			&& typeof obj.rotateCounterClockwise === 'function';
 	};
 

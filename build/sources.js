@@ -19,5 +19,6 @@ linkMikanSources([
 	'src/Statistics.js',
 	'src/Scene.js',
 	'src/Game.js',
-	'src/TouchGamePad.js'
+	'src/TouchGamePad.js',
+	'src/KeyGamePad.js'
 ]);

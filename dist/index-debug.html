@@ -9,8 +9,21 @@
     $(function () {
         var statistics = new Statistics();
 
+        // uses TouchGamePad if touch events are supported
+        var gamePad;
+        if ('ontouchstart' in document.documentElement) {
+            console.debug('using TouchGamePad');
+            gamePad = TouchGamePad;
+        } else {
+            console.debug('using KeyGamePad');
+            gamePad = KeyGamePad;
+        }
+
+        var canvas = gamePad.attachTo(document.getElementById('mikanCanvas'));
+        canvas.focus();
+
         var game = Game.start(
-            TouchGamePad.attachTo(document.getElementById('mikanCanvas')),
+            canvas,
             new ResourceManager(),
             statistics,
             function () {

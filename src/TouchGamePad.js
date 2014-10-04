@@ -30,10 +30,10 @@ TouchGamePad = (function () {
 		 * *TouchGamePad specific behavior.*
 		 *
 		 * `listener` will receive,
-		 *  - `moveLeft`:               when a user swipe leftward
-		 *  - `moveRight`:              when a user swipe rightward
-		 *  - `rotateClockwise`:        when a user swipe downward
-		 *  - `rotateCounterClockwise`: when a user swipe upward
+		 *  - `moveLeft`:               when a user swiped leftward
+		 *  - `moveRight`:              when a user swiped rightward
+		 *  - `rotateClockwise`:        when a user swiped downward
+		 *  - `rotateCounterClockwise`: when a user swiped upward
 		 *  - `releaseControl`:         when a user tapped
 		 *
 		 * @method addDirectionListener

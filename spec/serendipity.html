@@ -17,21 +17,6 @@
         }
         ResourceManager.augment(SpecResourceManager.prototype);
 
-        var directionListeners = [];
-        function TestCanvas() {}
-        TestCanvas.augment = function(canvas) {
-            canvas.addDirectionListener = function(listener) {
-                directionListeners.push(listener);
-            };
-            canvas.removeDirectionListener = function(listener) {
-                var idx = directionListeners.indexOf(listener);
-                if (idx != -1) {
-                    directionListener.splice(idx, 1);
-                }
-            };
-            return canvas;
-        };
-
         var statistics = new Statistics();
 
         function ViewModel() {
@@ -39,7 +24,8 @@
 
             self.score = ko.observable(statistics.score);
             self.level = ko.observable(statistics.level + 1);
-            self.preservativeProbability = ko.observable(0.05);
+            // difficulty parameters
+            self.preservativeProb = ko.observable(0.05);
             self.damage0Ratio = ko.observable(1);
             self.damage1Ratio = ko.observable(1);
             self.damage2Ratio = ko.observable(1);
@@ -50,7 +36,7 @@
                 self.damage2Ratio,
                 self.damage3Ratio
             ];
-            self.releaseProbability = ko.observable(0.01);
+            self.releaseProb = ko.observable(0.01);
 
             statistics.addObserver(function (id) {
                 switch (id) {
@@ -69,29 +55,34 @@
         };
         var viewModel = new ViewModel();
 
-        var canvas = document.getElementById('mikanCanvas');
-        TestCanvas.augment(canvas);
-        Game.start(canvas, new SpecResourceManager(), statistics, function () {
-            if (Math.random() < viewModel.preservativeProbability()) {
+        // nextItem determines an item according to `viewModel`
+        var difficulty = new Difficulty(statistics);
+        difficulty.nextItem = function () {
+            if (Math.random() < viewModel.preservativeProb()) {
                 item = new Preservative();
             } else {
-                var denominator = 0;
+                var totalRatio = 0;
                 for (var i = 0; i < viewModel.damageRatios.length; ++i) {
-                    denominator += Number(viewModel.damageRatios[i]());
+                    totalRatio += Number(viewModel.damageRatios[i]());
                 }
-                var numerator = denominator * Math.random();
+                var chance = totalRatio * Math.random();
                 var damage = 0;
-                while (numerator > viewModel.damageRatios[damage]()) {
-                    numerator -= viewModel.damageRatios[damage]();
+                while (chance > viewModel.damageRatios[damage]()) {
+                    chance -= viewModel.damageRatios[damage]();
                     ++damage;
                 }
                 item = new Mikan(damage);
             }
             return item;
-        });
+        };
+
+        var canvas = document.getElementById('mikanCanvas');
+
+        // randomly sends directions
+        GamePad.call(canvas);
         window.setInterval(function () {
             var directionId = Math.floor(4 * Math.random());
-            if (Math.random() < viewModel.releaseProbability()) {
+            if (Math.random() < viewModel.releaseProb()) {
                 directionId = 4;
             }
             var direction = [
@@ -101,10 +92,15 @@
                 'rotateCounterClockwise',
                 'releaseControl'
             ][directionId];
+            canvas.sendDirection(direction);
+            /*
             directionListeners.forEach(function (listener) {
                 listener[direction](canvas);
-            });
+            });*/
         }, 10);
+
+        // TestCanvas.augment(canvas);
+        Game.start(canvas, new SpecResourceManager(), statistics, difficulty);
 
         ko.applyBindings(viewModel);
     });
@@ -128,7 +124,7 @@
     <div style="float: none">
       Preservative Probability:
       <input type="number" min="0" max="1" step="0.01"
-             data-bind="value: preservativeProbability"></input><br>
+             data-bind="value: preservativeProb"></input><br>
       Damage 0 Ratio: <input type="number"
                              data-bind="value: damage0Ratio"></input><br>
       Damage 1 Ratio: <input type="number"
@@ -141,7 +137,7 @@
     <div>
       Release Probability:
       <input type="number" min="0" max="1" step="0.01"
-             data-bind="value: releaseProbability"></input>
+             data-bind="value: releaseProb"></input>
     </div>
   </div>
 </body>

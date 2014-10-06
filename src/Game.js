@@ -50,7 +50,9 @@ Game = (function () {
 	 * Throws an exception
 	 *  - if `canvas` is not an `HTMLElement`,
 	 *  - or if `canvas` is not a `GamePad`,
-	 *  - or if `resourceManager` is not a `ResourceManager`
+	 *  - or if `resourceManager` is not a `ResourceManager`,
+	 *  - or if `statistics` is not a `Statistics`,
+	 *  - or if `difficulty` is not a `Difficulty`
 	 *
 	 * @method start
 	 * @static
@@ -61,15 +63,17 @@ Game = (function () {
 	 *     The `ResouceManager` which resolves resources.
 	 * @param statistics {Statisitcs}
 	 *     The `Statistics` of the game.
-	 * @param nextItem {function}
-	 *     The function which determines the next item. Takes no arguments.
+	 * @param difficulty {Difficulty}
+	 *     The `Difficulty` of the game.
+	 * @return {Game}
+	 *     A new instance of `Game`.
 	 */
-	Game.start = function (canvas, resourceManager, statistics, nextItem) {
+	Game.start = function (canvas, resourceManager, statistics, difficulty) {
 		var game = new Game();
 		// loads the resources
 		Resources.loadSprites(resourceManager);
 		// creates a Scene associated with the canvas
-		game.scene = new Scene(canvas, statistics, nextItem);
+		game.scene = new Scene(canvas, statistics, difficulty);
 		canvas.width = game.scene.width;
 		canvas.height = game.scene.height;
 		// runs the game

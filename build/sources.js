@@ -17,6 +17,7 @@ linkMikanSources([
 	'src/Preservative.js',
 	'src/MikanBox.js',
 	'src/Statistics.js',
+	'src/Difficulty.js',
 	'src/Scene.js',
 	'src/Game.js',
 	'src/TouchGamePad.js',

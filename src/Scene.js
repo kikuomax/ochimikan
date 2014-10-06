@@ -3,9 +3,10 @@
  *
  * An `Actor` which spawns grabbed items will be scheduled initially.
  *
- * # Scenarios
+ * Scenarios
+ * ---------
  *
- * ## Rendering a scene
+ * ### Rendering a scene
  *
  *  1. A `Scene` is given.
  *  2. A user asks the `Scene` to render it.
@@ -22,11 +23,11 @@
  *     This must be a `GamePad` at the same time.
  * @param statistics {Statistics}
  *     The `Statistics` of the game.
- * @param nextItem {function}
- *     The function which determines the next item. Takes no arguments.
+ * @param difficulty {Difficulty}
+ *     The `Difficulty` of the game.
  */
 Scene = (function () {
-	function Scene(canvas, statistics, nextItem) {
+	function Scene(canvas, statistics, difficulty) {
 		var self = this;
 
 		ActorScheduler.call(self);
@@ -41,7 +42,7 @@ Scene = (function () {
 		 * The width of this scene.
 		 *
 		 * @property width
-		 * @type {number}
+		 * @type number
 		 * @final
 		 */
 		Object.defineProperty(self, 'width', { value: mikanBox.width });
@@ -50,7 +51,7 @@ Scene = (function () {
 		 * The height of this scene.
 		 *
 		 * @preoperty height
-		 * @type {number}
+		 * @type number
 		 * @final
 		 */
 		Object.defineProperty(self, 'height', { value: mikanBox.height });
@@ -59,20 +60,21 @@ Scene = (function () {
 		 * The canvas associated with this scene.
 		 *
 		 * @property canvas
-		 * @type {GameCanvas}
+		 * @type HTMLElement
 		 */
 		Object.defineProperty(self, 'canvas', { value: canvas });
 
 		// Updates the score and the level when mikans are erased.
-		var speed = 3;
+		/*
+		var speed = 2;
 		var toNextLevel = 20;
 		statistics.addObserver(function (id) {
 			switch (id) {
 			case 'mikanErased':
 				var count = arguments[2];
 				// updates the score
-				statistics.score +=
-					count * getComboFactor(statistics.comboLength);
+				statistics.score += (count + statistics.level)
+									* getComboFactor(statistics.comboLength)
 				// updates the level
 				var level = statistics.level;
 				while (count >= toNextLevel) {
@@ -84,14 +86,14 @@ Scene = (function () {
 				statistics.level = level;
 				break;
 			case 'levelUpdated':
-				speed = Math.min(3 + statistics.level / 2, 15);
+				speed = Math.min(2 + statistics.level / 4, 15);
 				break;
 			case 'statisticsReset':
-				speed = 3;
+				speed = 2;
 				toNextLevel = 20;
 				break;
 			}
-		});
+		});*/
 
 		/**
 		 * The actor which spawns grabbed items.
@@ -115,7 +117,7 @@ Scene = (function () {
 			// (0)
 			// (1)
 			for (var i = 0; i < 2; ++i) {
-				var item = nextItem();
+				var item = difficulty.nextItem();
 				var y = -(mikanBox.cellSize * (2 - i));
 				item.locate(x, y);
 				grabbedItems[i] = item;
@@ -140,7 +142,7 @@ Scene = (function () {
 		var gravity = new Actor(ActorPriorities.CONTROL, function (scheduler) {
 			if (grabbedItems) {
 				grabbedItems.forEach(function (item) {
-					item.y += speed;
+					item.y += difficulty.speed;
 				});
 				// releases grabbed items if they reach the ground
 				var bottom = Math.max(grabbedItems[0].y, grabbedItems[1].y);
@@ -207,7 +209,7 @@ Scene = (function () {
 		/**
 		 * Schedules to move grabbed items left.
 		 *
-		 * This method will be invoked from `GameCanvas`.
+		 * This method will be invoked from `GamePad`.
 		 *
 		 * @method moveLeft
 		 */
@@ -218,7 +220,7 @@ Scene = (function () {
 		/**
 		 * Schedules to move grabbed items right.
 		 *
-		 * This method will be invoked from `GameCanvas`.
+		 * This method will be invoked from `GamePad`.
 		 *
 		 * @method moveRight
 		 */
@@ -229,7 +231,7 @@ Scene = (function () {
 		/**
 		 * Schedules to rotate grabbed items clockwise.
 		 *
-		 * This method will be invoked from `GameCanvas`.
+		 * This method will be invoked from `GamePad`.
 		 *
 		 * @method rotateClockwise
 		 */
@@ -240,7 +242,7 @@ Scene = (function () {
 		/**
 		 * Schedules to rotate grabbed items counter-clockwise.
 		 *
-		 * This method will be invoked from `GameCanvas`.
+		 * This method will be invoked from `GamePad`.
 		 *
 		 * @method rotateCounterClockwise
 		 */
@@ -251,7 +253,7 @@ Scene = (function () {
 		/**
 		 * Schedules to frees grabbed items.
 		 *
-		 * This method will be invoked from `GameCanvas`.
+		 * This method will be invoked from `GamePad`.
 		 *
 		 * @method releaseControl
 		 */

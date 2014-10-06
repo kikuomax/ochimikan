@@ -20,21 +20,10 @@
             KeyGamePad.attachTo(canvas, document);
         }
 
-        var game = Game.start(
-            canvas,
-            new ResourceManager(),
-            statistics,
-            function () {
-              var item;
-              if (Math.random() < 0.1) {
-                  item = new Preservative();
-              } else {
-                  var damage = (Mikan.MAX_DAMAGE + 1) * Math.random();
-                  item = new Mikan(Math.floor(damage));
-              }
-              return item;
-            }
-        );
+        var game = Game.start(canvas,
+                              new ResourceManager(),
+                              statistics,
+                              new Difficulty(statistics));
 
         function ViewModel() {
             var self = this;

@@ -23,16 +23,18 @@ Difficulty = (function () {
 		// updates parameters when `statistics` is updated
 		var toNextLevel;
 		var speed;
+		var preservativeStock;
 		var preservativeProbability;
 		var maxDamageRatio;
 		statistics.addObserver(function (id) {
 			switch (id) {
-			case 'mikanErased':
+			case 'mikansErased':
 				// updates the score and level
 				var numErased = arguments[2];
 				var level = statistics.level;
-				statistics.score +=
-					(numErased + level) * comboFactorOf(statistics.comboLength);
+				statistics.score += (numErased + level)
+									* Difficulty.MIKAN_SCORE
+									* comboFactorOf(statistics.comboLength);
 				while (numErased > toNextLevel) {
 					numErased -= toNextLevel;
 					++level;
@@ -40,6 +42,13 @@ Difficulty = (function () {
 				}
 				toNextLevel -= numErased;
 				statistics.level = level;
+				break;
+			case 'preservativesErased':
+				// updates the score
+				var numErased = arguments[2];
+				statistics.score += numErased
+									* Difficulty.PRESERVATIVE_SCORE
+									* comboFactorOf(statistics.comboLength);
 				break;
 			case 'levelUpdated':
 				// updates the difficulty parameters
@@ -52,14 +61,16 @@ Difficulty = (function () {
 			}
 		});
 		function resetParameters() {
-			toNextLevel = 20;
+			toNextLevel       = 20;
+			preservativeStock = 0;
 			updateParameters();
 		}
 		function updateParameters() {
 			var level = statistics.level;
 			speed = Math.min(2 + level / 4, 15);
 			preservativeProbability =
-				Math.max(0, Math.min((level - 4) / 20, 0.1));
+				Math.max(0, Math.min((level - 4) / 100, 0.1));
+			preservativeStock += Math.floor((level + 1) / 5);
 			maxDamageRatio = Math.max(1, 5 - (level / 10));
 		}
 		resetParameters();
@@ -87,8 +98,12 @@ Difficulty = (function () {
 		 */
 		self.nextItem = function () {
 			var item;
-			if (Math.random() < preservativeProbability) {
+			console.debug('preservativeStock=' + preservativeStock);
+			if (preservativeStock > 0
+				&& Math.random() < preservativeProbability)
+			{
 				item = new Preservative();
+				--preservativeStock;
 			} else {
 				// the max damage is `maxDamageRatio` times often
 				// compared to any other damage
@@ -107,7 +122,7 @@ Difficulty = (function () {
 
 		// Returns the score factor of a specified combo length.
 		function comboFactorOf(comboLength) {
-			return 10 * Math.round(Math.pow(2, comboLength));
+			return Math.round(Math.pow(2, (comboLength - 1)));
 		}
 	}
 
@@ -130,6 +145,26 @@ Difficulty = (function () {
 			&& typeof obj.speed    === 'number'
 			&& typeof obj.nextItem === 'number';
 	};
+
+	/**
+	 * The base score of a single mikan.
+	 *
+	 * The default value is 10.
+	 *
+	 * @property MIKAN_SCORE
+	 * @type {number}
+	 */
+	Difficulty.MIKAN_SCORE = 10;
+
+	/**
+	 * The base score of a single preservative.
+	 *
+	 * The default value is 1000.
+	 *
+	 * @property PRESERVATIVE_SCORE
+	 * @type {number}
+	 */
+	Difficulty.PRESERVATIVE_SCORE = 1000;
 
 	return Difficulty;
 })();

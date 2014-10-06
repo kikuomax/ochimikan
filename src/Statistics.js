@@ -26,6 +26,10 @@
  *    Indicates that the total number of erased mikans has increased.
  *    Takes the following additional argument,
  *     1. (number) The number of newly erased mikans.
+ *  - 'preservativesErased':
+ *    Indicates that the total number of erased preservatives has increased.
+ *    Takes the following additional argument,
+ *     1. (number) The number of newly erased preservatives.
  *  - 'comboUpdated':
  *    Indicates that the length of the current combo has been changed.
  *    No optional arguments.
@@ -126,6 +130,21 @@ Statistics = (function () {
 		});
 
 		/**
+		 * The total number of erased preservatives.
+		 *
+		 * Initially 0.
+		 *
+		 * To change this number, use `addErasedPreservatives` or `reset`.
+		 *
+		 * @property erasedPreservativeCount
+		 * @type number
+		 */
+		var erasedPreservativeCount = 0;
+		Object.defineProperty(self, 'erasedPreservativeCount', {
+			get: function () { return erasedPreservativeCount }
+		});
+
+		/**
 		 * The length of the current combo.
 		 *
 		 * Initially 0.
@@ -143,7 +162,7 @@ Statistics = (function () {
 		/**
 		 * Increases the total number of erased mikans.
 		 *
-		 * Notifies 'mikanErased' to observers unless `count` is 0.
+		 * Notifies 'mikansErased' to observers unless `count` is 0.
 		 *
 		 * Throws an exception if `count` is not a number.
 		 *
@@ -157,7 +176,28 @@ Statistics = (function () {
 			}
 			if (count != 0) {
 				erasedMikanCount += count;
-				self.notifyObservers('mikanErased', self, count);
+				self.notifyObservers('mikansErased', self, count);
+			}
+		};
+
+		/**
+		 * Increases the total number of erased preservatives.
+		 *
+		 * Notifies 'preservativesErased' to observers unless `count` is 0.
+		 *
+		 * Throws an exception if `count` is not a number.
+		 *
+		 * @method addErasedPreservatives
+		 * @param count {number}
+		 *     The number to be added to the erased preservative count.
+		 */
+		self.addErasedPreservatives = function (count) {
+			if (typeof count !== 'number') {
+				throw 'count must be a number';
+			}
+			if (count != 0) {
+				erasedPreservativeCount += count;
+				self.notifyObservers('preservativesErased', self, count);
 			}
 		};
 
@@ -194,6 +234,7 @@ Statistics = (function () {
 		 *  - `level`
 		 *  - `score`
 		 *  - `erasedMikanCount`
+		 *  - `erasedPreservativeCount`
 		 *  - `comboLength`
 		 *
 		 * Notifies `statisticsReset` to observers.
@@ -201,10 +242,11 @@ Statistics = (function () {
 		 * @method reset
 		 */
 		self.reset = function () {
-			level            = 0;
-			score            = 0;
-			erasedMikanCount = 0;
-			comboLength      = 0;
+			level                   = 0;
+			score                   = 0;
+			erasedMikanCount        = 0;
+			erasedPreservativeCount = 0;
+			comboLength             = 0;
 			self.notifyObservers('statisticsReset', self);
 		};
 	}
@@ -216,14 +258,16 @@ Statistics = (function () {
 	 * A `Statistics` must satisfy all of the following conditions,
 	 *  - Is a `Observable`
 	 *  - Has all of the following properties,
-	 *     - level:            number
-	 *     - score:            number
-	 *     - erasedMikanCount: number
-	 *     - comboLength:      number
-	 *     - addErasedMikans:  function
-	 *     - addCombo:         function
-	 *     - resetCombo:       function
-	 *     - reset:            function
+	 *     - level:                   number
+	 *     - score:                   number
+	 *     - erasedMikanCount:        number
+	 *     - erasedPreservativeCount: number
+	 *     - comboLength:             number
+	 *     - addErasedMikans:         function
+	 *     - addErasedPreservatives:  function
+	 *     - addCombo:                function
+	 *     - resetCombo:              function
+	 *     - reset:                   function
 	 *
 	 * @method isClassOf
 	 * @static
@@ -234,14 +278,16 @@ Statistics = (function () {
 	 */
 	Statistics.isClassOf = function (obj) {
 		return Observable.isClassOf(obj)
-			&& typeof obj.level            === 'number'
-			&& typeof obj.score            === 'number'
-			&& typeof obj.erasedMikanCount === 'number'
-			&& typeof obj.comboLength      === 'number'
-			&& typeof obj.addErasedMikans  === 'function'
-			&& typeof obj.addCombo         === 'function'
-			&& typeof obj.resetCombo       === 'function'
-			&& typeof obj.reset            === 'function';
+			&& typeof obj.level                   === 'number'
+			&& typeof obj.score                   === 'number'
+			&& typeof obj.erasedMikanCount        === 'number'
+			&& typeof obj.erasedPreservativeCount === 'number'
+			&& typeof obj.comboLength             === 'number'
+			&& typeof obj.addErasedMikans         === 'function'
+			&& typeof obj.addErasedPreservatives  === 'function'
+			&& typeof obj.addCombo                === 'function'
+			&& typeof obj.resetCombo              === 'function'
+			&& typeof obj.reset                   === 'function';
 	};
 
 	return Statistics;

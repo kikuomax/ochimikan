@@ -3,17 +3,19 @@ describe('Statistics', function () {
 
 	beforeEach(function () {
 		statisticsLike = {
-			level:            0,
-			score:            0,
-			erasedMikanCount: 0,
-			comboLength:      0,
-			addErasedMikans:  function () {},
-			addCombo:         function () {},
-			resetCombo:       function () {},
-			reset:            function () {},
-			addObserver:      function () {},
-			removeObserver:   function () {},
-			notifyObservers:  function () {}
+			level:                   0,
+			score:                   0,
+			erasedMikanCount:        0,
+			erasedPreservativeCount: 0,
+			comboLength:             0,
+			addErasedMikans:         function () {},
+			addErasedPreservatives:  function () {},
+			addCombo:                function () {},
+			resetCombo:              function () {},
+			reset:                   function () {},
+			addObserver:             function () {},
+			removeObserver:          function () {},
+			notifyObservers:         function () {}
 		};
 	});
 
@@ -40,6 +42,11 @@ describe('Statistics', function () {
 	it('Should initially have 0 erased mikans', function () {
 		var stat = new Statistics();
 		expect(stat.erasedMikanCount).toBe(0);
+	});
+
+	it('Should initially have 0 erased preservatives', function () {
+		var stat = new Statistics();
+		expect(stat.erasedPreservativeCount).toBe(0);
 	});
 
 	it('Should initially have combo length 0', function () {
@@ -76,6 +83,13 @@ describe('Statistics', function () {
 		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
 	});
 
+	it(':isClassOf should be false for an object whose erasedPreservativeCount is not a number', function () {
+		delete statisticsLike.erasedPreservativeCount;
+		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
+		statisticsLike.erasedPreservativeCount = '0';
+		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
+	});
+
 	it(':isClassOf should be false for an object whose comboLength is not a number', function () {
 		delete statisticsLike.comboLength;
 		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
@@ -87,6 +101,13 @@ describe('Statistics', function () {
 		delete statisticsLike.addErasedMikans;
 		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
 		statisticsLike.addErasedMikans = 'addErasedMikans';
+		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
+	});
+
+	it(':isClassOf should be false for an object whose addErasedPreservatives is not a function', function () {
+		delete statisticsLike.addErasedPreservatives;
+		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
+		statisticsLike.addErasedPreservatives = 'addErasedPreservatives';
 		expect(Statistics.isClassOf(statisticsLike)).toBe(false);
 	});
 
@@ -194,6 +215,30 @@ describe('Statistics', function () {
 		expect(stat.erasedMikanCount).toBe(0);
 	});
 
+	it(':addErasedPreservatives should increase the number of erased preservatives', function () {
+		var stat = new Statistics();
+		stat.addErasedPreservatives(1);
+		expect(stat.erasedPreservativeCount).toBe(1);
+		stat.addErasedPreservatives(4);
+		expect(stat.erasedPreservativeCount).toBe(5);
+		stat.addErasedPreservatives(0);
+		expect(stat.erasedPreservativeCount).toBe(5);
+	});
+
+	it(':addErasedPreservatives should throw an exception if count is not specified', function () {
+		var stat = new Statistics();
+		expect(function () { stat.addErasedPreservatives(null) }).toThrow();
+		expect(function () { stat.addErasedPreservatives() }).toThrow();
+		expect(stat.erasedPreservativeCount).toBe(0);
+	});
+
+	it(':addErasedPreservatives should throw an exception if count is not a number', function () {
+		var stat = new Statistics();
+		expect(function () { stat.addErasedPreservatives('1') }).toThrow();
+		expect(function () { stat.addErasedPreservatives(true) }).toThrow();
+		expect(stat.erasedPreservativeCount).toBe(0);
+	});
+
 	it(':addCombo should increment the length of combo', function () {
 		var stat = new Statistics();
 		stat.addCombo();
@@ -228,6 +273,13 @@ describe('Statistics', function () {
 		stat.addErasedMikans(1);
 		stat.reset();
 		expect(stat.erasedMikanCount).toBe(0);
+	});
+
+	it(':reset should reset erasedPreservativeCount to 0', function () {
+		var stat = new Statistics();
+		stat.addErasedPreservatives(1);
+		stat.reset();
+		expect(stat.erasedPreservativeCount).toBe(0);
 	});
 
 	it(':reset should reset comboLength to 0', function () {
@@ -280,15 +332,29 @@ describe('Statistics working with events', function () {
 		expect(observer).not.toHaveBeenCalled();
 	});
 
-	it(':addErasedMikans should notify "mikanErased" to its observer', function () {
+	it(':addErasedMikans should notify "mikansErased" to its observer', function () {
 		stat.addErasedMikans(1);
-		expect(observer).toHaveBeenCalledWith('mikanErased', stat, 1);
+		expect(observer).toHaveBeenCalledWith('mikansErased', stat, 1);
+		observer.calls.reset();
 		stat.addErasedMikans(100);
-		expect(observer).toHaveBeenCalledWith('mikanErased', stat, 100);
+		expect(observer).toHaveBeenCalledWith('mikansErased', stat, 100);
 	});
 
 	it(':addErasedMikans should not notify its observer if count is 0', function () {
 		stat.addErasedMikans(0);
+		expect(observer).not.toHaveBeenCalled();
+	});
+
+	it(':addErasedPreservatives should notify "preservativesErased" to its observer', function () {
+		stat.addErasedPreservatives(1);
+		expect(observer).toHaveBeenCalledWith('preservativesErased', stat, 1);
+		observer.calls.reset();
+		stat.addErasedPreservatives(4);
+		expect(observer).toHaveBeenCalledWith('preservativesErased', stat, 4);
+	});
+
+	it(':addErasedPreservatives should not notify its observer if count is 0', function () {
+		stat.addErasedPreservatives(0);
 		expect(observer).not.toHaveBeenCalled();
 	});
 

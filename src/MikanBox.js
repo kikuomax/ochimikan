@@ -362,8 +362,8 @@ MikanBox = (function () {
 							++numErased;
 						});
 					});
-					statistics.addErasedMikans(numErased);
 					statistics.addCombo();
+					statistics.addErasedMikans(numErased);
 					// sprays
 					self.scheduleSprays(chains, scheduler);
 					// schedules to spoil items
@@ -516,6 +516,7 @@ MikanBox = (function () {
 			// spoils items
 			var spoiler =
 				new Actor(ActorPriorities.SPOIL, function (scheduler) {
+					var erasedPreservativeCount = 0;
 					for (var c = 0; c < columnCount; ++c) {
 						for (var r = 0; r < maxRowCount; ++r) {
 							var idx = indexOf(c, r);
@@ -525,9 +526,11 @@ MikanBox = (function () {
 								if (item.typeId == Item.TYPE_PRESERVATIVE
 									&& Item.isMaxDamaged(item))
 								{
-									// destroys the preservative after few frames
+									++erasedPreservativeCount;
+									// destroys the preservative after
+									// few frames
 									(function (item, ttl) {
-										Actor.call(item, ActorPriorities.SPOIL, function () {
+										Actor.call(item, ActorPriorities.SPOIL, function (scheduler) {
 											--ttl;
 											if (ttl > 0) {
 												scheduler.schedule(this);
@@ -548,6 +551,23 @@ MikanBox = (function () {
 								}
 							}
 						}
+					}
+					// updates the statistics when preservatives have
+					// disappeared
+					if (erasedPreservativeCount > 0) {
+						var timer = (function (ttl) {
+							return new Actor(
+								ActorPriorities.SPOIL, function (scheduler) {
+									--ttl;
+									if (ttl > 0) {
+										scheduler.schedule(this);
+									} else {
+										statistics.addErasedPreservatives(erasedPreservativeCount);
+									}
+								}
+							);
+						})(3);
+						scheduler.schedule(timer);
 					}
 				});
 			scheduler.schedule(spoiler);

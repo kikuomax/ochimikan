@@ -38,9 +38,10 @@ Spray = (function () {
 		}
 
 		/**
-		 * Performs the action of this spray.
+		 * *Spray specific behavior.*
 		 *
-		 * ## Behavior
+		 * Behavior
+		 * --------
 		 *
 		 *  1. Decrements `ttl`.
 		 *  2. Invokes `move`.
@@ -55,8 +56,7 @@ Spray = (function () {
 		 *     1. Resets `frameIndex` to 0.
 		 *     2. Proceeds to the step 3.
 		 *
-		 * @param scheduler {ActorScheduler}
-		 *     The `ActorScheduler` which is running this actor.
+		 * @method act
 		 */
 		Actor.call(self, ActorPriorities.SPRAY, function (scheduler) {
 			// moves and reschedules if ttl has not expired
@@ -122,11 +122,11 @@ Spray = (function () {
 	/**
 	 * The frame count of a spray.
 	 *
-	 * `FRAME_COUNT = 4`
+	 *     FRAME_COUNT = 4
 	 *
 	 * @property FRAME_COUNT
 	 * @type {number}
-	 * @final
+	 * @static
 	 */
 	Object.defineProperty(Spray, 'FRAME_COUNT', { value: 4 });
 

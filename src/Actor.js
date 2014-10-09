@@ -2,8 +2,8 @@
  * An actor.
  *
  * Throws an exception
- * - if `priority` is not a number
- * - or if `act` is not a function
+ *  - if `priority` is not a number
+ *  - or if `act` is not a function
  *
  * @class Actor
  * @constructor
@@ -33,7 +33,6 @@ Actor = (function () {
 		 *
 		 * @property priority
 		 * @type {number}
-		 * @final
 		 */
 		self.priority = priority;
 
@@ -53,8 +52,8 @@ Actor = (function () {
 	 * Returns whether a specified object is an `Actor`.
 	 *
 	 * An `Actor` must have the following properties,
-	 * - priority: number
-	 * - act: function
+	 *  - priority: number
+	 *  - act:      function
 	 *
 	 * @method isClassOf
 	 * @static
@@ -66,15 +65,15 @@ Actor = (function () {
 	Actor.isClassOf = function (obj) {
 		return obj != null
 			&& typeof obj.priority === 'number'
-			&& typeof obj.act === 'function';
+			&& typeof obj.act      === 'function';
 	};
 
 	/**
 	 * Returns whether a specified object can be an `Actor`.
 	 *
 	 * An object which has the following properties can be an `Actor`.
-	 * - priority: number
-	 * - act: function
+	 *  - priority: number
+	 *  - act: function
 	 *
 	 * @method canAugment
 	 * @static
@@ -86,7 +85,7 @@ Actor = (function () {
 	Actor.canAugment = function (obj) {
 		return obj != null
 			&& typeof obj.priority === 'number'
-			&& typeof obj.act === 'function';
+			&& typeof obj.act      === 'function';
 	};
 
 	/**

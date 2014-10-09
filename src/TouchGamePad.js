@@ -4,12 +4,12 @@
  * This constructor should be invoked in the context of an `HTMLElement`.
  * You should use `attachTo` function instead of this constructor.
  *
- * Throws an exception if `this` does not have `addEventListener` method.
+ * Throws an exception if `this` is not an `EventTarget`.
  *
  * @class TouchGamePad
  * @constructor
  * @extends GamePad
- * @param canvas {canvas HTMLElement}
+ * @param canvas {canvas EventTarget}
  *     The canvas element to attach.
  */
 TouchGamePad = (function () {
@@ -18,9 +18,9 @@ TouchGamePad = (function () {
 
 		GamePad.call(self);
 
-		// checks this object
+		// verifies this object
 		if (!('addEventListener' in self)) {
-			throw 'canvas must be an HTMLElement';
+			throw 'canvas must be an EventTarget';
 		}
 
 		// listens touch events of this canvas

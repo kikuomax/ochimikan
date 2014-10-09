@@ -7,7 +7,7 @@
  *
  * @class Preservative
  * @constructor
- * @extends Placed
+ * @extends Item
  * @uses Renderable
  */
 Preservative = (function () {
@@ -41,8 +41,8 @@ Preservative = (function () {
 	 *     Preservative.MAX_DAMAGE = 4
 	 *
 	 * @property MAX_DAMAGE
-	 * @type number
-	 * @final
+	 * @type {number}
+	 * @static
 	 */
 	Object.defineProperty(Preservative, 'MAX_DAMAGE', { value: 4 });
 
@@ -52,7 +52,7 @@ Preservative = (function () {
 	 *     Preservative.prototype.maxDamage = Preservative.MAX_DAMAGE
 	 *
 	 * @property maxDamage
-	 * @type number
+	 * @type {number}
 	 */
 	Preservative.prototype.maxDamage = Preservative.MAX_DAMAGE;
 

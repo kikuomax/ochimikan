@@ -2,8 +2,8 @@
  * A located object which has a location (`x`, `y`).
  *
  * Throws an exception
- * - if `x` is not a number
- * - or if `y` is not a number
+ *  - if `x` is not a number
+ *  - or if `y` is not a number
  *
  * @class Located
  * @constructor
@@ -49,10 +49,10 @@ Located = (function () {
 	 * Returns whether a specified object is a `Located`.
 	 *
 	 * A `Located` must have the following properties.
-	 * - x:         number
-	 * - y:         number
-	 * - locate:    function
-	 * - translate: function
+	 *  - x:         number
+	 *  - y:         number
+	 *  - locate:    function
+	 *  - translate: function
 	 *
 	 * @method isClassOf
 	 * @static
@@ -63,9 +63,9 @@ Located = (function () {
 	 */
 	Located.isClassOf = function (obj) {
 		return obj != null
-			&& typeof obj.x === 'number'
-			&& typeof obj.y === 'number'
-			&& typeof obj.locate === 'function'
+			&& typeof obj.x         === 'number'
+			&& typeof obj.y         === 'number'
+			&& typeof obj.locate    === 'function'
 			&& typeof obj.translate === 'function';
 	};
 
@@ -73,8 +73,8 @@ Located = (function () {
 	 * Returns whether a specified object can be a `Located`.
 	 *
 	 * An object which has all of the following properties can be a `Located`.
-	 * - x: number
-	 * - y: number
+	 *  - x: number
+	 *  - y: number
 	 *
 	 * @method canAugment
 	 * @static
@@ -93,8 +93,8 @@ Located = (function () {
 	 * Augments a specified object with features of the `Located`.
 	 *
 	 * The following property of `obj` will be overwritten.
-	 * - locate
-	 * - translate
+	 *  - locate
+	 *  - translate
 	 *
 	 * Throws an exception if `obj` is not specified.
 	 *

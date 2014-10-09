@@ -4,7 +4,7 @@
  * Behavior of an instance created by this constructor is different from
  * the prototype.
  *
- * ## loadImage
+ * ### loadImage
  *
  * An instance created by this constructor caches loaded images.
  *
@@ -35,7 +35,7 @@ ResourceManager = (function () {
 	 * Returns if a specified object is a `ResourceManager`.
 	 *
 	 * A `ResourceManager` must have all of the following property,
-	 * - loadImage: function
+	 *  - loadImage: function
 	 *
 	 * @method isClassOf
 	 * @static
@@ -69,7 +69,7 @@ ResourceManager = (function () {
 	 * Augments a specified object with features of `ResourceManager`.
 	 *
 	 * The following property of `obj` will be overwritten,
-	 * - loadImage
+	 *  - loadImage
 	 *
 	 * Never checks if `obj` actually can be a `ResourceManager`, because this
 	 * method may be applied to incomplete instances; i.e. prototypes.

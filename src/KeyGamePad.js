@@ -3,6 +3,8 @@
  *
  * You should use `attachTo` instead of this constructor.
  *
+ * Throws an exception if `target` is not an `EventTarget`.
+ *
  * @class KeyGamePad
  * @constructor
  * @extends GamePad
@@ -14,6 +16,11 @@ KeyGamePad = (function () {
 		var self = this;
 
 		GamePad.call(self);
+
+		// verifies the argument
+		if (!('addEventListener' in target)) {
+			throw 'target must be an EventTarget';
+		}
 
 		// processes key down events on this canvas
 		target.addEventListener('keydown', handleKeyDown, false);
@@ -83,13 +90,15 @@ KeyGamePad = (function () {
 	 *  - addDirectionListener
 	 *  - removeDirectionListener
 	 *
-	 * Throws an exception if `obj` is not specified.
+	 * Throws an exception
+	 *  - if `obj` is not specified,
+	 *  - or if `target` is not an `EventTarget`
 	 *
 	 * @method attachTo
 	 * @static
 	 * @param obj {object}
 	 *     The object to attach.
-	 * @param window {EventTarget}
+	 * @param target {EventTarget}
 	 *     The `EventTarget` on which key events are interpreted.
 	 * @return {object}
 	 *     `obj`.

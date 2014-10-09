@@ -15,7 +15,7 @@ GamePad = (function () {
 		 * Use `addDirectionListener` or `removeDirectionListener` instead.
 		 *
 		 * @property directionListeners
-		 * @type Array
+		 * @type {Array}
 		 * @private
 		 */
 		var directionListeners = [];

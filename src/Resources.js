@@ -11,10 +11,10 @@ Resources = (function () {
 	 * A collection of sprites.
 	 *
 	 * Each subproperty in this property is an array of sprites.
-	 * - mikan: an array of mikan sprites.
-	 *   each index corresponds to a degree of damage.
-	 * - spray: an array of spray sprites.
-	 *   each index corresponds to a frame index.
+	 *  - mikan: an array of mikan sprites.
+	 *    each index corresponds to a degree of damage.
+	 *  - spray: an array of spray sprites.
+	 *    each index corresponds to a frame index.
 	 *
 	 * @property SPRITES
 	 * @type {object}

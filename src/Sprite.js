@@ -4,13 +4,13 @@
  * Contents associated with `url` will not be loaded until `load` is invoked.
  *
  * Throws an exception
- * - if `url` is not a string
- * - or if `x` is not a number
- * - or if `y` is not a number
- * - or if `width` is not a number
- * - or if `height` is not a number
- * - or if `width < 0`
- * - or if `height` < 0
+ *  - if `url` is not a string
+ *  - or if `x` is not a number
+ *  - or if `y` is not a number
+ *  - or if `width` is not a number
+ *  - or if `height` is not a number
+ *  - or if `width < 0`
+ *  - or if `height` < 0
  *
  * @class Sprite
  * @constructor 

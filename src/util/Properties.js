@@ -21,10 +21,10 @@ Properties = (function () {
 	 *       of `obj`.
 	 *
 	 * Throws an exception
-	 * - if `obj` is not specified
-	 * - or if `name` is not specified
-	 * - or if `impl` is not a function
-	 * - or if the property of `obj` specified by `name` is not a function
+	 *  - if `obj` is not specified
+	 *  - or if `name` is not specified
+	 *  - or if `impl` is not a function
+	 *  - or if the property of `obj` specified by `name` is not a function
 	 * 
 	 * @method override
 	 * @param obj {object}

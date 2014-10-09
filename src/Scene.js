@@ -3,22 +3,17 @@
  *
  * An `Actor` which spawns grabbed items will be scheduled initially.
  *
- * Scenarios
- * ---------
- *
- * ### Rendering a scene
- *
- *  1. A `Scene` is given.
- *  2. A user asks the `Scene` to render it.
- *  3. The `Scene` clears a canvas associated with it.
- *  4. The `Scene` renders its mikan box, grabbed items and renderable actors
- *     scheduled in it.
+ * Throws an exception
+ *  - if `canvas` is not an `Element`,
+ *  - or if `canvas` is not a `GamePad`,
+ *  - or if `statistics` is not a `Statistics`,
+ *  - or if `difficulty` is not a `Difficulty`
  *
  * @class Scene
  * @contructor
  * @extends ActorScheduler
  * @uses DirectionListener
- * @param canvas {canvas HTMLElement, GamePad}
+ * @param canvas {Element, GamePad}
  *     The canvas element on which the `Scene` is to be rendered.
  *     This must be a `GamePad` at the same time.
  * @param statistics {Statistics}
@@ -32,59 +27,67 @@ Scene = (function () {
 
 		ActorScheduler.call(self);
 
-		var mikanBox = new MikanBox(Scene.COLUMN_COUNT,
-									Scene.ROW_COUNT,
-									Scene.ROW_MARGIN,
-									Scene.CELL_SIZE,
-									statistics);
+		// verifies the arguments
+		if (!(canvas instanceof Element)) {
+			throw 'canvas must be an Element';
+		}
+		if (!GamePad.isClassOf(canvas)) {
+			throw 'canvas must be a GamePad';
+		}
+		if (!Statistics.isClassOf(statistics)) {
+			throw 'statistics must be a Statistics';
+		}
+		if (!Difficulty.isClassOf(difficulty)) {
+			throw 'difficulty must be a Difficulty';
+		}
 
 		/**
-		 * The width of this scene.
+		 * The mikan box.
+		 *
+		 * @property mikanBox
+		 * @type {MikanBox}
+		 * @private
+		 */
+		var mikanBox;
+
+		/**
+		 * The width (in pixels) of this scene.
 		 *
 		 * @property width
-		 * @type number
-		 * @final
+		 * @type {number}
 		 */
-		Object.defineProperty(self, 'width', { value: mikanBox.width });
+		Object.defineProperty(self, 'width', {
+			get: function () { return mikanBox.width }
+		});
 
 		/**
-		 * The height of this scene.
+		 * The height (in pixels) of this scene.
 		 *
 		 * @preoperty height
-		 * @type number
-		 * @final
+		 * @type {number}
 		 */
-		Object.defineProperty(self, 'height', { value: mikanBox.height });
-
-		/**
-		 * The canvas associated with this scene.
-		 *
-		 * @property canvas
-		 * @type HTMLElement
-		 */
-		Object.defineProperty(self, 'canvas', { value: canvas });
+		Object.defineProperty(self, 'height', {
+			get: function () { return mikanBox.height }
+		});
 
 		/**
 		 * The actor which spawns grabbed items.
 		 *
-		 * The priority of the actor is `ActorPriorities.SPAWN`.
+		 * The priority is `ActorPriorities.SPAWN`.
 		 *
-		 * The items to be spawned have the following properties.
-		 *  - x: (COLUMN_COUNT / 2) * CELL_SIZE
-		 *  - y: -(CELL_SIZE * i), i=1,2
-		 *  - damage: randomly chosen
+		 * Items will be determined by `difficulty.nextItem`.
+		 * They will be centered and start falling from just above this mikan
+		 * box.
 		 *
 		 * @property spawner
 		 * @type {Actor, Renderable}
 		 * @private
 		 */
 		var grabbedItems;
-		var rotation;
+		var rotation;  // please refer to `updateRotation`
 		var spawner = new Actor(ActorPriorities.SPAWN, function (scheduler) {
 			grabbedItems = new Array(2);
 			var x = Math.floor(mikanBox.columnCount / 2) * mikanBox.cellSize;
-			// (0)
-			// (1)
 			for (var i = 0; i < 2; ++i) {
 				var item = difficulty.nextItem();
 				var y = -(mikanBox.cellSize * (2 - i));
@@ -95,12 +98,11 @@ Scene = (function () {
 			self.schedule(gravity);
 			self.schedule(spawner);
 		});
-		self.schedule(spawner);
 
 		/**
 		 * An actor which moves grabbed items downward.
 		 *
-		 * The priority of the actor is `ActorPriorities.CONTROL`.
+		 * The priority is `ActorPriorities.CONTROL`.
 		 *
 		 * Also is a renderable which renders grabbed items.
 		 *
@@ -155,11 +157,14 @@ Scene = (function () {
 									Scene.CELL_SIZE,
 									statistics);
 			grabbedItems = null;
-			self.actorQueue = [ spawner ];
+			self.actorQueue = [spawner];
 		};
+		self.reset();
 
 		/**
 		 * Renders this scene.
+		 *
+		 * Renders `Renderable` actors.
 		 *
 		 * @method render
 		 */
@@ -318,18 +323,24 @@ Scene = (function () {
 			newY1 = grabbedItems[1].y;
 			switch(newRotation) {
 			case 0:
+				// 0
+				// 1
 				newX0 = newX1;
 				newY0 = newY1 - mikanBox.cellSize;
 				break;
 			case 1:
+				// 1 0
 				newX0 = newX1 + mikanBox.cellSize;
 				newY0 = newY1;
 				break;
 			case 2:
+				// 1
+				// 0
 				newX0 = newX1;
 				newY0 = newY1 + mikanBox.cellSize;
 				break;
 			case 3:
+				// 0 1
 				newX0 = newX1 - mikanBox.cellSize;
 				newY0 = newY1;
 				break;
@@ -425,7 +436,6 @@ Scene = (function () {
 	 * @property COLUMN_COUNT
 	 * @type {number}
 	 * @static
-	 * @final
 	 */
 	Object.defineProperty(Scene, 'COLUMN_COUNT', { value: 8 });
 
@@ -437,7 +447,6 @@ Scene = (function () {
 	 * @property ROW_COUNT
 	 * @type {number}
 	 * @static
-	 * @final
 	 */
 	Object.defineProperty(Scene, 'ROW_COUNT', { value: 12 });
 
@@ -449,7 +458,6 @@ Scene = (function () {
 	 * @property ROW_MARGIN
 	 * @type {number}
 	 * @static
-	 * @final
 	 */
 	Object.defineProperty(Scene, 'ROW_MARGIN', { value: 8 });
 
@@ -461,7 +469,6 @@ Scene = (function () {
 	 * @property CELL_SIZE
 	 * @type {number}
 	 * @static
-	 * @final
 	 */
 	Object.defineProperty(Scene, 'CELL_SIZE', { value: 32 });
 

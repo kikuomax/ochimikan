@@ -12,9 +12,9 @@ Search = (function () {
 	 *
 	 * `comparator` must be a function which accepts two objects (`lhs`, `rhs`)
 	 * and retruns
-	 * - negative number if `lhs < rhs`
-	 * - 0 if `lhs == rhs`
-	 * - positive number if `lhs > rhs`
+	 *  - negative number if `lhs < rhs`
+	 *  - 0 if `lhs == rhs`
+	 *  - positive number if `lhs > rhs`
 	 *
 	 * A returning index `i` is an index such that
 	 *
@@ -60,9 +60,9 @@ Search = (function () {
 	 *
 	 * `comparator` must be a function which accepts two objects (`lhs`, `rhs`)
 	 * and returns
-	 * - negative number if `lhs < rhs`
-	 * - 0 if `lhs == rhs`
-	 * - positive number if `lhs > rhs`
+	 *  - negative number if `lhs < rhs`
+	 *  - 0 if `lhs == rhs`
+	 *  - positive number if `lhs > rhs`
 	 *
 	 * A returning index `i` satisfies
 	 *

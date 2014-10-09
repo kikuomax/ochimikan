@@ -63,7 +63,7 @@ MikanBox = (function () {
 	var MARKER_SPOIL = 2;
 
 	// the speed of falling mikan
-	var FALLING_SPEED = 15;
+	var FALLING_SPEED = 20;
 
 	// constructor
 	function MikanBox(columnCount, rowCount, rowMargin, cellSize, statistics) {
@@ -144,7 +144,6 @@ MikanBox = (function () {
 		 *
 		 * @property rowCount
 		 * @type {number}
-		 * @final
 		 */
 		Object.defineProperty(self, 'rowCount', { value: rowCount });
 
@@ -153,7 +152,6 @@ MikanBox = (function () {
 		 *
 		 * @property rowMargin
 		 * @type {number}
-		 * @final
 		 */
 		Object.defineProperty(self, 'rowMargin', { value: rowMargin });
 
@@ -162,7 +160,6 @@ MikanBox = (function () {
 		 *
 		 * @property cellSize
 		 * @type {number}
-		 * @final
 		 */
 		Object.defineProperty(self, 'cellSize', { value: cellSize });
 
@@ -171,7 +168,6 @@ MikanBox = (function () {
 		 *
 		 * @property width
 		 * @type {number}
-		 * @final
 		 */
 		Object.defineProperty(self, 'width', { value: columnCount * cellSize });
 
@@ -180,7 +176,6 @@ MikanBox = (function () {
 		 *
 		 * @property height
 		 * @type {number}
-		 * @final
 		 */
 		Object.defineProperty(self, 'height', { value: rowCount * cellSize });
 
@@ -189,7 +184,6 @@ MikanBox = (function () {
 		 *
 		 * @property statistics
 		 * @type {Statistics}
-		 * @final
 		 */
 		Object.defineProperty(self, 'statistics', { value: statistics });
 
@@ -693,8 +687,8 @@ MikanBox = (function () {
 		 * Checks if the specified column and row are valid.
 		 *
 		 * Throws an exception
-		 * - if `column` < 0 or `column` >= `columnCount`
-		 * - or if `row` < 0 or `row` >= `maxRowCount`
+		 *  - if `column` < 0 or `column` >= `columnCount`
+		 *  - or if `row` < 0 or `row` >= `maxRowCount`
 		 *
 		 * @method checkCell
 		 * @private
@@ -787,11 +781,11 @@ MikanBox = (function () {
 	/**
 	 * The minimum length of a chain.
 	 *
-	 * `CHAIN_LENGTH = 4`
+	 *     CHAIN_LENGTH = 4
 	 *
 	 * @property CHAIN_LENGTH
 	 * @type {number}
-	 * @final
+	 * @static
 	 */
 	Object.defineProperty(MikanBox, 'CHAIN_LENGTH', { value: 4 });
 

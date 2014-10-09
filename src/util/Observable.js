@@ -12,7 +12,7 @@ Observable = (function () {
 		 * The list of observer functions.
 		 *
 		 * @property observers
-		 * @type Array{function}
+		 * @type {Array}
 		 */
 		self.observers = [];
 	}
@@ -34,8 +34,8 @@ Observable = (function () {
 	 */
 	Observable.isClassOf = function (obj) {
 		return obj != null
-			&& typeof obj.addObserver === 'function'
-			&& typeof obj.removeObserver === 'function'
+			&& typeof obj.addObserver     === 'function'
+			&& typeof obj.removeObserver  === 'function'
 			&& typeof obj.notifyObservers === 'function';
 	};
 

@@ -39,7 +39,7 @@
  *       7. Back to the step 7 of the main scenario.
  *
  * @class Game
- * @static
+ * @constructor
  */
 Game = (function () {
 	function Game() {}
@@ -56,7 +56,7 @@ Game = (function () {
 	 *
 	 * @method start
 	 * @static
-	 * @param canvas {HTMLElement, GamePad}
+	 * @param canvas {Element, GamePad}
 	 *     The canvas element on which the game will be rendered.
 	 *     This must be a `GamePad` at the same time.
 	 * @param resourceManager {ResourceManager}
@@ -69,6 +69,23 @@ Game = (function () {
 	 *     A new instance of `Game`.
 	 */
 	Game.start = function (canvas, resourceManager, statistics, difficulty) {
+		// verifies arguments
+		if (!(canvas instanceof Element)) {
+			throw 'canvas must be an Element';
+		}
+		if (!GamePad.isClassOf(canvas)) {
+			throw 'canvas must be a GamePad';
+		}
+		if (!ResourceManager.isClassOf(resourceManager)) {
+			throw 'resourceManager must be a ResourceManager';
+		}
+		if (!Statistics.isClassOf(statistics)) {
+			throw 'statistics must be a Statisitcs';
+		}
+		if (!Difficulty.isClassOf(difficulty)) {
+			throw 'difficulty must be a Difficulty';
+		}
+
 		var game = new Game();
 		// loads the resources
 		Resources.loadSprites(resourceManager);
@@ -76,7 +93,7 @@ Game = (function () {
 		game.scene = new Scene(canvas, statistics, difficulty);
 		canvas.width = game.scene.width;
 		canvas.height = game.scene.height;
-		// runs the game
+		// runs the game loop
 		window.setInterval(function () {
 			// runs and renders a frame
 			game.scene.run();
@@ -93,11 +110,11 @@ Game = (function () {
 	/**
 	 * The interval between frames (in milliseconds).
 	 *
-	 * The default value is `50`.
+	 * The default value is `40`.
 	 *
 	 * @property FRAME_INTERVAL
-	 * @static
 	 * @type {number}
+	 * @static
 	 */
 	Game.FRAME_INTERVAL = 40;
 

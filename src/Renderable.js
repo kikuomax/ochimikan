@@ -14,8 +14,8 @@ Renderable = (function () {
 		var self = this;
 
 		// makes sure that render is a function
-		if (typeof render !== "function") {
-			throw "render must be a function";
+		if (typeof render !== 'function') {
+			throw 'render must be a function';
 		}
 
 		/**
@@ -32,7 +32,7 @@ Renderable = (function () {
 	 * Returns whether a specified object is a `Renderable`.
 	 *
 	 * A `Renderable` must have the following property.
-	 * - render: function 
+	 *  - render: function 
 	 *
 	 * @method isClassOf
 	 * @static
@@ -42,14 +42,14 @@ Renderable = (function () {
 	 *     Whether `obj` is a `Renderable`. `false` if `obj` is not specified.
 	 */
 	Renderable.isClassOf = function (obj) {
-		return obj != null && typeof obj.render === "function";
+		return obj != null && typeof obj.render === 'function';
 	};
 
 	/**
 	 * Returns whether a specified object can be a `Renderable`.
 	 *
 	 * An object which has the following property can be a `Renderable`.
-	 * - render: function
+	 *  - render: function
 	 *
 	 * @method canAugment
 	 * @static

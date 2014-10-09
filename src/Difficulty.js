@@ -83,7 +83,7 @@ Difficulty = (function () {
 		 *     2 + statistics.level / 4
 		 *
 		 * @property speed
-		 * @type number
+		 * @type {number}
 		 */
 		Object.defineProperty(self, 'speed', {
 			get: function () { return speed }
@@ -98,7 +98,6 @@ Difficulty = (function () {
 		 */
 		self.nextItem = function () {
 			var item;
-			console.debug('preservativeStock=' + preservativeStock);
 			if (preservativeStock > 0
 				&& Math.random() < preservativeProbability)
 			{
@@ -143,7 +142,7 @@ Difficulty = (function () {
 	Difficulty.isClassOf = function (obj) {
 		return obj != null
 			&& typeof obj.speed    === 'number'
-			&& typeof obj.nextItem === 'number';
+			&& typeof obj.nextItem === 'function';
 	};
 
 	/**
@@ -153,6 +152,7 @@ Difficulty = (function () {
 	 *
 	 * @property MIKAN_SCORE
 	 * @type {number}
+	 * @static
 	 */
 	Difficulty.MIKAN_SCORE = 10;
 
@@ -163,6 +163,7 @@ Difficulty = (function () {
 	 *
 	 * @property PRESERVATIVE_SCORE
 	 * @type {number}
+	 * @static
 	 */
 	Difficulty.PRESERVATIVE_SCORE = 1000;
 

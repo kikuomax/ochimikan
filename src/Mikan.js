@@ -43,9 +43,8 @@ Mikan = (function () {
 	 *     Mikan.MAX_DAMAGE = 3
 	 *
 	 * @property MAX_DAMAGE
+	 * @type {number}
 	 * @static
-	 * @type number
-	 * @final
 	 */
 	Object.defineProperty(Mikan, 'MAX_DAMAGE', { value: 3 });
 
@@ -55,8 +54,8 @@ Mikan = (function () {
 	 *     Mikan.prototype.maxDamage = Mikan.MAX_DAMAGE
 	 *
 	 * @property maxDamage
-	 * @type number
-	 * @final
+	 * @type {number}
+	 * @static
 	 */
 	Mikan.prototype.maxDamage = Mikan.MAX_DAMAGE;
 

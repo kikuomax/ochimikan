@@ -36,8 +36,7 @@ Item = (function () {
 		 * The type ID of this `Item`.
 		 *
 		 * @property typeId
-		 * @type number
-		 * @final
+		 * @type {number}
 		 */
 		Object.defineProperty(self, 'typeId', { value: typeId });
 
@@ -53,7 +52,7 @@ Item = (function () {
 		 *  - or if `damage` is to be set to a non-number
 		 *
 		 * @property damage
-		 * @type number
+		 * @type {number}
 		 */
 		Object.defineProperty(self, 'damage', {
 			get: function () { return damage },
@@ -214,8 +213,7 @@ Item = (function () {
 	 * The type ID for mikans.
 	 *
 	 * @property TYPE_MIKAN
-	 * @type number
-	 * @final
+	 * @type {number}
 	 */
 	Object.defineProperty(Item, 'TYPE_MIKAN', { value: 0 });
 
@@ -223,8 +221,7 @@ Item = (function () {
 	 * The type ID for preservatives.
 	 *
 	 * @property TYPE_PRESERVATIVE
-	 * @type number
-	 * @final
+	 * @type {number}
 	 */
 	Object.defineProperty(Item, 'TYPE_PRESERVATIVE', { value: 1 });
 

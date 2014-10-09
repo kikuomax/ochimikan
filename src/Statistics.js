@@ -8,7 +8,7 @@
  *  - Length of the current combo
  *
  * Events
- * ======
+ * ------
  *
  * `Statistics` notifies observers an event when it is changed.
  * An observer function will be invoked with the following arguments,
@@ -60,7 +60,7 @@ Statistics = (function () {
 		 *  - or if this property is set to a negative number
 		 *
 		 * @property level
-		 * @type number
+		 * @type {number}
 		 */
 		var level = 0;
 		Object.defineProperty(self, 'level', {
@@ -94,7 +94,7 @@ Statistics = (function () {
 		 *  - or if this property is set to a negative number
 		 *
 		 * @property score
-		 * @type number
+		 * @type {number}
 		 */
 		var score = 0;
 		Object.defineProperty(self, 'score', {
@@ -122,7 +122,7 @@ Statistics = (function () {
 		 * To change this number, use `addErasedMikans` or `reset`.
 		 *
 		 * @property erasedMikanCount
-		 * @type number
+		 * @type {number}
 		 */
 		var erasedMikanCount = 0;
 		Object.defineProperty(self, 'erasedMikanCount', {
@@ -137,7 +137,7 @@ Statistics = (function () {
 		 * To change this number, use `addErasedPreservatives` or `reset`.
 		 *
 		 * @property erasedPreservativeCount
-		 * @type number
+		 * @type {number}
 		 */
 		var erasedPreservativeCount = 0;
 		Object.defineProperty(self, 'erasedPreservativeCount', {
@@ -152,7 +152,7 @@ Statistics = (function () {
 		 * To change this number, use `addCombo`, `resetCombo` or `reset`.
 		 *
 		 * @property comboLength
-		 * @type number
+		 * @type {number}
 		 */
 		var comboLength = 0;
 		Object.defineProperty(self, 'comboLength', {

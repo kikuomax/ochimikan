@@ -24,6 +24,7 @@ Difficulty = (function () {
 		var toNextLevel;
 		var speed;
 		var preservativeStock;
+		var preservativeCount;
 		var preservativeProbability;
 		var maxDamageRatio;
 		statistics.addObserver(function (id) {
@@ -62,15 +63,15 @@ Difficulty = (function () {
 		});
 		function resetParameters() {
 			toNextLevel       = 20;
-			preservativeStock = 0;
+			preservativeCount = 0;
 			updateParameters();
 		}
 		function updateParameters() {
 			var level = statistics.level;
 			speed = Math.min(2 + level / 4, 15);
 			preservativeProbability =
-				Math.max(0, Math.min((level - 4) / 100, 0.1));
-			preservativeStock += Math.floor((level + 1) / 5);
+				Math.max(0, Math.min((level - 4) / 250, 0.1));
+			preservativeStock = Math.floor((level + 1) * (level + 2) / 10);
 			maxDamageRatio = Math.max(1, 5 - (level / 10));
 		}
 		resetParameters();
@@ -98,11 +99,11 @@ Difficulty = (function () {
 		 */
 		self.nextItem = function () {
 			var item;
-			if (preservativeStock > 0
+			if (preservativeCount < preservativeStock
 				&& Math.random() < preservativeProbability)
 			{
 				item = new Preservative();
-				--preservativeStock;
+				++preservativeCount;
 			} else {
 				// the max damage is `maxDamageRatio` times often
 				// compared to any other damage

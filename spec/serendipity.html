@@ -76,10 +76,11 @@
             return item;
         };
 
-        var canvas = document.getElementById('mikanCanvas');
+        var mainScene = document.getElementById('mainScene');
+        var itemQueue = document.getElementById('itemQueue');
 
         // randomly sends directions
-        GamePad.call(canvas);
+        GamePad.call(mainScene);
         window.setInterval(function () {
             var directionId = Math.floor(4 * Math.random());
             if (Math.random() < viewModel.releaseProb()) {
@@ -92,15 +93,14 @@
                 'rotateCounterClockwise',
                 'releaseControl'
             ][directionId];
-            canvas.sendDirection(direction);
-            /*
-            directionListeners.forEach(function (listener) {
-                listener[direction](canvas);
-            });*/
+            mainScene.sendDirection(direction);
         }, 10);
 
-        // TestCanvas.augment(canvas);
-        Game.start(canvas, new SpecResourceManager(), statistics, difficulty);
+        Game.start(mainScene,
+                   itemQueue,
+                   new SpecResourceManager(),
+                   statistics,
+                   difficulty);
 
         ko.applyBindings(viewModel);
     });
@@ -117,27 +117,35 @@
           data-bind="text: level"></span>
   </div>
   <div style="clear: both">
-    <canvas id="mikanCanvas"
+    <canvas id="mainScene"
             style="float: left;
                    background-image: url('../dist/imgs/background.png')">
     </canvas>
-    <div style="float: none">
-      Preservative Probability:
-      <input type="number" min="0" max="1" step="0.01"
-             data-bind="value: preservativeProb"></input><br>
-      Damage 0 Ratio: <input type="number"
-                             data-bind="value: damage0Ratio"></input><br>
-      Damage 1 Ratio: <input type="number"
-                             data-bind="value: damage1Ratio"></input><br>
-      Damage 2 Ratio: <input type="number"
-                             data-bind="value: damage2Ratio"></input><br>
-      Damage 3 Ratio: <input type="number"
-                             data-bind="value: damage3Ratio"></input><br>
+    <div style="float: left; margin-left: 1em">
+      <canvas id="itemQueue"
+              style="background-image: url('../dist/imgs/background.png')">
+      </canvas>
+      <p>Next</p>
     </div>
-    <div>
-      Release Probability:
-      <input type="number" min="0" max="1" step="0.01"
-             data-bind="value: releaseProb"></input>
+    <div style="float: left; margin-left: 1em">
+      <div>
+        Preservative Probability:
+        <input type="number" min="0" max="1" step="0.01"
+               data-bind="value: preservativeProb"></input><br>
+        Damage 0 Ratio: <input type="number"
+                               data-bind="value: damage0Ratio"></input><br>
+        Damage 1 Ratio: <input type="number"
+                               data-bind="value: damage1Ratio"></input><br>
+        Damage 2 Ratio: <input type="number"
+                               data-bind="value: damage2Ratio"></input><br>
+        Damage 3 Ratio: <input type="number"
+                               data-bind="value: damage3Ratio"></input><br>
+      </div>
+      <div>
+        Release Probability:
+        <input type="number" min="0" max="1" step="0.01"
+               data-bind="value: releaseProb"></input>
+      </div>
     </div>
   </div>
 </body>

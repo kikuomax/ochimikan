@@ -1,5 +1,7 @@
 /**
- * A scene of the game.
+ * The main scene of the game.
+ *
+ * `canvas` will be resized so that it fits the `MainScene`.
  *
  * An `Actor` which spawns grabbed items will be scheduled initially.
  *
@@ -9,20 +11,20 @@
  *  - or if `statistics` is not a `Statistics`,
  *  - or if `difficulty` is not a `Difficulty`
  *
- * @class Scene
+ * @class MainScene
  * @contructor
  * @extends ActorScheduler
  * @uses DirectionListener
  * @param canvas {Element, GamePad}
- *     The canvas element on which the `Scene` is to be rendered.
+ *     The canvas element on which the `MainScene` is to be rendered.
  *     This must be a `GamePad` at the same time.
  * @param statistics {Statistics}
  *     The `Statistics` of the game.
  * @param difficulty {Difficulty}
  *     The `Difficulty` of the game.
  */
-Scene = (function () {
-	function Scene(canvas, statistics, difficulty) {
+MainScene = (function () {
+	function MainScene(canvas, statistics, difficulty) {
 		var self = this;
 
 		ActorScheduler.call(self);
@@ -51,26 +53,6 @@ Scene = (function () {
 		var mikanBox;
 
 		/**
-		 * The width (in pixels) of this scene.
-		 *
-		 * @property width
-		 * @type {number}
-		 */
-		Object.defineProperty(self, 'width', {
-			get: function () { return mikanBox.width }
-		});
-
-		/**
-		 * The height (in pixels) of this scene.
-		 *
-		 * @preoperty height
-		 * @type {number}
-		 */
-		Object.defineProperty(self, 'height', {
-			get: function () { return mikanBox.height }
-		});
-
-		/**
 		 * The actor which spawns grabbed items.
 		 *
 		 * The priority is `ActorPriorities.SPAWN`.
@@ -86,17 +68,24 @@ Scene = (function () {
 		var grabbedItems;
 		var rotation;  // please refer to `updateRotation`
 		var spawner = new Actor(ActorPriorities.SPAWN, function (scheduler) {
-			grabbedItems = new Array(2);
-			var x = Math.floor(mikanBox.columnCount / 2) * mikanBox.cellSize;
-			for (var i = 0; i < 2; ++i) {
-				var item = difficulty.nextItem();
-				var y = -(mikanBox.cellSize * (2 - i));
-				item.locate(x, y);
-				grabbedItems[i] = item;
+			// makes sure that the center of the mikan box vacant
+			var center = Math.floor(mikanBox.columnCount / 2);
+			if (!mikanBox.itemIn(center, mikanBox.rowCount - 1)) {
+				grabbedItems = new Array(2);
+				var x = center * mikanBox.cellSize;
+				for (var i = 0; i < 2; ++i) {
+					var item = difficulty.nextItem();
+					var y = -(mikanBox.cellSize * (i + 1));
+					item.locate(x, y);
+					grabbedItems[i] = item;
+				}
+				rotation = 0;
+				self.schedule(gravity);
+				self.schedule(spawner);
+			} else {
+				// game over
+				alert('Game Over');
 			}
-			rotation = 0;
-			self.schedule(gravity);
-			self.schedule(spawner);
 		});
 
 		/**
@@ -146,31 +135,35 @@ Scene = (function () {
 		});
 
 		/**
-		 * Resets this `Scene`.
+		 * Resets this `MainScene`.
 		 *
 		 * @method reset
 		 */
 		self.reset = function () {
-			mikanBox = new MikanBox(Scene.COLUMN_COUNT,
-									Scene.ROW_COUNT,
-									Scene.ROW_MARGIN,
-									Scene.CELL_SIZE,
+			mikanBox = new MikanBox(MainScene.COLUMN_COUNT,
+									MainScene.ROW_COUNT,
+									MainScene.ROW_MARGIN,
+									MainScene.CELL_SIZE,
 									statistics);
 			grabbedItems = null;
 			self.actorQueue = [spawner];
 		};
 		self.reset();
 
+		// resizes `canvas`
+		canvas.width  = mikanBox.width;
+		canvas.height = mikanBox.height;
+
 		/**
 		 * Renders this scene.
 		 *
-		 * Renders `Renderable` actors.
+		 * Renders `Renderable` actors scheduled in this `ActorScheduler`.
 		 *
 		 * @method render
 		 */
 		self.render = function () {
 			var context = canvas.getContext('2d');
-			context.clearRect(0, 0, self.width, self.height);
+			context.clearRect(0, 0, canvas.width, canvas.height);
 			mikanBox.render(context);
 			// renders renderable actors
 			self.actorQueue.forEach(function (actor) {
@@ -318,31 +311,31 @@ Scene = (function () {
 		// Updates the rotation of grabbed items.
 		function updateRotation(newRotation) {
 			var newX0, newY0, newX1, newY1;
-			// rotates only grabbedItems[0]
-			newX1 = grabbedItems[1].x;
-			newY1 = grabbedItems[1].y;
+			// rotates only grabbedItems[1]
+			newX0 = grabbedItems[0].x;
+			newY0 = grabbedItems[0].y;
 			switch(newRotation) {
 			case 0:
-				// 0
 				// 1
-				newX0 = newX1;
-				newY0 = newY1 - mikanBox.cellSize;
+				// 0
+				newX1 = newX0;
+				newY1 = newY0 - mikanBox.cellSize;
 				break;
 			case 1:
-				// 1 0
-				newX0 = newX1 + mikanBox.cellSize;
-				newY0 = newY1;
+				// 0 1
+				newX1 = newX0 + mikanBox.cellSize;
+				newY1 = newY0;
 				break;
 			case 2:
-				// 1
 				// 0
-				newX0 = newX1;
-				newY0 = newY1 + mikanBox.cellSize;
+				// 1
+				newX1 = newX0;
+				newY1 = newY0 + mikanBox.cellSize;
 				break;
 			case 3:
-				// 0 1
-				newX0 = newX1 - mikanBox.cellSize;
-				newY0 = newY1;
+				// 1 0
+				newX1 = newX0 - mikanBox.cellSize;
+				newY1 = newY0;
 				break;
 			default:
 				console.error('invalid rotation: ' + newRotation);
@@ -426,51 +419,51 @@ Scene = (function () {
 			}
 		}
 	}
-	ActorScheduler.augment(Scene.prototype);
+	ActorScheduler.augment(MainScene.prototype);
 
 	/**
 	 * The number of columns in a mikan box.
 	 *
-	 *     Scene.COLUMN_COUNT = 8
+	 *     MainScene.COLUMN_COUNT = 8
 	 *
 	 * @property COLUMN_COUNT
 	 * @type {number}
 	 * @static
 	 */
-	Object.defineProperty(Scene, 'COLUMN_COUNT', { value: 8 });
+	Object.defineProperty(MainScene, 'COLUMN_COUNT', { value: 8 });
 
 	/**
 	 * The number of rows in a mikan box.
 	 *
-	 *     Scene.ROW_COUNT = 12
+	 *     MainScene.ROW_COUNT = 12
 	 *
 	 * @property ROW_COUNT
 	 * @type {number}
 	 * @static
 	 */
-	Object.defineProperty(Scene, 'ROW_COUNT', { value: 12 });
+	Object.defineProperty(MainScene, 'ROW_COUNT', { value: 12 });
 
 	/**
 	 * The number of extra rows.
 	 *
-	 *     Scene.ROW_MARGIN = 8
+	 *     MainScene.ROW_MARGIN = 8
 	 *
 	 * @property ROW_MARGIN
 	 * @type {number}
 	 * @static
 	 */
-	Object.defineProperty(Scene, 'ROW_MARGIN', { value: 8 });
+	Object.defineProperty(MainScene, 'ROW_MARGIN', { value: 8 });
 
 	/**
 	 * The size of each cell in a mikan box.
 	 *
-	 *     Scene.CELL_SIZE = 32
+	 *     MainScene.CELL_SIZE = 32
 	 *
 	 * @property CELL_SIZE
 	 * @type {number}
 	 * @static
 	 */
-	Object.defineProperty(Scene, 'CELL_SIZE', { value: 32 });
+	Object.defineProperty(MainScene, 'CELL_SIZE', { value: 32 });
 
-	return Scene;
+	return MainScene;
 })();

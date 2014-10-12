@@ -9,18 +9,20 @@
     $(function () {
         var statistics = new Statistics();
 
-        var canvas = document.getElementById('mikanCanvas');
+        var mainScene = document.getElementById('mainScene');
+        var itemQueue = document.getElementById('itemQueue');
 
         // uses TouchGamePad if touch events are supported
         if ('ontouchstart' in document.documentElement) {
             console.debug('using TouchGamePad');
-            TouchGamePad.attachTo(canvas);
+            TouchGamePad.attachTo(mainScene);
         } else {
             console.debug('using KeyGamePad');
-            KeyGamePad.attachTo(canvas, document);
+            KeyGamePad.attachTo(mainScene, document);
         }
 
-        var game = Game.start(canvas,
+        var game = Game.start(mainScene,
+                              itemQueue,
                               new ResourceManager(),
                               statistics,
                               new Difficulty(statistics));
@@ -67,11 +69,17 @@
           data-bind="text: level"></span>
   </div>
   <div style="clear: both">
-    <canvas id="mikanCanvas"
-            style="background-image: url('imgs/background.png')">
+    <canvas id="mainScene"
+            style="float: left; background-image: url('imgs/background.png')">
     </canvas>
+    <div style="float: left; margin-left: 1em">
+      <canvas id="itemQueue"
+              style="background-image: url('imgs/background.png')">
+      </canvas>
+      <p>Next</p>
+    </div>
   </div>
-  <div>
+  <div style="clear: both">
     <button data-bind="click: restart">Restart</button>
   </div>
 </body>

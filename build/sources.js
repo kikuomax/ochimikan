@@ -18,7 +18,8 @@ linkMikanSources([
 	'src/MikanBox.js',
 	'src/Statistics.js',
 	'src/Difficulty.js',
-	'src/Scene.js',
+	'src/MainScene.js',
+	'src/ItemQueue.js',
 	'src/Game.js',
 	'src/TouchGamePad.js',
 	'src/KeyGamePad.js'

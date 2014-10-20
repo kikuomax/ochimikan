@@ -64,6 +64,7 @@ Difficulty = (function () {
 		function resetParameters() {
 			toNextLevel       = 20;
 			preservativeCount = 0;
+			maxDamageRatio    = 2;
 			updateParameters();
 		}
 		function updateParameters() {
@@ -72,7 +73,6 @@ Difficulty = (function () {
 			preservativeProbability =
 				Math.max(0, Math.min((level - 4) / 250, 0.1));
 			preservativeStock = Math.floor((level + 1) * (level + 2) / 10);
-			maxDamageRatio = Math.max(1, 5 - (level / 10));
 		}
 		resetParameters();
 

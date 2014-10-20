@@ -1,5 +1,14 @@
 **OchiMikan** is a JavaScript game which runs on a web-browser.
 
+What is OchiMikan
+-----------------
+
+The name "OchiMikan" is a combination of Japanese words *落ちる(Ochiru)* and *蜜柑(Mikan)*.
+*Ochiru* means to fall and *Mikan* is a kind of mandarin oranges.
+*Mikan* is very popular in Japan especially during the winter.
+Because Japanese people often buy a bunch of *Mikans* at once, some of them get moldy in a *Mikan* box before consumption.
+Once a *Mikan* gets moldy, the mold quickly spreads in other *Mikans.*
+
 Building OchiMikan
 ------------------
 

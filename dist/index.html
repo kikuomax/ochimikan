@@ -3,14 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="libs/jquery-ui.min.css">
-  <style type="text/css">
-    .ui-widget {
-      font-size: 100%
-    }
-    #how-to-play-dialog table {
-      font-size: 80%
-    }
- </style>
+  <link rel="stylesheet" href="mikan.css">
   <script type="text/javascript" src="libs/jquery-1.11.1.min.js"></script>
   <script type="text/javascript" src="libs/jquery-ui.min.js"></script>
   <script type="text/javascript" src="libs/knockout-3.2.0.js"></script>
@@ -42,6 +35,7 @@
 
             self.score = ko.observable(statistics.score);
             self.level = ko.observable(statistics.level + 1);
+            self.scores = ko.observableArray();
 
             statistics.addObserver(function (id) {
                 switch (id) {
@@ -62,16 +56,49 @@
                 statistics.reset();
                 game.restart();
             };
+
             self.showHowToPlay = function () {
                 $('#how-to-play-dialog').dialog('open');
+            };
+
+            self.showBestSpoilers = function () {
+                $.get('http://localhost:9090/record')
+                    .done(function (scoresJson) {
+                        try {
+                            if (!ScoreList.canAugment(scoresJson)) {
+                                throw new Error('Invalid response from server');
+                            }
+                            // updates the score list
+                            self.scores.removeAll();
+                            var scores = ScoreList.augment(scoresJson);
+                            for (var i = 0; i < scores.scoreCount(); ++i) {
+                                var score = scores.scoreAt(i);
+                                self.scores.push(score);
+                            }
+                            // shows the score dialog
+                            $('#best-spoilers-dialog').dialog('open');
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    })
+                    .fail(function (_, _, error) {
+                        alert('Failed to get scores: ' + error);
+                    });
             };
         }
 
         // initializes the "How to Play" dialog
         $('#how-to-play-dialog').dialog({
-           resizable: false,
-           autoOpen:  false,
-           modal:     true
+            resizable: false,
+            autoOpen:  false,
+            modal:     true
+        });
+
+        // initializes the "Best Spoilers" dialog
+        $('#best-spoilers-dialog').dialog({
+            resizable: false,
+            autoOpen:  false,
+            modal:     true
         });
 
         // initializes the view model
@@ -101,7 +128,10 @@
   </div>
   <div style="clear: both">
     <button data-bind="click: restart">Restart</button>
-    <a href="#" data-bind="click: showHowToPlay" style="margin-left: 2em">How to Play</a>
+    <a href="#" style="margin-left: 1.5em"
+       data-bind="click: showHowToPlay">How to Play</a>
+    <a href="#" style="margin-left: 1.5em"
+       data-bind="click: showBestSpoilers">Best Spoilers</a>
   </div>
   <!-- How to Play dialog contents -->
   <div id="how-to-play-dialog" title="How to Play">
@@ -121,6 +151,31 @@
       <tr><td>Up Arrow</td><td>Rotate Counterclockwise</td></tr>
       <tr><td>Spacebar</td><td>Drop Quickly</td></tr>
     </table>
-   </div>
+  </div>
+  <!-- Score dialog contents -->
+  <div id="best-spoilers-dialog" title="Best Spoilers">
+    <h4>Best Spoilers</h4>
+    <table>
+      <thead>
+        <tr>
+          <th class="rank-column">Rank</th>
+          <th class="score-column">Score</th>
+          <th class="level-column">Level</th>
+          <th class="player-column">Name</th>
+          <th class="date-column">Date</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: scores">
+        <tr>
+          <td class="rank-column"   data-bind="text: $index() + 1"></td>
+          <td class="score-column"  data-bind="text: value"></td>
+          <td class="level-column"  data-bind="text: level"></td>
+          <td class="player-column" data-bind="text: player"></td>
+          <td class="date-column"
+              data-bind="text: dateObject().toLocaleDateString()"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>

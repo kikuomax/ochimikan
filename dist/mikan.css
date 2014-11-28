@@ -1,0 +1,63 @@
+.ui-widget {
+  font-size: 100%
+}
+
+#how-to-play-dialog table,
+#best-spoilers-dialog table {
+  font-size: 70%
+}
+
+#best-spoilers-dialog table {
+  table-layout: fixed;
+  width:        100%
+}
+
+#best-spoilers-dialog td,
+#best-spoilers-dialog th {
+  padding-left: 0.5em;
+  overflow:     hidden;
+  white-space:  nowrap
+}
+
+#best-spoilers-dialog th {
+  text-align: left
+}
+
+.rank-column {
+  padding-left: 0;
+  width:        2.5em
+}
+
+td.rank-column {
+  text-align: center
+}
+
+.score-column {
+  width: 3.5em
+}
+
+td.score-column {
+  text-align: right
+}
+
+.level-column {
+  width: 2.5em
+}
+
+td.level-column {
+  text-align: right
+}
+
+.player-column {
+  width: 5em
+}
+
+.date-column {
+  width: 6em
+}
+
+td.date-column {
+  text-align:     right;
+  font-size:      80%;
+  vertical-align: bottom
+}

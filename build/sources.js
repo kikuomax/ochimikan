@@ -18,6 +18,8 @@ linkMikanSources([
 	'src/MikanBox.js',
 	'src/Statistics.js',
 	'src/Difficulty.js',
+	'src/Score.js',
+	'src/ScoreList.js',
 	'src/MainScene.js',
 	'src/ItemQueue.js',
 	'src/Game.js',

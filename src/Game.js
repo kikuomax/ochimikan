@@ -8,13 +8,13 @@
  *
  *  1. A `MainScene` is presented.
  *  2. The `MainScene` presents a `MikanBox`.
- *  3. A user can see which items will be dropped in an `ItemQueue`.
+ *  3. A player can see which items will be dropped in an `ItemQueue`.
  *  4. Two grabbed items appear at the top of the `MikanBox`. They can be any
  *     combination of the followings,
  *      - A randomly damaged mikan
  *      - A preservative
  *  5. The grabbed items fall toward the bottom of the `MikanBox` (ground).
- *     The user can control the grabbed items during they are falling.
+ *     The player can control the grabbed items during they are falling.
  *  6. The grabbed items stop falling when either of them reaches the ground
  *     or a fixed item.
  *  7. The grabbed items become free.
@@ -26,6 +26,13 @@
  *  11. Back to the step 3.
  *
  * #### Derivative
+ *
+ *  - 4 Stacked items have reached the top of the `MikanBox`.
+ *       1. The game ends.
+ *       2. The player is prompted to enter his/her name and choose if his/her
+ *          score is sent to the server.
+ *       3. The player can see the rank of his/her score.
+ *       4. END
  *
  *  - 10 Some of the chains reaches or exceeds the limit length (active chains).
  *       1. Mikans composing the active chains explode and disappear.
@@ -39,11 +46,31 @@
  *       6. Items not placed on the ground or fixed items become free.
  *       7. Back to the step 7 of the main scenario.
  *
+ * Events
+ * ------
+ *
+ * A `Game` notifies events to its observers. Observers will receive at least
+ * the following arguments,
+ *  1. Event ID: A string which tells the event type
+ *  2. The instance of `Game`
+ *
+ * An event ID can be one of the following,
+ *  - "gameEnded":
+ *    Notified when the game has ended.
+ *    Observers will receive the following additional argument,
+ *     1. Statistics of the last game
+ *
  * @class Game
  * @constructor
+ * @extends Observable
  */
 Game = (function () {
-	function Game() {}
+	function Game() {
+		var self = this;
+
+		Observable.call(self);
+	}
+	Observable.augment(Game.prototype);
 
 	/**
 	 * Starts the game.
@@ -103,6 +130,11 @@ Game = (function () {
 		Resources.loadSprites(resourceManager);
 		// creates a MainScene associated with `mainScene`
 		game.mainScene = new MainScene(mainScene, statistics, difficulty);
+		game.mainScene.addObserver(function (id) {
+			if (id == 'gameEnded') {
+				game.notifyObservers('gameEnded', game, statistics);
+			}
+		});
 		// creates an ItemQueue associated with `itemQueue`
 		game.itemQueue = new ItemQueue(itemQueue, 4, difficulty);
 		// runs the game loop

@@ -7,6 +7,16 @@
   font-size: 70%
 }
 
+#score-registration-dialog form {
+  font-size: 90%
+}
+
+#score-registration-dialog fieldset {
+  padding:    0;
+  margin-top: 1em;
+  border:     0
+}
+
 #best-spoilers-dialog table {
   table-layout: fixed;
   width:        100%
@@ -14,17 +24,27 @@
 
 #best-spoilers-dialog td,
 #best-spoilers-dialog th {
-  padding-left: 0.5em;
+  padding-left: 0.2em;
   overflow:     hidden;
   white-space:  nowrap
+}
+
+#best-spoilers-dialog td:first-child,
+#best-spoilers-dialog th:first-child {
+  padding-left: 0
 }
 
 #best-spoilers-dialog th {
   text-align: left
 }
 
+td.rank-column,
+td.score-column,
+td.level-column {
+  font-family: monospace
+}
+
 .rank-column {
-  padding-left: 0;
   width:        2.5em
 }
 
@@ -45,11 +65,11 @@ td.score-column {
 }
 
 td.level-column {
-  text-align: right
+  text-align: center
 }
 
 .player-column {
-  width: 5em
+  width: 6em
 }
 
 .date-column {
@@ -60,4 +80,9 @@ td.date-column {
   text-align:     right;
   font-size:      80%;
   vertical-align: bottom
+}
+
+.score-result {
+  font-size: 120%;
+  color:     #FF0000
 }

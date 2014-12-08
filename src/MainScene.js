@@ -11,10 +11,24 @@
  *  - or if `statistics` is not a `Statistics`,
  *  - or if `difficulty` is not a `Difficulty`
  *
+ * Events
+ * ------
+ *
+ * A `MainScene` will notify events to its observers. Observers will receive
+ * at least the following arguments,
+ *  1. Event ID: A string which tells the event type
+ *  2. The instance of `MainScene`
+ *
+ * An event ID will be one of the following,
+ *  - "gameEnded":
+ *    Notified when the game has ended.
+ *    Observers will receive no additional arguments.
+ *
  * @class MainScene
  * @contructor
  * @extends ActorScheduler
  * @uses DirectionListener
+ * @uses Observable
  * @param canvas {Element, GamePad}
  *     The canvas element on which the `MainScene` is to be rendered.
  *     This must be a `GamePad` at the same time.
@@ -28,6 +42,7 @@ MainScene = (function () {
 		var self = this;
 
 		ActorScheduler.call(self);
+		Observable.call(self);
 
 		// verifies the arguments
 		if (!(canvas instanceof Element)) {
@@ -84,7 +99,7 @@ MainScene = (function () {
 				self.schedule(spawner);
 			} else {
 				// game over
-				alert('Game Over');
+				self.notifyObservers('gameEnded', self);
 			}
 		});
 
@@ -420,6 +435,7 @@ MainScene = (function () {
 		}
 	}
 	ActorScheduler.augment(MainScene.prototype);
+	Observable.augment(MainScene.prototype);
 
 	/**
 	 * The number of columns in a mikan box.

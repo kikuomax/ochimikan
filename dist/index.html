@@ -29,6 +29,11 @@
                               new ResourceManager(),
                               statistics,
                               new Difficulty(statistics));
+        game.addObserver(function (id) {
+            if (id == 'gameEnded') {
+                $('#score-registration-dialog').dialog('open');
+            }
+        });
 
         function ViewModel() {
             var self = this;
@@ -36,6 +41,7 @@
             self.score = ko.observable(statistics.score);
             self.level = ko.observable(statistics.level + 1);
             self.scores = ko.observableArray();
+            self.name = ko.observable('');
 
             statistics.addObserver(function (id) {
                 switch (id) {
@@ -62,7 +68,7 @@
             };
 
             self.showBestSpoilers = function () {
-                $.get('http://localhost:9090/record')
+                $.get('http://localhost:9090/record?from=0&to=10')
                     .done(function (scoresJson) {
                         try {
                             if (!ScoreList.canAugment(scoresJson)) {
@@ -85,6 +91,41 @@
                         alert('Failed to get scores: ' + error);
                     });
             };
+
+            self.registerScore = function () {
+                // authenticates before sending the score
+                $.ajax({
+                    url: 'http://localhost:9090/authenticate',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('guest:mikan')
+                    }
+                }).done(function (token) {
+                    postScore(token.token);
+                }).fail(function (_, _, error) {
+                    alert('Failed to authenticate: ' + error);
+                });
+
+                function postScore(token) {
+                    $.ajax({
+                        url: 'http://localhost:9090/record?from=0&to=10',
+                        type: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            value:  statistics.score,
+                            level:  statistics.level,
+                            player: self.name(),
+                            date:   Math.floor(new Date().getTime() / 1000)
+                        })
+                    }).done(function (response) {
+                        self.showBestSpoilers();
+                    }).fail(function (_, _, error) {
+                        alert('Failed to register score: ' + error);
+                    });
+                }
+            };
         }
 
         // initializes the "How to Play" dialog
@@ -101,8 +142,26 @@
             modal:     true
         });
 
+        var vm = new ViewModel();
+
+        // initializes the "Game Over" dialog
+        $('#score-registration-dialog').dialog({
+            resizable: false,
+            autoOpen:  false,
+            modal:     true,
+            buttons: {
+                'Register': function () {
+                    vm.registerScore();
+                    $(this).dialog('close');
+                },
+                Cancel: function () {
+                    $(this).dialog('close');
+                }
+            }
+        });
+
         // initializes the view model
-        ko.applyBindings(new ViewModel());
+        ko.applyBindings(vm);
     });
   </script>
   <title>落ちみかん</title>
@@ -154,15 +213,14 @@
   </div>
   <!-- Score dialog contents -->
   <div id="best-spoilers-dialog" title="Best Spoilers">
-    <h4>Best Spoilers</h4>
     <table>
       <thead>
         <tr>
           <th class="rank-column">Rank</th>
-          <th class="score-column">Score</th>
-          <th class="level-column">Level</th>
-          <th class="player-column">Name</th>
-          <th class="date-column">Date</th>
+          <th class="score-column subsequent-column">Score</th>
+          <th class="level-column subsequent-column">Level</th>
+          <th class="player-column subsequent-column">Name</th>
+          <th class="date-column subsequent-column">Date</th>
         </tr>
       </thead>
       <tbody data-bind="foreach: scores">
@@ -176,6 +234,24 @@
         </tr>
       </tbody>
     </table>
+  </div>
+  <!-- Score registration dialog -->
+  <div id="score-registration-dialog" title="Game Over">
+    <form>
+      <h4>Register your score and name!</h4>
+      <fieldset>
+        <p>
+          Score <span class="score-result" data-bind="text: score"></span>
+          (Level: <span data-bind="text: level"></span>)
+        </p>
+        <label style="display: block" for="name">Name</label>
+        <input style="display: block" type="text" name="name"
+               data-bind="value: name">
+        <!-- hides the default submit button -->
+        <input type="submit" tabindex="-1"
+               style="position: absolute; top: -1000px">
+      </fieldset>
+    </form>
   </div>
 </body>
 </html>

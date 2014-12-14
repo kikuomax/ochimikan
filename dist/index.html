@@ -10,7 +10,7 @@
   <script type="text/javascript" src="mikan.js"></script>
   <script type="text/javascript">
     $(function () {
-        var recordBase = 'http://localhost:9090';
+        var recordBase = new RecordBase('http://localhost:9090');
         var statistics = new Statistics();
 
         var mainScene = document.getElementById('mainScene');
@@ -71,67 +71,28 @@
             };
 
             self.showBestSpoilers = function () {
-                $.get(recordBase + '/record?from=0&to=10')
-                    .done(function (scoresJson) {
-                        try {
-                            if (!ScoreList.canAugment(scoresJson)) {
-                                throw new Error('Invalid response from server');
-                            }
-                            var scores = ScoreList.augment(scoresJson);
-                            updateBestSpoilers(scores);
-                            $('#best-spoilers-dialog').dialog('open');
-                        } catch (err) {
-                            console.error(err);
-                        }
+                recordBase.requestScores()
+                    .done(function (scoreList) {
+                        updateBestSpoilers(scoreList);
+                        $('#best-spoilers-dialog').dialog('open');
                     })
-                    .fail(function (_, _, error) {
-                        alert('Failed to get scores: ' + error);
+                    .fail(function (error) {
+                        alert('Failed to request scores: ' + error);
                     });
             };
 
             self.registerScore = function () {
-                var score = {
-                    value:  statistics.score,
-                    level:  statistics.level,
-                    player: self.name(),
-                    date:   Math.floor(new Date().getTime() / 1000)
-                };
-                // authenticates before sending the score
-                $.ajax({
-                    url: recordBase + '/authenticate',
-                    headers: {
-                        'Authorization': 'Basic ' + btoa('guest:mikan')
-                    }
-                }).done(function (token) {
-                    postScore(token.token);
-                }).fail(function (_, _, error) {
-                    alert('Failed to authenticate: ' + error);
-                });
-
-                function postScore(token) {
-                    $.ajax({
-                        url: recordBase + '/record?from=0&to=10',
-                        type: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        },
-                        contentType: 'application/json',
-                        data: JSON.stringify(score)
-                    }).done(function (scoresJson) {
-                        try {
-                            if (!ScoreList.canAugment(scoresJson)) {
-                                throw new Error('Invalid response from server');
-                            }
-                            var scores = ScoreList.augment(scoresJson);
-                            updateBestSpoilers(scores, score);
-                            $('#best-spoilers-dialog').dialog('open');
-                        } catch (err) {
-                            console.error(err);
-                        }
-                    }).fail(function (_, _, error) {
+                var score = new Score(statistics.score,
+                                      statistics.level,
+                                      self.name());
+                recordBase.registerScore(score)
+                    .done(function (scoreList) {
+                        updateBestSpoilers(scoreList, score);
+                        $('#best-spoilers-dialog').dialog('open');
+                    })
+                    .fail(function (error) {
                         alert('Failed to register score: ' + error);
                     });
-                }
             };
 
             self.togglePrivacyNotice = function () {

@@ -93,6 +93,8 @@
                     .fail(function (error) {
                         alert('Failed to register score: ' + error);
                     });
+                // makes sure that the registration dialog is closed
+                $('#score-registration-dialog').dialog('close');
             };
 
             self.togglePrivacyNotice = function () {
@@ -143,7 +145,6 @@
             buttons: {
                 'Register': function () {
                     vm.registerScore();
-                    $(this).dialog('close');
                 },
                 Cancel: function () {
                     $(this).dialog('close');
@@ -237,7 +238,7 @@
   </div>
   <!-- Score registration dialog -->
   <div id="score-registration-dialog" title="Game Over">
-    <form>
+    <form data-bind="submit: registerScore">
       <h4>Register your score and name!</h4>
       <fieldset>
         <p>

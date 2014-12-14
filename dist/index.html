@@ -10,6 +10,7 @@
   <script type="text/javascript" src="mikan.js"></script>
   <script type="text/javascript">
     $(function () {
+        var recordBase = 'http://localhost:9090';
         var statistics = new Statistics();
 
         var mainScene = document.getElementById('mainScene');
@@ -42,6 +43,8 @@
             self.level = ko.observable(statistics.level + 1);
             self.scores = ko.observableArray();
             self.name = ko.observable('');
+            self.lastRank = ko.observable(-1);
+            self.privacyNotice = ko.observable(false);
 
             statistics.addObserver(function (id) {
                 switch (id) {
@@ -68,20 +71,14 @@
             };
 
             self.showBestSpoilers = function () {
-                $.get('http://localhost:9090/record?from=0&to=10')
+                $.get(recordBase + '/record?from=0&to=10')
                     .done(function (scoresJson) {
                         try {
                             if (!ScoreList.canAugment(scoresJson)) {
                                 throw new Error('Invalid response from server');
                             }
-                            // updates the score list
-                            self.scores.removeAll();
                             var scores = ScoreList.augment(scoresJson);
-                            for (var i = 0; i < scores.scoreCount(); ++i) {
-                                var score = scores.scoreAt(i);
-                                self.scores.push(score);
-                            }
-                            // shows the score dialog
+                            updateBestSpoilers(scores);
                             $('#best-spoilers-dialog').dialog('open');
                         } catch (err) {
                             console.error(err);
@@ -93,9 +90,15 @@
             };
 
             self.registerScore = function () {
+                var score = {
+                    value:  statistics.score,
+                    level:  statistics.level,
+                    player: self.name(),
+                    date:   Math.floor(new Date().getTime() / 1000)
+                };
                 // authenticates before sending the score
                 $.ajax({
-                    url: 'http://localhost:9090/authenticate',
+                    url: recordBase + '/authenticate',
                     headers: {
                         'Authorization': 'Basic ' + btoa('guest:mikan')
                     }
@@ -107,26 +110,55 @@
 
                 function postScore(token) {
                     $.ajax({
-                        url: 'http://localhost:9090/record?from=0&to=10',
+                        url: recordBase + '/record?from=0&to=10',
                         type: 'POST',
                         headers: {
                             'Authorization': 'Bearer ' + token
                         },
                         contentType: 'application/json',
-                        data: JSON.stringify({
-                            value:  statistics.score,
-                            level:  statistics.level,
-                            player: self.name(),
-                            date:   Math.floor(new Date().getTime() / 1000)
-                        })
-                    }).done(function (response) {
-                        self.showBestSpoilers();
+                        data: JSON.stringify(score)
+                    }).done(function (scoresJson) {
+                        try {
+                            if (!ScoreList.canAugment(scoresJson)) {
+                                throw new Error('Invalid response from server');
+                            }
+                            var scores = ScoreList.augment(scoresJson);
+                            updateBestSpoilers(scores, score);
+                            $('#best-spoilers-dialog').dialog('open');
+                        } catch (err) {
+                            console.error(err);
+                        }
                     }).fail(function (_, _, error) {
                         alert('Failed to register score: ' + error);
                     });
                 }
             };
+
+            self.togglePrivacyNotice = function () {
+                self.privacyNotice(!self.privacyNotice());
+            };
+
+            // updates the best spoilers and the last rank.
+            // `lastScore` may be omitted.
+            function updateBestSpoilers(scores, lastScore) {
+                var rank = -1;
+                self.scores.removeAll();
+                for (var i = 0; i < scores.scoreCount(); ++i) {
+                    var score = scores.scoreAt(i);
+                    self.scores.push(score);
+                    if (lastScore
+                        && lastScore.value == score.value
+                        && lastScore.level == score.level
+                        && lastScore.player == score.player)
+                    {
+                        rank = i;
+                    }
+                }
+                self.lastRank(rank);
+            }
         }
+
+        var vm = new ViewModel();
 
         // initializes the "How to Play" dialog
         $('#how-to-play-dialog').dialog({
@@ -141,8 +173,6 @@
             autoOpen:  false,
             modal:     true
         });
-
-        var vm = new ViewModel();
 
         // initializes the "Game Over" dialog
         $('#score-registration-dialog').dialog({
@@ -225,12 +255,21 @@
       </thead>
       <tbody data-bind="foreach: scores">
         <tr>
-          <td class="rank-column"   data-bind="text: $index() + 1"></td>
-          <td class="score-column"  data-bind="text: value"></td>
-          <td class="level-column"  data-bind="text: level"></td>
-          <td class="player-column" data-bind="text: player"></td>
+          <td class="rank-column"
+              data-bind="text: $index() + 1,
+                         css: { 'last-rank': $index() == $root.lastRank() }"></td>
+          <td class="score-column"
+              data-bind="text: value,
+                         css: { 'last-rank': $index() == $root.lastRank() }"></td>
+          <td class="level-column"
+              data-bind="text: level,
+                         css: { 'last-rank': $index() == $root.lastRank() }"></td>
+          <td class="player-column"
+              data-bind="text: player,
+                         css: { 'last-rank': $index() == $root.lastRank() }"></td>
           <td class="date-column"
-              data-bind="text: dateObject().toLocaleDateString()"></td>
+              data-bind="text: dateObject().toLocaleDateString(),
+                         css: { 'last-rank': $index() == $root.lastRank() }"></td>
         </tr>
       </tbody>
     </table>
@@ -251,6 +290,13 @@
         <input type="submit" tabindex="-1"
                style="position: absolute; top: -1000px">
       </fieldset>
+      <a href="#" class="privacy-notice"
+         data-bind="click: togglePrivacyNotice">What are registered?</a>
+      <p class="privacy-notice" data-bind="visible: privacyNotice">
+        Your score, level, date of registration and name entered in the above
+        text box will be registered in the server and they will be visible
+        from other spoilers.
+      </p>
     </form>
   </div>
 </body>

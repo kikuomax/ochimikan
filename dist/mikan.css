@@ -12,9 +12,10 @@
 }
 
 #score-registration-dialog fieldset {
-  padding:    0;
-  margin-top: 1em;
-  border:     0
+  padding:       0;
+  margin-top:    1em;
+  margin-bottom: 1em;
+  border:        0
 }
 
 #best-spoilers-dialog table {
@@ -85,4 +86,17 @@ td.date-column {
 .score-result {
   font-size: 120%;
   color:     #FF0000
+}
+
+.last-rank {
+  color: #FF6000
+}
+
+a.privacy-notice {
+  font-size: 80%;
+  color:     #0000FF
+}
+
+p.privacy-notice {
+  font-size: 80%
 }

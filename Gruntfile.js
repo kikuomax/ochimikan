@@ -1,6 +1,8 @@
 module.exports = function (grunt) {
     grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+		sources: './build/sources.js',
+		header: './build/header.js',
 		build: {
 			debug: './dist/mikan.js'
 		},
@@ -37,16 +39,20 @@ module.exports = function (grunt) {
 		function linkMikanSources(filenames) {
 			sourceFilenames = filenames;
 		}
-		eval(grunt.file.read('./build/sources.js'));
+		eval(grunt.file.read(grunt.config('sources')));
 		return sourceFilenames;
 	}
 
 	/** Makes separated source files one. */
 	function combineSources() {
 		var sourceFilenames = getSourceFilenames();
-		return sourceFilenames.map(function (fn) {
+		var cat = sourceFilenames.map(function (fn) {
 			return grunt.file.read(fn);
-		}).join('');
+		}).join('\n');
+		// prepends the header
+		var header =
+			grunt.template.process(grunt.file.read(grunt.config('header')));
+		return header + cat;
 	}
 
 	grunt.registerMultiTask('build', 'Build mikan.js', function () {

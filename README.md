@@ -9,6 +9,8 @@ The name "OchiMikan" is a combination of Japanese words *落ちる(Ochiru)* and 
 Because Japanese people often buy a bunch of *Mikans* at once, some of them get moldy in a *Mikan* box before consumption.
 Once a *Mikan* gets moldy, the mold quickly spreads in other *Mikans.*
 
+OchiMikan is now hosted on http://ochimikan.herokuapp.com/.
+
 Building OchiMikan
 ------------------
 
@@ -19,7 +21,7 @@ Before playing OchiMikan, you need to build it through the following steps.
 		git clone https://github.com/kikuomax/ochimikan.git
 		cd ochimikan
 
- 2. Install [Node.js](http://nodejs.org) if you do not have it installed. OchiMikan itself does not depend on Node.js but it is still needed to build OchiMikan.
+ 2. Install [Node.js](http://nodejs.org) if you do not have it installed. OchiMikan itself does not depend on Node.js but it is still needed to organize source files.
 
  3. Install [Grunt](http://gruntjs.com) if you do not have it installed.
 
@@ -59,7 +61,7 @@ As you open `dist/index.html`, a pair of mikans will start falling on your brows
 
 You can control mikans by the keyboard on your PC, or touch motion if your device supports touch events.
 
-**Keyboud**
+**Keyboard**
 
 	Left Arrow:   Move mikans left
 	Right Arrow:  Move mikans right
@@ -90,7 +92,16 @@ There is a simple script `service.js` which hosts the contents of `dist` directo
 
 You can download OchiMikan into your mobile device.
 
-*The above script is not intended to be used in a practical service. It is just for a temporary use.*
+*The above script is not intended to be used for production. It is just for a temporary use.*
+
+Score Server
+------------
+
+An external score server [OchiMikan Records](https://github.com/kikuomax/ochimikan-records) is available.
+
+If you run a score server on other than `localhost:9090`, please replace the URI of the following line in [index.html](dist/index.html) with the URI to your score server.
+
+	var recordBase = new RecordBase('http://localhost:9090');
 
 Generating Documentation
 ------------------------

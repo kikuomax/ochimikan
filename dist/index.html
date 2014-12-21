@@ -1,7 +1,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="libs/jquery-ui.min.css">
   <link rel="stylesheet" href="mikan.css">
   <script type="text/javascript" src="libs/jquery-1.11.1.min.js"></script>
@@ -70,11 +69,11 @@
                 $('#how-to-play-dialog').dialog('open');
             };
 
-            self.showBestSpoilers = function () {
+            self.showBestScores = function () {
                 recordBase.requestScores()
                     .done(function (scoreList) {
-                        updateBestSpoilers(scoreList);
-                        $('#best-spoilers-dialog').dialog('open');
+                        updateBestScores(scoreList);
+                        $('#best-scores-dialog').dialog('open');
                     })
                     .fail(function (error) {
                         alert('Failed to request scores: ' + error);
@@ -87,8 +86,8 @@
                                       self.name());
                 recordBase.registerScore(score)
                     .done(function (scoreList) {
-                        updateBestSpoilers(scoreList, score);
-                        $('#best-spoilers-dialog').dialog('open');
+                        updateBestScores(scoreList, score);
+                        $('#best-scores-dialog').dialog('open');
                     })
                     .fail(function (error) {
                         alert('Failed to register score: ' + error);
@@ -101,9 +100,9 @@
                 self.privacyNotice(!self.privacyNotice());
             };
 
-            // updates the best spoilers and the last rank.
+            // updates the best scores and the last rank.
             // `lastScore` may be omitted.
-            function updateBestSpoilers(scores, lastScore) {
+            function updateBestScores(scores, lastScore) {
                 var rank = -1;
                 self.scores.removeAll();
                 for (var i = 0; i < scores.scoreCount(); ++i) {
@@ -130,8 +129,8 @@
             modal:     true
         });
 
-        // initializes the "Best Spoilers" dialog
-        $('#best-spoilers-dialog').dialog({
+        // initializes the "Fungus Kingdom" dialog
+        $('#best-scores-dialog').dialog({
             resizable: false,
             autoOpen:  false,
             modal:     true
@@ -179,18 +178,21 @@
   </div>
   <div style="clear: both">
     <button data-bind="click: restart">Restart</button>
-    <a href="#" style="margin-left: 1.5em"
+    <a href="#" style="margin-left: 1em"
        data-bind="click: showHowToPlay">How to Play</a>
-    <a href="#" style="margin-left: 1.5em"
-       data-bind="click: showBestSpoilers">Best Spoilers</a>
+    <a href="#" style="margin-left: 1em"
+       data-bind="click: showBestScores">Fungus Kingdom</a>
   </div>
   <!-- How to Play dialog contents -->
   <div id="how-to-play-dialog" title="How to Play">
+    <p>
+      OchiMikan is a game to breed and spread molds in Mikans (kind of oranges).
+    </p>
     <h4>Touch Enabled Devices</h4>
     <table>
       <tr><td>Left Swipe</td><td>Move Left</td></tr>
       <tr><td>Right Swipe</td><td>Move Right</td></tr>
-      <tr><td>Down Swipe</td><td>Move Clockwise</td></tr>
+      <tr><td>Down Swipe</td><td>Rotate Clockwise</td></tr>
       <tr><td>Up Swipe</td><td>Rotate Counterclockwise</td></tr>
       <tr><td>Tap</td><td>Drop Quickly</td></tr>
     </table>
@@ -198,13 +200,16 @@
     <table>
       <tr><td>Left Arrow</td><td>Move Left</td></tr>
       <tr><td>Right Arrow</td><td>Move Right</td></tr>
-      <tr><td>Down Arrow</td><td>Move Clockwise</td></tr>
+      <tr><td>Down Arrow</td><td>Rotate Clockwise</td></tr>
       <tr><td>Up Arrow</td><td>Rotate Counterclockwise</td></tr>
       <tr><td>Spacebar</td><td>Drop Quickly</td></tr>
     </table>
+    <p style="width: 100%; text-align: right; font-size: 60%">
+      Version <span data-bind="text: getOchiMikanVersion()"></span>
+    </p>
   </div>
   <!-- Score dialog contents -->
-  <div id="best-spoilers-dialog" title="Best Spoilers">
+  <div id="best-scores-dialog" title="Fungus Kingdom">
     <table>
       <thead>
         <tr>
@@ -257,7 +262,7 @@
       <p class="privacy-notice" data-bind="visible: privacyNotice">
         Your score, level, date of registration and name entered in the above
         text box will be registered in the server and they will be visible
-        from other spoilers.
+        from other players.
       </p>
     </form>
   </div>

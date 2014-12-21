@@ -3,8 +3,13 @@
 }
 
 #how-to-play-dialog table,
-#best-spoilers-dialog table {
+#how-to-play-dialog p,
+#best-scores-dialog table {
   font-size: 70%
+}
+
+#how-to-play-dialog h4 {
+  margin-bottom: 0.5em
 }
 
 #score-registration-dialog form {
@@ -18,24 +23,24 @@
   border:        0
 }
 
-#best-spoilers-dialog table {
+#best-scores-dialog table {
   table-layout: fixed;
   width:        100%
 }
 
-#best-spoilers-dialog td,
-#best-spoilers-dialog th {
+#best-scores-dialog td,
+#best-scores-dialog th {
   padding-left: 0.2em;
   overflow:     hidden;
   white-space:  nowrap
 }
 
-#best-spoilers-dialog td:first-child,
-#best-spoilers-dialog th:first-child {
+#best-scores-dialog td:first-child,
+#best-scores-dialog th:first-child {
   padding-left: 0
 }
 
-#best-spoilers-dialog th {
+#best-scores-dialog th {
   text-align: left
 }
 
